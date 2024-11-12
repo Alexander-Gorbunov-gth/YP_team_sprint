@@ -7,7 +7,14 @@ from dateutil import parser
 from elasticsearch.helpers import bulk
 from elasticsearch_dsl import connections
 
-from documents.movie import Movie, get_movie_index_data
+import psycopg
+from psycopg.conninfo import make_conninfo
+
+from documents.movie import Movie
+from documents.genre import Genre
+from documents.person import Person
+from documents.load_data import get_index_data
+
 from helpers.backoff_func_wrapper import backoff
 from logger import logger
 from settings import settings
@@ -23,7 +30,7 @@ def _send_to_es(es_load_data:  Generator[dict[str, Any], Any, None]):
     )
 
 
-def update_movie_index():
+def get_state():
     state_manager = StateManager(JsonFileStorage(logger=logger))
 
     last_sync_state = state_manager.get_state('movie_index_last_sync_state')
@@ -32,18 +39,31 @@ def update_movie_index():
         last_sync_state = pytz.UTC.localize(datetime.min)
     else:
         last_sync_state = parser.isoparse(last_sync_state)
+    return last_sync_state, state_manager
 
+
+indexes = [
+    Genre,
+    Movie,
+    Person
+]
+
+
+def update_indexs():
     connections.create_connection(hosts=settings.elasticsearch_settings.get_host())
-    Movie.init()
+    last_sync_state, state_manager = get_state()
 
-    for rows in get_movie_index_data(settings.database_settings.get_dsn(), last_sync_state, 100):
-        es_load_data = (dict(d.to_dict(True, skip_empty=False), **{'_id': d.id}) for d in rows)
+    database_settings = settings.database_settings.get_dsn()
+    dsn = make_conninfo(**database_settings)
 
-        _send_to_es(es_load_data)
+    with psycopg.connect(dsn) as conn:
 
-        last_change_date = pytz.UTC.localize(max(item.last_change_date for item in rows))
-        if last_change_date > last_sync_state:
-            last_sync_state = last_change_date
+        for index in indexes:
+            index.init()
+
+            for rows in get_index_data(conn, index, last_sync_state, 100):
+                es_load_data = (dict(d.to_dict(True, skip_empty=False), **{'_id': d.id}) for d in rows)
+                _send_to_es(es_load_data)
 
     state_manager.set_state('movie_index_last_sync_state', last_sync_state.isoformat())
 
@@ -51,7 +71,7 @@ def update_movie_index():
 if __name__ == '__main__':
     while True:
         try:
-            update_movie_index()
+            update_indexs()
             time.sleep(60)
         except Exception as e:
             logger.exception(e)
