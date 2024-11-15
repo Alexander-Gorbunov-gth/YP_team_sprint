@@ -1,28 +1,33 @@
 
 # Используем pydantic для упрощения работы при перегонке данных из json в объекты
 from typing import List, Optional
+from uuid import UUID
 from pydantic import BaseModel
 
 
+class FilmRole(BaseModel):
+    id: UUID
+    roles: List[str]
+
 class Person(BaseModel):
-    uuid:str
-    name:str
-    
-class Actor(Person):
-    pass
+    id:UUID
+    full_name:str
+    films:List[FilmRole]
 
-class Writer(Person):
+class EntityBase(BaseModel):
+    id: UUID
+    name: str
+class Actor(EntityBase):
     pass
-
-class Director(Person):
+class Writer(EntityBase):
     pass
-
-class Genre(BaseModel):
-    uuid:str
-    name:str
+class Director(EntityBase):
+    pass
+class Genre(EntityBase):
+    pass
     
 class Film(BaseModel):
-    uuid: str
+    id: UUID
     title: str
     imdb_rating: Optional[float]
     description:Optional[str]

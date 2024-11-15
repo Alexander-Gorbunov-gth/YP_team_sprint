@@ -8,6 +8,8 @@ from redis.asyncio import Redis
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.film import Film
+# from src.main import get_redis, get_elastic
+
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
