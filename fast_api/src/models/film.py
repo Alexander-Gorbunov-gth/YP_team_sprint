@@ -4,18 +4,23 @@ from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel
 
+        
+class ShortFilm(BaseModel):
+    id:str
+    title:str
+    imdb_rating:float
 
 class FilmRole(BaseModel):
-    id: UUID
+    id: str
     roles: List[str]
 
 class Person(BaseModel):
-    id:UUID
+    id:str
     full_name:str
     films:List[FilmRole]
 
 class EntityBase(BaseModel):
-    id: UUID
+    id: str
     name: str
 class Actor(EntityBase):
     pass
@@ -27,11 +32,11 @@ class Genre(EntityBase):
     pass
     
 class Film(BaseModel):
-    id: UUID
+    id: str
     title: str
     imdb_rating: Optional[float]
     description:Optional[str]
-    genre:List[Genre]
+    genres:List[str]
     actors:List[Actor]
     writers:List[Writer]
     directors:List[Director]
