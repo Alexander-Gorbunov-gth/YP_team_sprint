@@ -15,7 +15,7 @@ router = APIRouter()
 
 # поиск по персонам по id
 @router.get('/{person_id}', response_model=Person)
-# @cache(expire=60)
+@cache(expire=60)
 async def person_details(person_id: str, person_service: PersonService = Depends(get_person_service)) -> Person:
     try:
         person = await person_service.get_by_id(person_id)
@@ -31,7 +31,7 @@ async def person_details(person_id: str, person_service: PersonService = Depends
 
 # поиск по персонам с возможностью передачи query параметров 
 @router.get('/', response_model=List[Person])
-# @cache(expire=60)
+@cache(expire=60)
 async def all_persons(person_service: PersonService = Depends(get_person_service),
                         name: Optional[str] = Query(None, alias="name"),
                         order: str = Query("asc", enum=["asc", "desc"]),

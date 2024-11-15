@@ -9,55 +9,27 @@ from src.db import elastic, redis
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-# import aioredis
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Optional
 
-# @asynccontextmanager
-# async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-#     redis = aioredis.from_url("redis://redis")
-#     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-#     yield
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    redis.redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT)
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    elastic.es = AsyncElasticsearch(hosts=[f"http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"])
+
+    yield
     
-# # Глобальные переменные для Redis и Elasticsearch
-# redis: Optional[Redis] = None
-# elastic: Optional[AsyncElasticsearch] = None
-
-# @asynccontextmanager
-# async def lifespan(_: FastAPI):
-#     # global redis, elastic
-#     # Подключение к Redis
-#     redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT)
-#     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-#     yield
-    # # Подключение к Elasticsearch
-    # elastic = AsyncElasticsearch(hosts=[f"http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"])
-
-    # yield  
-    
-    # # Закрытие соединений при завершении работы
-    # await redis.close()
-    # await elastic.close()
+    # Закрытие соединений при завершении работы
+    await redis.redis.close()
+    await elastic.es.close()
 
 app = FastAPI(
     title=config.PROJECT_NAME,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
-    # lifespan=lifespan
+    lifespan=lifespan
 )
-
-
-@app.on_event('startup')
-async def startup():
-    redis.redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT)
-    elastic.es = AsyncElasticsearch(hosts=[f'http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}'])
-
-
-@app.on_event('shutdown')
-async def shutdown():
-    await redis.redis.close()
-    await elastic.es.close()
 
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
 app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])
