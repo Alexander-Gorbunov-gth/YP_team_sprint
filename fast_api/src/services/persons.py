@@ -29,8 +29,8 @@ class PersonService:
         return person
     
        
-    async def get_all_persons(self, name, order, limit, offset):
-        persons = await self._get_all_persons_from_elastic(name, order, limit, offset)
+    async def get_all_persons(self, query, order, page_size, page_number):
+        persons = await self._get_all_persons_from_elastic(query, order, page_size, page_number)
         if not persons:
             return []
             
