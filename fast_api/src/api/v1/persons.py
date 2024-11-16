@@ -20,13 +20,13 @@ router = APIRouter()
 @router.get('/search', response_model=List[Person])
 @cache(expire=60)
 async def all_persons(person_service: PersonService = Depends(get_person_service),
-                        name: Optional[str] = Query(None, alias="name"),
+                        query: Optional[str] = Query(None, alias="query"),
                         order: str = Query("asc", enum=["asc", "desc"]),
-                        limit: int = Query(10, gt=0, le=100),
-                        offset: int = Query(0, ge=0)
+                        page_size: int = Query(10, gt=0, le=100),
+                        page_number: int = Query(1, ge=1)
                       )->Optional[List[Person]]:
     try:
-        persons = await person_service.get_all_persons(name, order, limit, offset)
+        persons = await person_service.get_all_persons(query, order, page_size, page_number)
         if not persons:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Персоны не найдены")
         return persons    
