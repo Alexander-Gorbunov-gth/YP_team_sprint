@@ -12,7 +12,10 @@ from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.film import Genre
 
+import logging
+from fastapi import HTTPException
 
+logger = logging.getLogger(__name__)
 class GenreService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
@@ -24,8 +27,8 @@ class GenreService:
             return None
         return genre
     
-    async def get_all_genres(self, name, order, limit, offset):
-        genres = await self._get_all_genres_from_elastic(name, order, limit, offset)
+    async def get_all_genres(self, query, order, page_size, page_number):
+        genres = await self._get_all_genres_from_elastic(query, order, page_size, page_number)
         if not genres:
             return None
         return genres
@@ -37,47 +40,55 @@ class GenreService:
         except NotFoundError:
             return None
         return Genre(**doc['_source'])
-    
-    async def _get_all_genres_from_elastic(self, name, order, limit, offset):
-        if name:
-            es_query = {
-                "from": offset,
-                "size": limit,
-                "sort": [
-                    {"name.raw": {"order": order}}
-                ],
+
+
+    async def _get_all_genres_from_elastic(self, query, order, page_size, page_number):
+        # Рассчитываем offset и size
+        from_value = (page_number - 1) * page_size
+        size_value = page_size
+        
+        def generate_query(query, exact=True):
+            return {
+                "from": from_value,
+                "size": size_value,
+                "sort": [{"name.raw": {"order": order}}],
                 "query": {
                     "bool": {
                         "must": [
-                            {"term": {"name.raw": name}}
+                            {"term" if exact else "match": {"name.raw" if exact else "name": query}}
                         ]
                     }
                 }
             }
-        else:
-            es_query = {
-            "from": offset,
-            "size": limit,
-            "sort": [
-                {"name.raw": {"order": order}}
-            ],
-            "query": {
-                "match_all": {}
-            }
-        }
-        
+
         try:
-            result = await self.elastic.search(index="genres", body=es_query)
+            # Если query передано, делаем точный поиск
+            if query:
+                es_query = generate_query(query, exact=True)
+                result = await self.elastic.search(index="genres", body=es_query)
+            else:
+                # Если query не передано, выполняем общий запрос
+                es_query = {
+                    "from": from_value,
+                    "size": size_value,
+                    "sort": [{"name.raw": {"order": order}}],
+                    "query": {
+                        "match_all": {}
+                    }
+                }
+                result = await self.elastic.search(index="genres", body=es_query)
+            
             genres = [
                 Genre(id=hit["_id"], name=hit["_source"]["name"])
                 for hit in result["hits"]["hits"]
             ]
             
             return genres if genres else []
-        
+
         except Exception as e:
-            print(f"Ошибка при запросе точного поиска в Elasticsearch: {e}")    
-            
+            logger.error(f"Ошибка при запросе в Elasticsearch: {str(e)}")
+            raise HTTPException(status_code=500, detail="Ошибка при запросе")
+
 
 @lru_cache()
 def get_genre_service(
