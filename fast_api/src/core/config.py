@@ -1,39 +1,21 @@
-from pathlib import Path
+import os
 from logging import config as logging_config
-
-from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
 
 from src.core.logger import LOGGING
 
+# Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
 
-BASE_DIR = Path(__file__).parent.parent.parent
+# Название проекта. Используется в Swagger-документации
+PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
 
-load_dotenv()
+# Настройки Redis
+REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
+REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 
+# Настройки Elasticsearch
+ELASTIC_HOST = os.getenv('ELASTIC_HOST', '127.0.0.1')
+ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
 
-class Settings(BaseSettings):
-    project_name: str = 'movies'
-    redis_host: str = '127.0.0.1'
-    redis_port: int = 6379
-    elastic_host: str = '127.0.0.1'
-    elastic_port: int = 9200
-
-    @property
-    def elastic_url(self) -> str:
-        """Формируем URL для подключения к Elasticsearch."""
-        return f'http://{self.elastic_host}:{self.elastic_port}'
-
-    @property
-    def redis_url(self) -> str:
-        """Формируем URL для подключения к Redis"""
-        return f'http://{self.redis_host}:{self.redis_port}'
-
-    class Config:
-        env_file_encoding = 'utf-8'
-        case_sensitive = True
-        extra = "allow"
-
-
-settings = Settings()
+# Корень проекта
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
