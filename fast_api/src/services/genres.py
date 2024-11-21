@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import List, Optional
 from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -18,7 +17,7 @@ class GenreService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, genre_id: UUID) -> Optional[Genre]:
+    async def get_by_id(self, genre_id: UUID) -> Genre | None:
         genre = await self._get_genre_from_elastic(genre_id)
         if not genre:
             return None

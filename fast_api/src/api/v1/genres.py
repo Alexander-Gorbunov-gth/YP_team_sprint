@@ -1,19 +1,18 @@
 from http import HTTPStatus
-from typing import List, Optional
 import logging
 
-from fastapi import APIRouter, Depends,  HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from fastapi_cache.decorator import cache
 
 from src.models.film import Genre
 from src.services.genres import GenreService, get_genre_service
 
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 # поиск по жанрам по id
 @router.get('/{genre_id}', response_model=Genre)
@@ -25,21 +24,22 @@ async def genre_details(genre_id: str, genre_service: GenreService = Depends(get
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Жанр не найден')
 
         return Genre(id=genre.id, name=genre.name)
-    
+
     except Exception as e:
         logger.error(f"Ошибка при поиске жанра по ID {genre_id}: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=f"Ошибка при получении жанра: {str(e)}")
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail=f"Ошибка при получении жанра: {str(e)}")
 
 
 # поиск по жанрам с возможностью передачи query параметров 
-@router.get('/', response_model=List[Genre])
+@router.get('/', response_model=list[Genre])
 @cache(expire=60)
 async def all_genres(genre_service: GenreService = Depends(get_genre_service),
-                    name: Optional[str] = Query(None, alias="name"),
-                    order: str = Query("asc", enum=["asc", "desc"]),
-                    limit: int = Query(10, gt=0, le=100),
-                    offset: int = Query(0, ge=0)
-                    )->Optional[List[Genre]]:
+                     name: str | None = Query(None, alias="name"),
+                     order: str = Query("asc", enum=["asc", "desc"]),
+                     limit: int = Query(10, gt=0, le=100),
+                     offset: int = Query(0, ge=0)
+                     ) -> list[Genre] | None:
     try:
         genres = await genre_service.get_all_genres(name, order, limit, offset)
         if not genres:
@@ -47,6 +47,5 @@ async def all_genres(genre_service: GenreService = Depends(get_genre_service),
         return genres
     except Exception as e:
         logger.error(f"Ошибка при получении жанров: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=f"Ошибка при получении жанров: {str(e)}")
-    
-    
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                            detail=f"Ошибка при получении жанров: {str(e)}")
