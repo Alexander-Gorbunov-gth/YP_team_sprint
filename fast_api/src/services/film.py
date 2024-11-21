@@ -2,11 +2,12 @@ import hashlib
 import json
 import logging
 from functools import lru_cache
-from typing import Optional, Any
+from typing import Any
 
 from elasticsearch import AsyncElasticsearch, NotFoundError, ConnectionError
 from fastapi import Depends
 from redis.asyncio import Redis
+from backoff import on_exception, expo, full_jitter
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
@@ -27,7 +28,7 @@ class FilmService:
             order: str = 'desc',
             page_size: int = 10,
             page: int = 1,
-    ) -> Optional[list[Film]]:
+    ) -> list[Film] | None:
         """ Получаем список фильмов, кэшируем результаты. """
         search_query = self._generate_es_query(sort=sort, order=order, page_size=page_size, page=page)
         films = await self._get_films_with_query(search_query)
@@ -35,7 +36,7 @@ class FilmService:
             return None
         return films
 
-    async def get_by_id(self, film_id: str) -> Optional[Film]:
+    async def get_by_id(self, film_id: str) -> Film | None:
         """ Получаем фильм по ID с кэшированием. """
         film = await self._film_from_cache(film_id)
         if not film:
@@ -51,7 +52,7 @@ class FilmService:
             order: str = 'desc',
             page_size: int = 10,
             page: int = 1
-    ) -> Optional[list[Film]]:
+    ) -> list[Film] | None:
         """ Получаем фильмы по запросу с кэшированием. """
         search_query = self._generate_es_query(query=query, order=order, page_size=page_size, page=page)
         films = await self._get_films_with_query(search_query)
@@ -59,7 +60,8 @@ class FilmService:
             return None
         return films
 
-    async def _get_films_with_query(self, query: dict[str, Any]) -> Optional[list[Film]]:
+    @on_exception(expo, ConnectionError, max_tries=5, jitter=full_jitter)
+    async def _get_films_with_query(self, query: dict[str, Any]) -> list[Film] | None:
         """ Получаем фильмы из Elasticsearch с кэшированием. """
         cache_key = self._generate_cache_key(query)
         films = await self._get_from_cache(cache_key)
@@ -82,7 +84,8 @@ class FilmService:
             logger.warning('Ошибка подключения к ElasticSearch. Ошибка {}'.format(e))
             return None
 
-    async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
+    @on_exception(expo, ConnectionError, max_tries=5, jitter=full_jitter)
+    async def _get_film_from_elastic(self, film_id: str) -> Film | None:
         """ Получаем фильм из Elasticsearch. """
         try:
             doc = await self.elastic.get(index='movies', id=film_id)
@@ -94,7 +97,7 @@ class FilmService:
             logger.warning('Ошибка подключения к ElasticSearch. Ошибка {}'.format(e))
             return None
 
-    async def _film_from_cache(self, film_id: str) -> Optional[Film]:
+    async def _film_from_cache(self, film_id: str) -> Film | None:
         """ Получаем фильм из кэша. """
         data = await self.redis.get(film_id)
         if not data:
@@ -105,7 +108,7 @@ class FilmService:
         """ Сохраняем фильм в кэш. """
         await self.redis.set(film.id, film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
 
-    async def _get_from_cache(self, cache_key: str) -> Optional[list[Film]]:
+    async def _get_from_cache(self, cache_key: str) -> list[Film] | None:
         """ Получаем фильмы из кэша. """
         data = await self.redis.get(cache_key)
         if data:

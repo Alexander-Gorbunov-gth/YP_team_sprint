@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -22,7 +21,7 @@ class PersonService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, person_id: UUID) -> Optional[Person]:
+    async def get_by_id(self, person_id: UUID) -> Person | None:
         person = await self._get_person_from_elastic(person_id)
         if not person:
             return None
