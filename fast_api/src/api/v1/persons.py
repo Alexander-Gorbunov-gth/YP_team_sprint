@@ -24,7 +24,7 @@ async def all_persons(person_service: PersonService = Depends(get_person_service
                       offset: int = Query(0, ge=0)
                       ) -> list[Person] | None:
     try:
-        persons = await person_service.get_all_persons(name, order, limit, offset)
+        persons = await person_service.get_all_persons(query, order, page_size, page_number)
         if not persons:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Персоны не найдены")
         return persons
