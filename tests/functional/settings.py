@@ -2,6 +2,8 @@ from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
+from tests.functional.testdata.elastic_mapping import ELASTICSEARCH_SCHEMA
+
 BASE_DIR = Path(__file__).parent
 
 
@@ -10,6 +12,9 @@ class TestSettings(BaseSettings):
     elastic_port: int = Field(9200, validation_alias='ELASTIC_PORT')
     elastic_user: str | None = Field(None, validation_alias='ELASTIC_USER')
     elastic_password: SecretStr | None = Field(None, validation_alias='ELASTIC_PASSWORD')
+    elastic_index: str = Field('movies', validation_alias='ELASTIC_INDEX_NAME')
+    elastic_index_mapping: dict = Field(default_factory=lambda: ELASTICSEARCH_SCHEMA)
+
     redis_host: str = Field('127.0.0.1', validation_alias='REDIS_HOST')
     redis_port: int = Field(6379, validation_alias='REDIS_PORT')
     redis_password: SecretStr | None = Field(None, validation_alias='REDIS_PASSWORD')
