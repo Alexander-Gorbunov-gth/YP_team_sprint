@@ -44,10 +44,10 @@ async def test_search():
         bulk_query.append(data)
 
     # 2. Загружаем данные в ES
-    es_client = AsyncElasticsearch(hosts=test_settings.es_host, verify_certs=False)
-    if await es_client.indices.exists(index=test_settings.es_index):
-        await es_client.indices.delete(index=test_settings.es_index)
-    await es_client.indices.create(index=test_settings.es_index, **test_settings.es_index_mapping)
+    es_client = AsyncElasticsearch(hosts=test_settings.get_elastic_url(), verify_certs=False)
+    if await es_client.indices.exists(index=test_settings.elastic_index):
+        await es_client.indices.delete(index=test_settings.elastic_index)
+    await es_client.indices.create(index=test_settings.elastic_index, **test_settings.elastic_index_mapping)
 
     updated, errors = await async_bulk(client=es_client, actions=bulk_query)
 

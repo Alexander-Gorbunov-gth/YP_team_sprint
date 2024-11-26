@@ -11,4 +11,4 @@ python3 /code/tests/functional/utils/wait_for_elastic.py
 echo "Elasticsearch успешно запущен!"
 
 echo "-------Запуск тестов-------"
-pytest /code/tests/functional/src"
+pytest /code/tests/functional/src
