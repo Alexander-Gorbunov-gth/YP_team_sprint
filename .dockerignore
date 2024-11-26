@@ -17,4 +17,3 @@ docker-compose.yml
 
 # Исключить любые другие файлы, которые не нужны внутри контейнера
 *.env
-tests/entrypoint.sh
