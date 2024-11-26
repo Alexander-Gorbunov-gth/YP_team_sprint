@@ -20,9 +20,12 @@ class TestSettings(BaseSettings):
     redis_password: SecretStr | None = Field(None, validation_alias='REDIS_PASSWORD')
     redis_db: int = Field(0, validation_alias='REDIS_DB')
 
+    service_url: str = Field(validation_alias='SERVICE_URL')
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / '.env',
-        env_file_encoding='utf-8'
+        env_file_encoding='utf-8',
+        extra='ignore'
     )
 
     def get_elastic_url(self) -> str:
