@@ -46,8 +46,8 @@ services:
   redis:
     env_file:
       - functional/.env
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    # environment:
+    #   - REDIS_PASSWORD=${REDIS_PASSWORD}
     container_name: redis_tests
     image: redis:6.2
     restart: unless-stopped

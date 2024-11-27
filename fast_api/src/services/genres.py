@@ -9,7 +9,7 @@ from redis.asyncio import Redis
 # from src.main import get_redis, get_elastic
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.models.film import Genre
+from src.models.genre import Genre
 
 import logging
 from fastapi import HTTPException

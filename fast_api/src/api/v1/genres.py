@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends,  HTTPException, Query
 from pydantic import BaseModel
 from fastapi_cache.decorator import cache
 
-from src.models.film import Genre
+from src.models.genre import Genre
 from src.services.genres import GenreService, get_genre_service
 
 

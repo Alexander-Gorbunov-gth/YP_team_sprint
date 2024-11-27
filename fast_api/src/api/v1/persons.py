@@ -7,7 +7,7 @@ from fastapi_cache.decorator import cache
 from pydantic import BaseModel
 
 from src.services.film import FilmService, get_film_service
-from src.models.film import Person, ShortFilm
+from src.models.person import Person, ShortFilm
 from src.services.persons import PersonService, get_person_service
 
 
