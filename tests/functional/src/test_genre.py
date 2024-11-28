@@ -8,7 +8,7 @@ from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
 from ..settings import test_settings
-from ..fixtures.es_data import GET_GENRE_UUID
+from ..fixtures.es_data import GENRE_UUID, GENRE_NAME
 from ..testdata.indexes import indexes, Genre
 
 
@@ -46,7 +46,22 @@ async def test_get_genre(
     http_client: aiohttp.ClientSession
 ):
     async with http_client.get(
-        f"{test_settings.service_url}/api/v1/genres"
+        f"http://{test_settings.service_url}/api/v1/genres/{GENRE_UUID}/"
     ) as response:
         assert response.status == 200
-        print(response.json())
+        result = response.json()
+        assert result.get("name") == GENRE_NAME
+
+
+@pytest.mark.asyncio
+async def test_get_genre_list(
+    add_genres,
+    http_client: aiohttp.ClientSession
+):
+    async with http_client.get(
+        f"http://{test_settings.service_url}/api/v1/genres/{GENRE_UUID}/"
+    ) as response:
+        assert response.status == 200
+        result = response.json()
+        assert result.get("name") == GENRE_NAME
+
