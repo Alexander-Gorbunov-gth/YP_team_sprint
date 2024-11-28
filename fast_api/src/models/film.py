@@ -12,10 +12,10 @@ class Film(BaseModel):
     genres: list[str]
     title: str
     description: str | None = None
-    directors_names: str
-    actors_names: str
-    writers_names: str
-    directors: list[Person]
+    directors_names: list[str]
+    actors_names: list[str]
+    writers_names: list[str]
+    directors: list[Person] | None
     actors: list[Person]
     writers: list[Person]
 

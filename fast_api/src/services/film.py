@@ -22,6 +22,7 @@ class FilmService:
     async def get_film_list(
             self,
             sort: str = '-imdb_rating',
+            order: str = "desc",
             page_size: int = 10,
             page: int = 1,
     ) -> list[Film] | None:
