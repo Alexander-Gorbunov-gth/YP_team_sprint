@@ -8,7 +8,8 @@ from elasticsearch.helpers import async_bulk
 
 from ..testdata.indexes import indexes, Genre
 
-GET_GENRE_UUID = str(uuid.uuid4())
+GENRE_UUID = str(uuid.uuid4())
+GENRE_NAME = "GENRE_NAME"
 
 @pytest_asyncio.fixture(name="create_es_indexes", scope='session')
 def create_es_indexes(es_dsl):
@@ -44,8 +45,8 @@ async def es_write_data(es_client):
 async def add_genre(es_write_data):
     genre_data = [
         Genre(
-            id=GET_GENRE_UUID,
-            name="genre_name"
+            id=GENRE_UUID,
+            name=GENRE_NAME
         )
     ]
     bulk_query: list[dict] = []
