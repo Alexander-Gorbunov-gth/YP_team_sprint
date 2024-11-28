@@ -2,7 +2,7 @@ from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
-from tests.functional.testdata.elastic_mapping import ELASTICSEARCH_SCHEMA
+# from tests.functional.testdata.elastic_mapping import ELASTICSEARCH_SCHEMA
 
 BASE_DIR = Path(__file__).parent
 
@@ -12,8 +12,8 @@ class TestSettings(BaseSettings):
     elastic_port: int = Field(9200, validation_alias='ELASTIC_PORT')
     elastic_user: str | None = Field(None, validation_alias='ELASTIC_USER')
     elastic_password: SecretStr | None = Field(None, validation_alias='ELASTIC_PASSWORD')
-    elastic_index: str = Field('movies', validation_alias='ELASTIC_INDEX_NAME')
-    elastic_index_mapping: dict = Field(default_factory=lambda: ELASTICSEARCH_SCHEMA)
+    # elastic_index: str = Field('movies', validation_alias='ELASTIC_INDEX_NAME')
+    # elastic_index_mapping: dict = Field(default_factory=lambda: ELASTICSEARCH_SCHEMA)
 
     redis_host: str = Field('127.0.0.1', validation_alias='REDIS_HOST')
     redis_port: int = Field(6379, validation_alias='REDIS_PORT')
@@ -35,6 +35,10 @@ class TestSettings(BaseSettings):
     def get_redis_url(self) -> str:
         auth_part = f":{self.redis_password.get_secret_value()}@" if self.redis_password else ""
         return f"redis://{auth_part}{self.redis_host}:{self.redis_port}/{self.redis_db}"
+    
+    @property
+    def es_url_to_connect(self):
+        return f"http://{self.elastic_host}:{self.elastic_port}"
 
 
 test_settings = TestSettings()
