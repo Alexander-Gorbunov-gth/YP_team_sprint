@@ -14,22 +14,21 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = 'movies'
-    REDIS_HOST: str = '127.0.0.1'
-    REDIS_PORT: int = 6379
-    ELASTIC_HOST: str = '127.0.0.1'
-    ELASTIC_PORT: int = 9200
-    REDIS_PASSWORD: str
+    project_name: str = 'movies'
+    redis_host: str = '127.0.0.1'
+    redis_port: int = 6379
+    elastic_host: str = '127.0.0.1'
+    elastic_port: int = 9200
 
     @property
     def elastic_url(self) -> str:
         """Формируем URL для подключения к Elasticsearch."""
-        return f'http://{self.ELASTIC_HOST}:{self.ELASTIC_PORT}'
+        return f'http://{self.elastic_host}:{self.elastic_port}'
 
     @property
     def redis_url(self) -> str:
         """Формируем URL для подключения к Redis"""
-        return f'http://{self.REDIS_HOST}:{self.REDIS_PORT}'
+        return f'http://{self.redis_host}:{self.redis_port}'
 
     class Config:
         env_file_encoding = 'utf-8'
