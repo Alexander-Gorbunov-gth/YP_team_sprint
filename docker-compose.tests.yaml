@@ -6,22 +6,22 @@ services:
     ports:
       - '8000:8000'
     build:
-      context: ../
-      dockerfile: fast_api/Dockerfile
+      context: ./fast_api
+      dockerfile: ./Dockerfile
     env_file:
-      - ./functional/.env
+      - .env
     networks:
       - tests_network
 
   tests:
     build:
-      context: ../
+      context: .
       dockerfile: ./tests/Dockerfile
     container_name: tests
     volumes:
-      - ../tests:/code/tests
+      - ./tests:/code/tests
     env_file:
-      - ./functional/.env
+      - .env
     networks:
       - tests_network
 
@@ -50,9 +50,9 @@ services:
 
   redis:
     env_file:
-      - functional/.env
-    # environment:
-    #   - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - .env
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     container_name: redis_tests
     image: redis:6.2
     restart: unless-stopped
