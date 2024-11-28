@@ -21,8 +21,8 @@ def create_es_indexes(es_dsl):
 async def es_client():
     print("!es_client")
     es_client = AsyncElasticsearch(
-        # hosts=test_settings.es_url_to_connect,
-        "http://localhost:9200/",
+        hosts=test_settings.es_url_to_connect,
+        # "http://localhost:9200/",
         verify_certs=False,
         timeout=20
     )
