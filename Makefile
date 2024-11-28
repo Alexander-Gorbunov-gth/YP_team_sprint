@@ -1,3 +1,3 @@
 .PHONY: run
 run:
-	@docker compose build && docker compose up
+	@docker compose -f docker-compose.tests.yaml build && docker compose -f docker-compose.tests.yaml up

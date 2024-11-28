@@ -16,7 +16,7 @@ router = APIRouter()
 
 # поиск по жанрам по id
 @router.get('/{genre_id}', response_model=Genre)
-@cache(expire=60)
+# @cache(expire=60)
 async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> Genre:
     try:
         genre = await genre_service.get_by_id(genre_id)
@@ -33,7 +33,7 @@ async def genre_details(genre_id: str, genre_service: GenreService = Depends(get
 
 # поиск по жанрам с возможностью передачи query параметров 
 @router.get('/', response_model=list[Genre])
-@cache(expire=60)
+# @cache(expire=60)
 async def all_genres(genre_service: GenreService = Depends(get_genre_service),
                      name: str | None = Query(None, alias="name"),
                      order: str = Query("asc", enum=["asc", "desc"]),

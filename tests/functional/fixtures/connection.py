@@ -4,6 +4,7 @@ import aiohttp
 
 from elasticsearch import AsyncElasticsearch
 from elasticsearch_dsl import connections
+
 from ..settings import test_settings
 
 
@@ -14,10 +15,8 @@ async def es_dsl():
 
 @pytest_asyncio.fixture(name='es_client', scope='session')
 async def es_client():
-    print("!es_client")
     es_client = AsyncElasticsearch(
         hosts=test_settings.es_url_to_connect,
-        # "http://localhost:9200/",
         verify_certs=False,
         timeout=20
     )
@@ -29,3 +28,4 @@ async def es_client():
 async def http_client():
     async with aiohttp.ClientSession() as session:
         yield session
+    await session.close()

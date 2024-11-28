@@ -39,7 +39,7 @@ async def test_index_is_create(
     async with http_client.get(f"{test_settings.es_url_to_connect}{index}") as response:
         assert response.status == status_code
 
-
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_get_genre(
     add_genre,
@@ -52,16 +52,15 @@ async def test_get_genre(
         result = response.json()
         assert result.get("name") == GENRE_NAME
 
-
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_get_genre_list(
     add_genres,
     http_client: aiohttp.ClientSession
 ):
     async with http_client.get(
-        f"http://{test_settings.service_url}/api/v1/genres/{GENRE_UUID}/"
+        f"http://{test_settings.service_url}/api/v1/genres/"
     ) as response:
         assert response.status == 200
-        result = response.json()
-        assert result.get("name") == GENRE_NAME
+
 

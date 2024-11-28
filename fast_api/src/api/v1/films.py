@@ -26,7 +26,7 @@ def handle_no_films_error(films: list, query_params: dict):
 async def film_list(
         sort: str = Query(default='-imdb_rating', enum=['imdb_rating', '-imdb_rating'], alias='sort'),
         order: str = Query(default='desc', enum=['asc', 'desc']),
-        page_size: int = Query(default=10, ge=1, le=50, alias='page_size'),
+        page_size: int = Query(default=50, ge=1, le=50, alias='page_size'),
         page: int = Query(default=1, ge=1),
         film_service: FilmService = Depends(get_film_service)
 ) -> list[ResponseFilm]:
@@ -52,7 +52,7 @@ async def film_details(
 async def film_search(
         query: str = Query(..., alias='query'),
         order: str = Query(default='desc', enum=['asc', 'desc'], alias='order'),
-        page_size: int = Query(default=10, gt=1, le=50, alias='page_size'),
+        page_size: int = Query(default=50, gt=1, le=50, alias='page_size'),
         page: int = Query(default=1, ge=1, alias='page'),
         film_service: FilmService = Depends(get_film_service)
 ) -> list[ResponseFilm]:
