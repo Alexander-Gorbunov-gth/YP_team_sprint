@@ -10,6 +10,8 @@ services:
       - ./functional/.env
     networks:
       - tests_network
+    ports:
+      - "8080:8080"
 
   tests:
     build:
@@ -28,7 +30,6 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - logger.level=WARN
-      - ES_JAVA_OPTS=-Xms200m -Xmx200m
     container_name: elasticsearch_tests
     image: elasticsearch:8.15.3
     restart: unless-stopped
