@@ -1,22 +1,24 @@
 services:
-  gateway:
+  nginx:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    container_name: theatre-gateway
+    container_name: nginx_movies
     restart: always
     volumes:
       - static_volume:/code/static:ro
     ports:
       - "80:80"
     depends_on:
-      - api
+      - admin
+    networks:
+      - movies_network
 
-  api:
+  admin:
     build:
       context: .
       dockerfile: movies_admin/Dockerfile
-    container_name: theatre-api
+    container_name: admin_movies
     restart: always
     volumes:
       - ./movies_admin:/code
@@ -24,30 +26,40 @@ services:
     env_file:
       - ./.env
     depends_on:
-      theatre-db:
+      postgres:
         condition: service_healthy
+    networks:
+      - movies_network
 
   fast_api:
     build: ./fast_api
+    container_name: fast_api_movies
     env_file:
       - ./.env
     depends_on:
-      - theatre-db
+      - postgres
       - redis
-      - elastic_search
+      - elasticsearch
+    networks:
+      - movies_network
   
   redis:
     image: redis:alpine
+    container_name: redis_movies
+    networks:
+      - movies_network
 
-  theatre-db:
+  postgres:
     image: postgres:14
-    container_name: theatre-db
+    container_name: postgres_movies
     restart: always
     volumes:
       - content_db:/var/lib/postgresql/data/
       - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - ./.env
+    networks:
+      - movies_network
     healthcheck:
       test:
         [
@@ -59,19 +71,23 @@ services:
       retries: 3
 
   etl_service:
+    container_name: etl_service_movies
     build:
       context: .
       dockerfile: etl_service/Dockerfile
     env_file:
       - ./.env
     depends_on:
-      theatre-db:
+      postgres:
         condition: service_healthy
-      elastic_search:
+      elasticsearch:
         condition: service_healthy
+    networks:
+      - movies_network
 
-  elastic_search:
-    image: elasticsearch:8.15.3 
+  elasticsearch:
+    image: elasticsearch:8.15.3
+    container_name: elasticsearch_movies
     logging:
       driver: none
     ports:
@@ -79,7 +95,7 @@ services:
     expose:
       - "9200"
     healthcheck:
-      test: curl -s http://elastic_search:9200 >/dev/null || exit 1
+      test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
       interval: 30s
       timeout: 10s
       retries: 50
@@ -87,17 +103,29 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - logger.level=WARN
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - cluster.routing.allocation.disk.watermark.low=95%
+      - cluster.routing.allocation.disk.watermark.high=97%
+      - cluster.routing.allocation.disk.watermark.flood_stage=98%
+    networks:
+      - movies_network
 
   kibana:
     image: kibana:8.15.3
     restart: always
+    container_name: kibana_movies
     environment:
       - ELASTICSEARCH_HOSTS=http://elastic_search:9200    # address of elasticsearch docker container which kibana will connect
     ports:
       - 5601:5601
     depends_on:
-      - elastic_search  
+      - elasticsearch
+    networks:
+      - movies_network
 
+networks:
+  movies_network:
+    driver: bridge
 
 volumes:
   content_db:
