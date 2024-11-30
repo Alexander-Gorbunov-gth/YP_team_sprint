@@ -1,97 +1,59 @@
+import logging
 from functools import lru_cache
 from uuid import UUID
 
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
 
-# from src.db.elastic import get_elastic
-# from src.main import get_redis, get_elastic
+
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
+from src.services.db_managers import DBManager, ElasticManager
+from src.services.redis_service import AbstractCache, RedisCache
 from src.models.genre import Genre
 
-import logging
-from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
+
+
 class GenreService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
+    def __init__(self, redis: AbstractCache, db_client: DBManager):
         self.redis = redis
-        self.elastic = elastic
+        self.db_client = db_client
 
     async def get_by_id(self, genre_id: UUID) -> Genre | None:
-        genre = await self._get_genre_from_elastic(genre_id)
-        if not genre:
-            return None
-        return genre
-    
-    async def get_all_genres(self, query, order, page_size, page_number):
-        genres = await self._get_all_genres_from_elastic(query, order, page_size, page_number)
-        if not genres:
-            return None
+        genre_key = self.redis.get_query_key(genre_id)
+        genre = await self.redis.get_object(genre_key)
+        if genre is None:
+            genre = await self.db_client.get_object_by_id(genre_id)
+            if genre is None:
+                logger.warning("Не найден фильм с id %s.", genre_id)
+                return None
+            await self.redis.set_object(object_key=genre_key, value=genre)
+        return Genre(**genre)
+
+    async def get_all_genres(
+        self, sort: str = "name", page: int = 1, page_size: int = 10
+    ) -> list[Genre]:
+        genres_key = self.redis.get_query_key(sort=sort, page_size=page_size, page=page)
+        genres = await self.redis.get_object(object_key=genres_key)
+        if genres is None:
+            genres = await self.db_client.get_objects_by_query()
+            if genres is None:
+                logger.warning(
+                    "Не найдено данных при запросе с параметрами: %s.", genres_key
+                )
+                return None
+            await self.redis.set_object(object_key=genres_key, value=genres)
         return genres
-    
-
-    async def _get_genre_from_elastic(self, genre_id: UUID):
-        try:
-            doc = await self.elastic.get(index='genres', id=genre_id)
-        except NotFoundError:
-            return None
-        return Genre(**doc['_source'])
-
-
-    async def _get_all_genres_from_elastic(self, query, order, page_size, page_number):
-        # Рассчитываем offset и size
-        from_value = (page_number - 1) * page_size
-        size_value = page_size
-        
-        def generate_query(query, exact=True):
-            return {
-                "from": from_value,
-                "size": size_value,
-                "sort": [{"name.raw": {"order": order}}],
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term" if exact else "match": {"name.raw" if exact else "name": query}}
-                        ]
-                    }
-                }
-            }
-
-        try:
-            # Если query передано, делаем точный поиск
-            if query:
-                es_query = generate_query(query, exact=True)
-                result = await self.elastic.search(index="genres", body=es_query)
-            else:
-                # Если query не передано, выполняем общий запрос
-                es_query = {
-                    "from": from_value,
-                    "size": size_value,
-                    "sort": [{"name.raw": {"order": order}}],
-                    "query": {
-                        "match_all": {}
-                    }
-                }
-                result = await self.elastic.search(index="genres", body=es_query)
-            
-            genres = [
-                Genre(id=hit["_id"], name=hit["_source"]["name"])
-                for hit in result["hits"]["hits"]
-            ]
-            
-            return genres if genres else []
-
-        except Exception as e:
-            logger.error(f"Ошибка при запросе в Elasticsearch: {str(e)}")
-            raise HTTPException(status_code=500, detail="Ошибка при запросе")
 
 
 @lru_cache()
 def get_genre_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(redis, elastic)
+    redis_client = RedisCache(redis_client=redis)
+    elastic_manager = ElasticManager(es_client=elastic, index_name="genres")
+    return GenreService(redis_client, elastic_manager)

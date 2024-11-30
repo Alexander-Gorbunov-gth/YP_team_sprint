@@ -1,127 +1,48 @@
 from functools import lru_cache
-from uuid import UUID
+import logging
 
-from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import Depends, Query
+from elasticsearch import AsyncElasticsearch
+from fastapi import Depends
 from redis.asyncio import Redis
 
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-# from src.main import get_redis, get_elastic
+from src.services.redis_service import AbstractCache, RedisCache
+from src.services.db_managers import DBManager, ElasticManager
 from src.models.film import Person
-import logging
-from fastapi import HTTPException
+
 
 logger = logging.getLogger(__name__)
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
 class PersonService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
-        self.elastic = elastic
+    def __init__(self, redis_client: AbstractCache, elastic_client: DBManager):
+        self.redis_client = redis_client
+        self.elastic_client = elastic_client
 
-    async def get_by_id(self, person_id: UUID) -> Person | None:
-        person = await self._get_person_from_elastic(person_id)
-        if not person:
-            return None
+    async def get_person_by_id(self, person_id: str) -> Person | None:
+        person_key = self.redis_client.get_query_key(person_id)
+        person = await self.redis_client.get_object(person_key)
+        if person is None:
+            person = await self.elastic_client.get_object_by_id(person_id)
+            if person is None:
+                logger.warning("Не удалось получить персону по id %s", person_id)
+                return None
+            await self.redis_client.set_object(object_key=person_key, value=person)
         return person
-    
-       
-    async def get_all_persons(self, query, order, page_size, page_number):
-        persons = await self._get_all_persons_from_elastic(query, order, page_size, page_number)
-        if not persons:
-            return []
-            
-        return persons
-    
 
-    async def _get_person_from_elastic(self, person_id: UUID):
-        try:
-            doc = await self.elastic.get(index='persons', id=person_id)
-        except NotFoundError:
-            return None
-        return Person(**doc['_source'])
-    
-    # GET /api/v1/persons/search?query=captain&page_number=1&page_size=50
+    async def get_person_by_query(self, query, sort, page_size, page):
+        pass
 
-    # Настройка логирования
-    logger = logging.getLogger(__name__)
+    async def get_person_list(self, sort, page_size, page):
+        pass
 
-    async def _get_all_persons_from_elastic(self, query, order, page_size, page_number):
-        from_value = (page_number - 1) * page_size
-        size_value = page_size  
-        
-        def generate_query(query, exact=True):
-            return {
-                "from": from_value,
-                "size": size_value,
-                "sort": [{"full_name.raw": {"order": order}}],
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term" if exact else "match": {"full_name.raw" if exact else "full_name": query}}
-                        ]
-                    }
-                }
-            }
 
-        try:
-            # Если query передано, делаем точный поиск
-            if query:
-                es_query = generate_query(query, exact=True) 
-                result = await self.elastic.search(index="persons", body=es_query)
-
-                persons = [
-                    Person(id=hit["_id"], full_name=hit["_source"]["full_name"], films=hit["_source"].get("films", []))
-                    for hit in result["hits"]["hits"]
-                ]
-                
-                if persons:
-                    return persons
-
-                # Если точных совпадений нет, то выполняем полнотекстовый поиск
-                es_query = generate_query(query, exact=False)  
-                result = await self.elastic.search(index="persons", body=es_query)
-                
-                persons = [
-                    Person(id=hit["_id"], full_name=hit["_source"]["full_name"], films=hit["_source"].get("films", []))
-                    for hit in result["hits"]["hits"]
-                ]
-                if persons:
-                    return persons
-            
-            # Если query не передано, выполняем общий запрос
-            es_query = {
-                "from": from_value,
-                "size": size_value,
-                "sort": [{"full_name.raw": {"order": order}}],
-                "query": {
-                    "match_all": {}
-                }
-            }
-
-            # Выполняем запрос для всех персон
-            result = await self.elastic.search(index="persons", body=es_query)
-
-            persons = [
-                Person(id=hit["_id"], full_name=hit["_source"]["full_name"], films=hit["_source"].get("films", []))
-                for hit in result["hits"]["hits"]
-            ]
-            
-            if persons:
-                return persons
-            
-            raise HTTPException(status_code=404, detail="Персоны не найдены")
-
-        except Exception as e:
-            
-            logger.error(f"Ошибка при запросе в Elasticsearch: {str(e)}")
-            raise HTTPException(status_code=500, detail="Ошибка при запросе")  
-                
 @lru_cache()
 def get_person_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
-    return PersonService(redis, elastic)
+    redis_client = RedisCache(redis)
+    elastic_client = ElasticManager(elastic, "person")
+    return PersonService(redis_client=redis_client, elastic_client=elastic_client)
