@@ -34,12 +34,15 @@ class GenreService:
         return Genre(**genre)
 
     async def get_all_genres(
-        self, sort: str = "name", page: int = 1, page_size: int = 10
+        self, sort: str | None = "-name", page: int = 1, page_size: int = 10
     ) -> list[Genre]:
         genres_key = self.redis.get_query_key(sort=sort, page_size=page_size, page=page)
         genres = await self.redis.get_object(object_key=genres_key)
         if genres is None:
-            genres = await self.db_client.get_objects_by_query()
+            genres = await self.db_client.get_objects_by_query(
+                sort=sort, page_size=page_size, page=page
+            )
+
             if genres is None:
                 logger.warning(
                     "Не найдено данных при запросе с параметрами: %s.", genres_key

@@ -135,11 +135,12 @@ class ElasticManager(DBManager):
             search = search.query(Q("match_all"))
             logger.debug("Сформирован запрос для получения всех документов.")
 
-        for sort_field in sort.split(","):
-            field = sort_field.lstrip("-")
-            order = "desc" if sort_field.startswith("-") else "asc"
-            search = search.sort({field: {"order": order}})
-            logger.debug("Добавлена сортировка: {} ({}).".format(field, order))
+        if sort is not None:
+            for sort_field in sort.split(","):
+                field = sort_field.lstrip("-")
+                order = "desc" if sort_field.startswith("-") else "asc"
+                search = search.sort({field: {"order": order}})
+                logger.debug("Добавлена сортировка: {} ({}).".format(field, order))
 
         search = search[(page - 1) * page_size : page * page_size]
         return search

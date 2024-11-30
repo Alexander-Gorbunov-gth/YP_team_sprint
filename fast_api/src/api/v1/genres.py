@@ -29,13 +29,13 @@ async def genre_details(
 @router.get("/", response_model=list[Genre])
 async def all_genres(
     genre_service: GenreService = Depends(get_genre_service),
-    sort: str = "name",
     page_size: int = Query(10, gt=0, le=100),
     page: int = Query(1, ge=1),
 ) -> list[Genre] | None:
-
+    
+    
     genres = await genre_service.get_all_genres(
-        sort=sort, page_size=page_size, page=page
+        sort=None, page_size=page_size, page=page
     )
     if not genres:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Жанры не найдены")
