@@ -1,11 +1,5 @@
-import datetime
-import uuid
-
 import aiohttp
 import pytest
-from elasticsearch import AsyncElasticsearch
-
-from elasticsearch.helpers import async_bulk
 
 from ..settings import test_settings
 from ..fixtures.es_data import GENRE_UUID, GENRE_NAME

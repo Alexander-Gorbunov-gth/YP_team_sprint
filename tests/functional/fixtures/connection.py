@@ -7,11 +7,13 @@ from elasticsearch_dsl import connections
 
 from ..settings import test_settings
 
+
 @pytest_asyncio.fixture(scope='session')
 def event_loop():
     loop = asyncio.get_event_loop()
     yield loop
     loop.close()
+
 
 @pytest_asyncio.fixture(name='es_dsl', scope='session')
 async def es_dsl():
@@ -33,4 +35,3 @@ async def es_client():
 async def http_client():
     async with aiohttp.ClientSession() as session:
         yield session
-        # await session.close()

@@ -9,6 +9,7 @@ from src.models.person import Person, ShortFilm
 from src.services.persons import PersonService, get_person_service
 from src.services.film import FilmService, get_film_service
 
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
