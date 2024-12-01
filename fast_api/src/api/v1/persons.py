@@ -30,8 +30,18 @@ async def person_list(
 
 
 @router.get("/{person_id}", response_model=Person)
-async def person_details():
-    pass
+async def person_details(
+    person_id: str,
+    person_service: PersonService = Depends(get_person_service)
+):
+    persons = await person_service.get_person_by_id(
+        person_id
+    )
+    if not persons:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Ошибка при получении фильмов"
+        )
+    return persons
 
 
 @router.get("/search/")
