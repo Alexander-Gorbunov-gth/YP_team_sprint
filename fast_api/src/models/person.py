@@ -1,7 +1,6 @@
-from .mixins import EntityBase
+from src.models.mixins import EntityBase
 from pydantic import BaseModel
-from typing import List, Optional
-
+from typing import List
 
 
 class ShortFilm(BaseModel):
