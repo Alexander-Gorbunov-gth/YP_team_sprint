@@ -14,6 +14,9 @@ GENRE_NAME = "GENRE_NAME"
 FILM_UUID = str(uuid.uuid4())
 FILM_NAME = "FILM_NAME"
 
+PERSON_UUID = str(uuid.uuid4())
+PERSON_NAME = "FILM_NAME"
+
 @pytest_asyncio.fixture(name="create_es_indexes", scope='session')
 async def create_es_indexes(es_dsl, http_client):
     # for index in indexes:
@@ -164,11 +167,27 @@ async def add_persons(es_write_data):
         Person(
             id=str(uuid.uuid4()),
             full_name=f"person_name {_}"
-        ) for _ in range(10)
+        ) for _ in range(60)
     ]
     bulk_query: list[dict] = []
     for row in data:
-        data = {'_index': 'genres', '_id': row.id}
+        data = {'_index': 'persons', '_id': row.id}
+        data.update({'_source': row.to_dict()})
+        bulk_query.append(data)
+    await es_write_data(bulk_query)
+
+
+@pytest_asyncio.fixture(name='add_person')
+async def add_person(es_write_data):
+    data = [
+        Person(
+            id=PERSON_UUID,
+            full_name=PERSON_NAME
+        )
+    ]
+    bulk_query: list[dict] = []
+    for row in data:
+        data = {'_index': 'persons', '_id': row.id}
         data.update({'_source': row.to_dict()})
         bulk_query.append(data)
     await es_write_data(bulk_query)
