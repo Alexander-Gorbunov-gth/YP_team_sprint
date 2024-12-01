@@ -1,10 +1,4 @@
-import datetime
-import uuid
-
-import aiohttp
 import pytest
-from elasticsearch import AsyncElasticsearch
-from elasticsearch.helpers import async_bulk, BulkIndexError
 
 from tests.functional.settings import test_settings
 
@@ -15,7 +9,6 @@ async def test_search(add_films, http_client):
     query_data = {'search': 'The Star'}
     async with http_client.get(url, params=query_data) as response:
         body = await response.json()
-        headers = response.headers
         status = response.status
     assert status == 200
     assert len(body) == 50

@@ -9,7 +9,6 @@ BASE_DIR = Path(__file__).parent
 
 class TestSettings(BaseSettings):
     elastic_host: str = Field('127.0.0.1', validation_alias='ELASTIC_HOST')
-    print(elastic_host)
     elastic_port: int = Field(9200, validation_alias='ELASTIC_PORT')
     elastic_user: str | None = Field(None, validation_alias='ELASTIC_USER')
     elastic_password: SecretStr | None = Field(None, validation_alias='ELASTIC_PASSWORD')

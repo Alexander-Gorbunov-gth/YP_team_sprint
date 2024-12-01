@@ -2,11 +2,12 @@ import pytest_asyncio
 import asyncio
 import uuid
 
+
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk, BulkIndexError
 
 from ..settings import test_settings
-from ..testdata.indexes import indexes, Genre, Person
+from ..testdata.indexes import indexes, Genre, Person, Films
 
 GENRE_UUID = str(uuid.uuid4())
 GENRE_NAME = "GENRE_NAME"
@@ -19,8 +20,8 @@ PERSON_NAME = "FILM_NAME"
 
 @pytest_asyncio.fixture(name="create_es_indexes", scope='session')
 async def create_es_indexes(es_dsl, http_client):
-    # for index in indexes:
-    #     index.init()
+    for index in indexes:
+        index.init()
     pass
 
 @pytest_asyncio.fixture(name='es_client', scope='session')
@@ -40,23 +41,8 @@ async def es_write_data(es_client):
             client=es_client,
             actions=data,
             refresh=True
-
         )
-        await es_client.close()
-
-        if errors:
-            raise Exception('Ошибка записи данных в Elasticsearch')
-        try:
-            updated, errors = await async_bulk(
-                client=es_client,
-                actions=data,
-                refresh=True
-            )
-        except BulkIndexError as e:
-            for error in e.errors:
-                print(error)
-            raise
-
+        await asyncio.sleep(1)
         await es_client.close()
 
         if errors:
@@ -163,31 +149,33 @@ async def add_film(es_write_data):
 
 @pytest_asyncio.fixture(name='add_persons')
 async def add_persons(es_write_data):
-    data = [
-        Person(
-            id=str(uuid.uuid4()),
-            full_name=f"person_name {_}"
-        ) for _ in range(60)
-    ]
+    es_data = [{
+        'id': str(uuid.uuid4()),
+        'full_name': f"person_name {_}",
+        'films': [
+            {'id': 'ef86b8ff-3c82-4d31-ad8e-72b69f4e3f15', 'roles': ['writer']},
+        ]
+    } for _ in range(60)]
     bulk_query: list[dict] = []
-    for row in data:
-        data = {'_index': 'persons', '_id': row.id}
-        data.update({'_source': row.to_dict()})
+    for row in es_data:
+        data = {'_index': 'persons', '_id': row['id']}
+        data.update({'_source': row})
         bulk_query.append(data)
     await es_write_data(bulk_query)
 
 
 @pytest_asyncio.fixture(name='add_person')
 async def add_person(es_write_data):
-    data = [
-        Person(
-            id=PERSON_UUID,
-            full_name=PERSON_NAME
-        )
-    ]
+    es_data = [{
+        'id': PERSON_UUID,
+        'full_name': PERSON_NAME,
+        'films': [
+            {'id': 'ef86b8ff-3c82-4d31-ad8e-72b69f4e3f15', 'roles': ['writer']},
+        ]
+    }]
     bulk_query: list[dict] = []
-    for row in data:
-        data = {'_index': 'persons', '_id': row.id}
-        data.update({'_source': row.to_dict()})
+    for row in es_data:
+        data = {'_index': 'persons', '_id': row['id']}
+        data.update({'_source': row})
         bulk_query.append(data)
     await es_write_data(bulk_query)
