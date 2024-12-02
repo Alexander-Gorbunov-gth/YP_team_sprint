@@ -40,9 +40,8 @@ async def es_write_data(es_client):
         updated, errors = await async_bulk(
             client=es_client,
             actions=data,
-            refresh=True
+            refresh='wait_for'
         )
-        await asyncio.sleep(1)
         await es_client.close()
 
         if errors:

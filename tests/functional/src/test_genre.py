@@ -1,5 +1,6 @@
 import aiohttp
 import pytest
+from http import HTTPStatus
 
 from ..settings import test_settings
 from ..fixtures.es_data import GENRE_UUID, GENRE_NAME
@@ -11,15 +12,15 @@ from ..testdata.indexes import indexes, Genre
     [
         (
             "/movies",
-            200,
+            HTTPStatus.OK,
         ),
         (
             "/genres",
-            200,
+            HTTPStatus.OK,
         ),
         (
             "/persons",
-            200,
+            HTTPStatus.OK,
         )
     ]
 )
@@ -41,7 +42,7 @@ async def test_get_genre(
     async with http_client.get(
         f"{test_settings.service_url}/api/v1/genres/{GENRE_UUID}/"
     ) as response:
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         result = await response.json()
         assert result.get("name") == GENRE_NAME
 
@@ -53,4 +54,4 @@ async def test_get_genre_list(
     async with http_client.get(
         f"{test_settings.service_url}/api/v1/genres/"
     ) as response:
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK

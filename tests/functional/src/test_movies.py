@@ -1,4 +1,5 @@
 import pytest
+from http import HTTPStatus
 
 from ..settings import test_settings
 
@@ -10,7 +11,7 @@ async def test_film_list(add_films, http_client):
     async with http_client.get(url) as response:
         response_data = await response.json()
         status = response.status
-    assert status == 200
+    assert status == HTTPStatus.OK
     assert len(response_data) == 50
 
     params = {}
@@ -19,7 +20,7 @@ async def test_film_list(add_films, http_client):
         second_page_response = await response.json()
         status = response.status
 
-    assert status == 200
+    assert status == HTTPStatus.OK
     assert len(second_page_response) == 10
 
     params = {}
@@ -28,7 +29,7 @@ async def test_film_list(add_films, http_client):
         page_size_response = await response.json()
         status = response.status
 
-    assert status == 200
+    assert status == HTTPStatus.OK
     assert len(page_size_response) == 20
 
 
@@ -36,6 +37,6 @@ async def test_film_list(add_films, http_client):
 async def test_get_film(add_film, http_client):
     url = test_settings.service_url + '/api/v1/films/' + FILM_UUID
     async with http_client.get(url) as response:
-        assert response.status == 200
+        assert response.status == HTTPStatus.OK
         result = await response.json()
         assert result.get("title") == FILM_NAME

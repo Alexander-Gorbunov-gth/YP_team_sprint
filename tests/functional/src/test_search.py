@@ -1,4 +1,5 @@
 import pytest
+from http import HTTPStatus
 
 from tests.functional.settings import test_settings
 
@@ -10,5 +11,5 @@ async def test_search(add_films, http_client):
     async with http_client.get(url, params=query_data) as response:
         body = await response.json()
         status = response.status
-    assert status == 200
+    assert status == HTTPStatus.OK
     assert len(body) == 50

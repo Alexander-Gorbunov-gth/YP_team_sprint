@@ -5,3 +5,4 @@ redis==5.2.0
 pytest==8.3.3
 pydantic-settings==2.1.0
 elasticsearch_dsl
+backoff==2.2.1
