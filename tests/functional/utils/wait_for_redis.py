@@ -1,15 +1,21 @@
 import time
-
+from backoff import on_exception, expo
 from redis import Redis
 from redis.exceptions import ConnectionError
 
 from tests.functional.settings import test_settings
 
-if __name__ == '__main__':
+
+@on_exception(
+    expo,
+    ConnectionError,
+    max_tries=15,
+    max_time=150
+)
+def main():
     redis_client = Redis(host=test_settings.redis_host, port=test_settings.redis_port)
-    while True:
-        try:
-            if redis_client.ping():
-                break
-        except ConnectionError:
-            time.sleep(1)
+    redis_client.ping()
+
+
+if __name__ == '__main__':
+    main()
