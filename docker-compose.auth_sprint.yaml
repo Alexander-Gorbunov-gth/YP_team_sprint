@@ -19,7 +19,16 @@ services:
       - ./.auth.env
     ports:
       - 5432:5432
-  
+
+  second_postgres:
+    image: postgres:14
+    restart: always
+    volumes:
+      - pg_second:/var/lib/postgresql/data/
+    env_file:
+      - ./.auth.env
+    ports:
+      - 5433:5432
   
   # nginx:
   #   build:
@@ -150,6 +159,7 @@ services:
 
 volumes:
   pg_auth:
+  pg_second:
   # content_db:
   # static_volume:
   # elasticsearch-data:
