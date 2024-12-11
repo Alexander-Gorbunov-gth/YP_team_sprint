@@ -1,22 +1,19 @@
-from sqlmodel import SQLModel, Field
+import uuid
+from datetime import datetime
 
-from .mixins import DateTimeMixin
+from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy.dialects.postgresql import UUID
 
-
-class BasePermission(SQLModel):
-    title: str
-    description: str | None
-
-
-class Permission(BasePermission, DateTimeMixin, table=True):
-    code: str = Field(default=None, primary_key=True)
+from src.db.postgres import Base
+from .mixins import TimestampMixin
 
 
-class PermissionPublic(BasePermission):
-    """Для ответов АПИ"""
-    code: str
+class Permission(Base, TimestampMixin):
+    __tablename__ = 'permissions'
 
+    slug = Column(String(255), primary_key=True, unique=True, nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(String(255))
 
-class PermissionCreate(BasePermission):
-    """Для тела Post запроса"""
-    code: str
+    def __repr__(self) -> str:
+        return f'<Permission {self.slug}>'
