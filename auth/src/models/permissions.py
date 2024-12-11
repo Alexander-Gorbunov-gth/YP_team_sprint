@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from src.db.postgres import Base
 from .mixins import TimestampMixin
@@ -17,3 +18,13 @@ class Permission(Base, TimestampMixin):
 
     def __repr__(self) -> str:
         return f'<Permission {self.slug}>'
+
+
+class UserPermissionsAssociation(Base):
+    __tablename__ = 'user_permission_association'
+
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True)
+    permission_slug = Column(String(255), ForeignKey('permissions.slug'), primary_key=True)
+
+    user = relationship("User", back_populates="user_permission")
+    permission = relationship("Permission", back_populates="user_permission")
