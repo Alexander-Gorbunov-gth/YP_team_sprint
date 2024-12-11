@@ -1,7 +1,14 @@
-from sqlmodel import SQLModel, Field
+from datetime import datetime
+from sqlalchemy import Column, DateTime
+from sqlalchemy.ext.declarative import declared_attr
 
 
-class DateTimeMixin:
-    pass
-    # create_ar
-    # update_at 
+class TimestampMixin:
+
+    @declared_attr
+    def created_at(cls):
+        return Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    @declared_attr
+    def updated_at(cls):
+        return Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

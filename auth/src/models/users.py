@@ -1,42 +1,37 @@
-from sqlmodel import SQLModel, Field
+import uuid
+from datetime import datetime
 
-from .mixins import DateTimeMixin
+from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from src.core.auth import verify_password, get_password_hash
 
-
-class UserBase(SQLModel):
-    """Базовая модель"""
-    username: str = Field(unique=True)
-    is_superuser: bool = False
-    disabled: bool = False
-
-
-class User(UserBase, table=True):
-    """Для БД"""
-    uuid: str | None = Field(default=None, primary_key=True)
-    password: str
-
-    def __str__(self) -> str:
-        return f"User - {self.username}"
+from src.db.postgres import Base
+from .mixins import TimestampMixin
 
 
-class UserPublic(UserBase):
-    """Модель для ответа эндпоинта"""
-    pass
+class User(Base, TimestampMixin):
+    __tablename__ = 'users'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    login = Column(String(255), unique=True, nullable=False)
+    password = Column(String(255), nullable=False)
+    first_name = Column(String(50))
+    last_name = Column(String(50))
+    is_superuser = Column(Boolean, default=False)
+
+    user_sessions = relationship('UserSessionAssociation', back_populates='user')
+    sessions = relationship('Session', secondary='user_session_association', back_populates='users')
 
 
-class UserLogin(SQLModel):
-    """Модель для POST запроса login"""
-    username: str
-    password: str
+    def __init__(self, login: str, password: str, first_name:str, last_name: str) -> None:
+        self.login = login
+        self.password = self.password = get_password_hash(password)
+        self.first_name = first_name
+        self.last_name = last_name
+    
+    def check_password(self, password: str) -> bool:
+        return verify_password(self.password, password)
 
-
-class Token(SQLModel):
-    """Модель ответа для эндпоинт токена"""
-    access_token: str
-    refresh_token: str
-    token_type: str
-
-
-class TokenData(SQLModel):
-    """Модель для payload токена"""
-    uuid: str | None = None
+    def __repr__(self) -> str:
+        return f'<User {self.login}>'
