@@ -3,13 +3,13 @@ from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 from sqlmodel import SQLModel, create_engine
 
-from src.core.config import settings
 from src.db import redis
 from src.db.postgres import create_database, purge_database
 from src.api.v1.auth import auth_router
 from src.api.v1.me import me_router
 from src.api.v1.permission import perm_router
 from src.api.v1.users import users_router
+from src.services.cli_commands import typer_app
 
 from contextlib import asynccontextmanager
 
@@ -38,3 +38,6 @@ app.include_router(auth_router, prefix='/auth', tags=['auth'])
 app.include_router(me_router, prefix='/me', tags=['me'])
 app.include_router(users_router, prefix='/users', tags=['users'])
 app.include_router(perm_router, prefix='/permissions', tags=['permissions'])
+
+if __name__ == "__main__":
+    typer_app()
