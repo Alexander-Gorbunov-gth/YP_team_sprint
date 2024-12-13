@@ -1,5 +1,5 @@
-import uuid
-from datetime import datetime
+from pydantic import BaseModel
+from typing import Optional, List
 
 from sqlalchemy import Boolean, Column, DateTime, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
@@ -34,3 +34,18 @@ class UserPermissionsAssociation(Base):
 
     user = relationship("User", back_populates="user_permissions")
     permission = relationship("Permission", back_populates="user_permissions")
+
+
+class PermissionCreate(BaseModel):
+    slug: str
+    title: str
+    description: Optional[str] = None
+
+
+class PermissionUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+
+
+class PermissionPublic(PermissionCreate):
+    pass

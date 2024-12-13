@@ -42,4 +42,3 @@ def createsuperuser(login: str, password: str):
 def check(arg: str):
     typer.echo(arg)
     return
-# python src/main.py createsuperuser admin admin
