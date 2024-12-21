@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.users import User
 from src.services.users.schemas import UserCreate
 from src.services.auth.schemas import ResponseTokens
+from src.services.users.interfacies import UserRepository
 
 
 class IAuthService(ABC):
@@ -137,3 +138,9 @@ class ISQLAlchemyUoW(IBaseUoW):
 
         self._session.expunge_all()
         await self._session.rollback()
+
+
+class IAuthUoW(IBaseUoW, ABC):
+    """Интерфейс UoW для сервиса аутентификации"""
+
+    users: UserRepository
