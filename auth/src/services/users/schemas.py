@@ -1,11 +1,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 
 
 class UserBase(BaseModel):
-    login: str = Field(..., min_length=3, max_length=255)
+    email: EmailStr = Field(..., min_length=3, max_length=255)
     first_name: str | None = Field(None, max_length=50)
     last_name: str | None = Field(None, max_length=50)
 
