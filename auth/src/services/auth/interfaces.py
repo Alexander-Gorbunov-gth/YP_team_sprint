@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.models.users import User
 from src.services.users.schemas import UserCreate
 from src.services.auth.schemas import ResponseTokens
@@ -70,3 +72,68 @@ class IAuthService(ABC):
         :return: None
         """
         raise NotImplementedError
+
+
+class IBaseUoW(ABC):
+    """
+    Интерфейс для любых единиц работы,
+    которые будут использоваться для атомарности транзакций, согласно DDD.
+    """
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
+        if exc_type is None:
+            await self._commit()
+        else:
+            await self._rollback()
+
+    @abstractmethod
+    async def _commit(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def _rollback(self) -> None:
+        raise NotImplementedError
+
+
+class ISQLAlchemyUoW(IBaseUoW):
+    """Реализация Unit of Work для работы с базой данных через SQLAlchemy."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        """
+        Инициализация Unit of Work с асинхронной сессией.
+
+        Args:
+            session_factory [AsyncSession]: Асинхронныя сессия SQLAlchemy.
+        """
+
+        super().__init__()
+        self._session: AsyncSession = session
+
+    async def __aenter__(self) -> "ISQLAlchemyUoW":
+        """
+        Открытие контекста Unit of Work, создавая новую сессию.
+
+        Returns:
+            SQLAlchemyAbstractUnitOfWork: Текущий экземпляр.
+        """
+
+        return await super().__aenter__()
+
+    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
+        """Завершение контекста Unit of Work и закрытие сессии."""
+        await super().__aexit__(exc_type, exc_value, traceback)
+        await self._session.close()
+
+    async def _commit(self) -> None:
+        """Зафиксировать изменения в базе данных."""
+
+        await self._session.commit()
+
+    async def _rollback(self) -> None:
+        """Откатить изменения в базе данных."""
+
+        self._session.expunge_all()
+        await self._session.rollback()
