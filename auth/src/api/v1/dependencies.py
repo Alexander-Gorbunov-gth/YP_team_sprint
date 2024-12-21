@@ -4,8 +4,8 @@ from typing import Annotated
 
 from dependency_injector.wiring import inject, Provide
 from fastapi import Depends
-from src.users.injective import Container
-from src.users.interfacies import IUserService
+from src.services.users.injective import Container
+from src.services.users.interfacies import IUserService
 
 
 @inject

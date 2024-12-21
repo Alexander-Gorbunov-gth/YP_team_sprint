@@ -3,13 +3,13 @@ import uuid
 from fastapi import HTTPException, status
 
 from src.models.users import User
-from src.users.exceptions import (
+from src.services.users.exceptions import (
     EntityAlreadyExistsError,
     EntityNotFoundError,
     PermissionAssociationError,
 )
-from src.users.interfacies import IUserService, UserRepository
-from src.users.schemas import UserCreate, UserResponse, UserUpdate
+from src.services.users.interfacies import IUserService, UserRepository
+from src.services.users.schemas import UserCreate, UserResponse, UserUpdate
 
 
 class UserService(IUserService):

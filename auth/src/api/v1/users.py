@@ -2,9 +2,9 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends
 
 from src.models.users import User
-from src.users import schemas
-from src.users.injective import Container
-from src.users.interfacies import IUserService
+from src.services.users import schemas
+from src.services.users.injective import Container
+from src.services.users.interfacies import IUserService
 from .dependencies import user_by_id
 
 users_router = APIRouter()

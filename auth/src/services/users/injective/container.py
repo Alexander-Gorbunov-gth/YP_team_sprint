@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 
 from src.core.config import Settings
 from src.models.users import User
-from src.users.repositories import SqlmodelUserRepository
-from src.users.services import UserService
+from src.services.users.repositories import SqlmodelUserRepository
+from src.services.users.services import UserService
 
 
 class Container(containers.DeclarativeContainer):

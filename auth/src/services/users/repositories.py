@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.permissions import UserPermissionsAssociation, Permission
-from src.users.exceptions import (
+from src.services.users.exceptions import (
     EntityNotFoundError,
     EntityAlreadyExistsError,
     PermissionAssociationError,
