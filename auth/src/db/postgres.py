@@ -9,7 +9,7 @@ from src.core.config import settings
 
 Base = declarative_base()
 
-engine = create_async_engine(settings.postgres.db_url, echo=True, future=True)
+engine = create_async_engine(settings.db.db_url, echo=True, future=True)
 
 
 async def get_session() -> AsyncSession:  # type: ignore
