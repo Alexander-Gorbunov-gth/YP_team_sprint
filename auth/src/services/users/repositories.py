@@ -2,11 +2,12 @@ from typing import Generic, TypeVar, Type
 from uuid import UUID
 
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, Result
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.permissions import UserPermissionsAssociation, Permission
+from src.models.users import User
 from src.services.users.exceptions import (
     EntityNotFoundError,
     EntityAlreadyExistsError,
@@ -22,7 +23,6 @@ UpdateSchema = TypeVar("UpdateSchema", bound=BaseModel)
 class SqlmodelUserRepository(
     UserRepository, Generic[Model, CreateSchema, UpdateSchema]
 ):
-
     def __init__(self, session: AsyncSession, model: Type[Model]):
         self._session = session
         self._model = model
@@ -83,7 +83,6 @@ class SqlmodelUserRepository(
         return association
 
     async def remove_permission(self, instance: Model, slug: str):
-
         stmt = select(UserPermissionsAssociation).where(
             UserPermissionsAssociation.user_id == instance.id,
             UserPermissionsAssociation.permission_slug == slug,
@@ -98,3 +97,19 @@ class SqlmodelUserRepository(
 
         await self._session.delete(association)
         await self._session.commit()
+
+    async def get_by_email(self, email: str) -> User | None:
+        """
+        Асинхронный метод для получения пользователя из базы данных по его email.
+
+        Args:
+            email (str): Электронная почта пользователя, по которой выполняется поиск.
+
+        Returns:
+            User | None: Экземпляр объекта User, если пользователь с указанным email найден.
+                         Если пользователь не найден, возвращает None.
+        """
+        result: Result = await self._session.execute(
+            select(User).filter_by(email=email)
+        )
+        return result.scalar_one_or_none()

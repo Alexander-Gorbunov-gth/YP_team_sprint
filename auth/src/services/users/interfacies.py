@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class UserRepository(ABC):
-
     @abstractmethod
     async def create(self, *args, **kwargs):
         pass
@@ -31,9 +30,14 @@ class UserRepository(ABC):
     async def remove_permission(self, *args, **kwargs):
         pass
 
+    @abstractmethod
+    async def get_by_email(self, *args, **kwargs):
+        """Метод для получения пользователя по его email."""
+        
+        raise NotImplementedError
+
 
 class IUserService(ABC):
-
     @abstractmethod
     async def create_user(self, *args, **kwargs):
         pass
