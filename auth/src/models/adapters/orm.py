@@ -24,7 +24,7 @@ metadata = MetaData()
 
 
 class TimestampMixin:
-    """Mixin for automatic timestamp fields."""
+    """Миксин для добавления полей создания и обновления"""
 
     @staticmethod
     def create_timestamp_columns():
@@ -45,10 +45,10 @@ users_table = Table(
     "users",
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-    Column("email", String, nullable=False, unique=True),
-    Column("password", String, nullable=False),
-    Column("full_name", String, nullable=True),
-    Column("role_id", ForeignKey("roles.id")),
+    Column("email", String(255), nullable=False, unique=True),
+    Column("password", String(255), nullable=False),
+    Column("full_name", String(255), nullable=True),
+    Column("role_id", ForeignKey("roles.id"), nullable=True),
     *TimestampMixin.create_timestamp_columns(),
     Index("ix_users_email", "email"),
 )
@@ -57,14 +57,14 @@ roles_table = Table(
     "roles",
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-    Column("name", String, nullable=False, unique=True),
+    Column("title", String(255), nullable=False, unique=True),
 )
 
 permissions_table = Table(
     "permissions",
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-    Column("name", String(255), nullable=False, unique=True),
+    Column("slug", String(255), nullable=False, unique=True),
     Column("title", String(255), nullable=True),
     Column("description", String(255), nullable=True),
 )
@@ -108,8 +108,8 @@ def map_users():
         class_=User,
         local_table=users_table,
         properties={
-            "sessions": relationship("SessionsModel", back_populates="user"),
-            "role": relationship("RolesModel", back_populates="users"),
+            "sessions": relationship(Session, back_populates="user", lazy="selectin"),
+            "role": relationship(Role, back_populates="users", lazy="selectin"),
         },
     )
 
@@ -117,7 +117,7 @@ def map_users():
         class_=Session,
         local_table=sessions_table,
         properties={
-            "user": relationship("UsersModel", back_populates="sessions"),
+            "user": relationship(User, back_populates="sessions"),
         },
     )
 
@@ -129,7 +129,10 @@ def map_roles_permissions():
         properties={
             "users": relationship(User, back_populates="role"),
             "permissions": relationship(
-                Permission, secondary=role_permission_table, back_populates="role"
+                Permission,
+                secondary=role_permission_table,
+                back_populates="role",
+                lazy="joined",
             ),
         },
     )

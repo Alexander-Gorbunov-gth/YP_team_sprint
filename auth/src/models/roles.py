@@ -7,7 +7,7 @@ from src.models.mixins import IdMixinModel
 
 @dataclass
 class Role(IdMixinModel, IModel):
-    name: str
+    title: str
 
 
 @dataclass

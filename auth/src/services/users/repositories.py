@@ -6,7 +6,7 @@ from sqlalchemy import select, Result
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.permissions import UserPermissionsAssociation, Permission
+from src.models.permissions import Permission
 from src.models.users import User
 from src.services.users.exceptions import (
     EntityNotFoundError,
@@ -69,34 +69,34 @@ class SqlmodelUserRepository(
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    async def add_permission(self, instance: Model, slug: str):
-        permission = await self._session.get(Permission, slug)
-        if not permission:
-            raise EntityNotFoundError(f"Объект с slug - {slug} не найден")
+    # async def add_permission(self, instance: Model, slug: str):
+    #     permission = await self._session.get(Permission, slug)
+    #     if not permission:
+    #         raise EntityNotFoundError(f"Объект с slug - {slug} не найден")
 
-        association = UserPermissionsAssociation(
-            user_id=instance.id, permission_slug=permission
-        )
-        self._session.add(association)
-        await self._session.commit()
-        await self._session.refresh(association)
-        return association
+    #     association = UserPermissionsAssociation(
+    #         user_id=instance.id, permission_slug=permission
+    #     )
+    #     self._session.add(association)
+    #     await self._session.commit()
+    #     await self._session.refresh(association)
+    #     return association
 
-    async def remove_permission(self, instance: Model, slug: str):
-        stmt = select(UserPermissionsAssociation).where(
-            UserPermissionsAssociation.user_id == instance.id,
-            UserPermissionsAssociation.permission_slug == slug,
-        )
-        result = await self._session.execute(stmt)
-        association = result.scalar_one_or_none()
+    # async def remove_permission(self, instance: Model, slug: str):
+    #     stmt = select(UserPermissionsAssociation).where(
+    #         UserPermissionsAssociation.user_id == instance.id,
+    #         UserPermissionsAssociation.permission_slug == slug,
+    #     )
+    #     result = await self._session.execute(stmt)
+    #     association = result.scalar_one_or_none()
 
-        if not association:
-            raise PermissionAssociationError(
-                f"Разрешение {slug} не привязано к пользователю {instance.login}"
-            )
+    #     if not association:
+    #         raise PermissionAssociationError(
+    #             f"Разрешение {slug} не привязано к пользователю {instance.login}"
+    #         )
 
-        await self._session.delete(association)
-        await self._session.commit()
+    #     await self._session.delete(association)
+    #     await self._session.commit()
 
     async def get_by_email(self, email: str) -> User | None:
         """

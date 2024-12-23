@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field, field_validator, EmailStr
 
 class UserBase(BaseModel):
     email: EmailStr = Field(..., min_length=3, max_length=255)
-    first_name: str | None = Field(None, max_length=50)
-    last_name: str | None = Field(None, max_length=50)
+    full_name: str | None = Field(None, max_length=255)
+    role_id: UUID | None = Field(None)
 
 
 class UserCreate(UserBase):
@@ -35,3 +35,4 @@ class UserResponse(UserBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True

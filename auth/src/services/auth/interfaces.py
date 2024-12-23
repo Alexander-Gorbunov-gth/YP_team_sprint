@@ -1,78 +1,131 @@
 from abc import ABC, abstractmethod
+from typing import TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.declarative import DeclarativeMeta
 
-from src.models.users import User
-from src.services.users.schemas import UserCreate
-from src.services.auth.schemas import ResponseTokens
-from src.services.users.interfacies import UserRepository
+
+Model = TypeVar("Model", bound=DeclarativeMeta)
 
 
 class IAuthService(ABC):
     @abstractmethod
-    async def register(self, user: UserCreate) -> User:
-        """
-        Регистрирует нового пользователя в системе.
+    async def register(self, *args, **kwargs):
+        """Регистрирует нового пользователя в системе."""
 
-        :param user: Информация о пользователе, которую нужно зарегистрировать.
-        :return: Модель пользователя, содержащая данные о новом пользователе.
+        raise NotImplementedError
+
+    # @abstractmethod
+    # async def login(self, *args, **kwargs):
+    #     """Выполняет вход пользователя по электронной почте и паролю."""
+    #
+    #     raise NotImplementedError
+
+    # @abstractmethod
+    # async def change_password(self, *args, **kwargs):
+    #     """Изменяет пароль пользователя."""
+
+    #     raise NotImplementedError
+
+    # @abstractmethod
+    # async def logout(self, *args, **kwargs):
+    #     """Выполняет выход пользователя из системы, аннулирует сессию."""
+    #
+    #     raise NotImplementedError
+
+    # @abstractmethod
+    # async def refresh(self, *args, **kwargs):
+    #     """Обновляет токен доступа с использованием refresh-токена."""
+
+    #     raise NotImplementedError
+
+    # @abstractmethod
+    # async def close_sessions(self):
+    #     """Закрывает все активные сессии пользователя, кроме текущей."""
+
+    #     raise NotImplementedError
+
+
+class IRepository(ABC):
+    """
+    Интерфейс репозитория, определяющий основные методы для работы с данными.
+    Этот интерфейс может быть реализован для различных типов хранилищ (SQL, NoSQL, файловые системы и т.д.).
+    """
+
+    @abstractmethod
+    async def add(self, *args, **kwargs):
+        """
+        Асинхронный метод для добавления объекта в хранилище.
+        Должен быть реализован в подклассе.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def login(self, email: str, password: str) -> ResponseTokens:
+    async def update(self, *args, **kwargs):
         """
-        Выполняет вход пользователя по электронной почте и паролю.
-
-        :param email: Электронная почта пользователя.
-        :param password: Пароль пользователя.
-        :return: Токены, содержащие доступ к системе.
+        Асинхронный метод для обновления объекта в хранилище.
+        Должен быть реализован в подклассе.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def change_password(
-        self, user_id: str, current_password: str, new_password: str
-    ) -> User:
+    async def get_by_id(self, *args, **kwargs):
         """
-        Изменяет пароль пользователя.
-
-        :param access_token: Токен доступа пользователя для завершения сессии.
-        :param current_password: Текущий пароль пользователя.
-        :param new_password: Новый пароль, который нужно установить.
-        :return: Модель пользователя с обновленным паролем.
+        Асинхронный метод для получения объекта из хранилища по его идентификатору.
+        Должен быть реализован в подклассе.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def logout(self, access_token: str):
+    async def get_list(self, *args, **kwargs):
         """
-        Выполняет выход пользователя из системы, аннулирует сессию.
-
-        :param access_token: Токен доступа пользователя для завершения сессии.
-        :return: None
+        Асинхронный метод для получения списка объектов из хранилища.
+        Должен быть реализован в подклассе.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def refresh(self, refresh_token: str) -> ResponseTokens:
+    async def delete(self, *args, **kwargs):
         """
-        Обновляет токен доступа с использованием refresh-токена.
-
-        :param refresh_token: Токен обновления для получения нового access-токена.
-        :return: Новая пара ключей.
+        Асинхронный метод для удаления объекта из хранилища.
+        Должен быть реализован в подклассе.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def close_sessions(self, current_user_id: str, current_access_token: str):
+    async def get_by_filters(self, *args, **kwargs):
         """
-        Закрывает все активные сессии пользователя, кроме текущей.
+        Асинхронный метод для получения списка объектов из хранилища, который удовлетворяют условиям.
+        Должен быть реализован в подклассе.
+        """
 
-        :param current_access_token: Текущий токен пользователя, который не должен быть закрыт.
-        :return: None
-        """
         raise NotImplementedError
+
+    @abstractmethod
+    async def get_with_joins(self, *args, **kwargs):
+        """
+        Асинхронный метод для получения списка объектов из нескольких таблиц хранилища.
+        Должен быть реализован в подклассе.
+        """
+
+        raise NotImplementedError
+
+
+class ISQLAlchemyRepository(IRepository, ABC):
+    """
+    Базовый класс SQL-репозитория, предоставляющий общую функциональность для работы с SQLAlchemy.
+    """
+
+    def __init__(self, session: AsyncSession, model: Model) -> None:
+        """
+        Инициализирует SQL-репозиторий.
+
+        Args:
+            db_session (AsyncSession): Асинхронная сессия SQLAlchemy для выполнения запросов к базе данных.
+            model: Модель базы данных (ORM-класс), с которой будет работать репозиторий.
+        """
+        self._session: AsyncSession = session
+        self._model: Model = model
 
 
 class IBaseUoW(ABC):
@@ -143,4 +196,7 @@ class ISQLAlchemyUoW(IBaseUoW):
 class IAuthUoW(IBaseUoW, ABC):
     """Интерфейс UoW для сервиса аутентификации"""
 
-    users: UserRepository
+    users: ISQLAlchemyRepository
+    sessions: ISQLAlchemyRepository
+    roles: ISQLAlchemyRepository
+    permissions: ISQLAlchemyRepository

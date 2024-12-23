@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from typing import List
 
 from src.services.permissions import PermissionsService
-from src.models.permissions import PermissionPublic
+from src.schemas.permissions import PermissionPublic
 
 perm_router = APIRouter()
 

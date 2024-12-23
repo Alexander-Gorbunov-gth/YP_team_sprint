@@ -1,20 +1,30 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Form
+
+from src.services.auth.service import AuthService, get_auth_service
+from src.services.users.schemas import UserCreate
+from src.services.auth.interfaces import IAuthService
 
 
 auth_router = APIRouter()
 
 
-
-
 @auth_router.post("/register/")
-async def register():
-    pass
+async def register(
+    user_data: UserCreate,
+    auth_service: IAuthService = Depends(get_auth_service),
+):
+    user = await auth_service.register(user=user_data)
+    return user
 
 
 @auth_router.post("/login/")
-async def login():
-    pass
-
+async def login(
+    email: str = Form(...),
+    password: str = Form(...),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    permissions = await auth_service.login(email=email, password=password)
+    return permissions
 
 
 @auth_router.post("/logout/")
