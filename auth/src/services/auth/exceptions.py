@@ -16,3 +16,15 @@ class UserNotFoundError(BaseAuthException):
 
 class InvalidPasswordError(BaseAuthException):
     pass
+
+
+class BaseSessionError(Exception):
+    pass
+
+
+class SessionHasExpired(BaseSessionError):
+    pass
+
+
+class AuthError(BaseSessionError):
+    pass

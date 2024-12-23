@@ -15,12 +15,11 @@ class TokenResponse(AccessToken):
     token_type: str = Field(default="Bearer")
 
 
-class TokenUserData(BaseModel):
+class Payload(BaseModel):
     sub: str
     scope: list[str] = Field(default=[])
     iat: datetime
-    access_exp: datetime
-    refresh_exp: datetime
+    exp: datetime
     jti: str
 
 

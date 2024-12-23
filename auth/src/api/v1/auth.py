@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, Request, status
 
 from src.services.auth.service import AuthService, get_auth_service
 from src.services.users.schemas import UserCreate
+from src.schemas.users import TokenResponse, Payload
 from src.services.auth.interfaces import IAuthService
+from src.services.auth.helpers import extract_and_validate_token
 
 
 auth_router = APIRouter()
@@ -19,17 +21,25 @@ async def register(
 
 @auth_router.post("/login/")
 async def login(
+    request: Request,
     email: str = Form(...),
     password: str = Form(...),
     auth_service: AuthService = Depends(get_auth_service),
-):
-    permissions = await auth_service.login(email=email, password=password)
-    return permissions
+) -> TokenResponse:
+    headers = request.headers
+    refresh_token, access_token = await auth_service.login(
+        email=email, password=password, headers=headers
+    )
+    return access_token
 
 
-@auth_router.post("/logout/")
-async def logout():
-    pass
+@auth_router.post("/logout/", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(
+    payload: Payload = Depends(extract_and_validate_token),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> None:
+    await auth_service.logout(jti=payload.jti)
+    return
 
 
 @auth_router.post("/change-password/")

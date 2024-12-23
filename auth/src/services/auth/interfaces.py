@@ -200,3 +200,30 @@ class IAuthUoW(IBaseUoW, ABC):
     sessions: ISQLAlchemyRepository
     roles: ISQLAlchemyRepository
     permissions: ISQLAlchemyRepository
+
+
+class IBlackList(ABC):
+    """
+    Абстрактный класс для работы с черным списком токенов (JTI).
+    """
+
+    @abstractmethod
+    async def set_in_black_list(self, jti: str, ttl: int | None = None) -> None:
+        """
+        Добавляет идентификатор токена (JTI) в черный список.
+
+        :param jti: Уникальный идентификатор токена (JTI).
+        :param ttl: Время жизни записи в черном списке в секундах.
+                    Если None, запись будет храниться бесконечно.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def check_id_in_black_list(self, jti: str) -> bool:
+        """
+        Проверяет, находится ли идентификатор токена (JTI) в черном списке.
+
+        :param jti: Уникальный идентификатор токена (JTI).
+        :return: True, если идентификатор находится в черном списке, иначе False.
+        """
+        raise NotImplementedError

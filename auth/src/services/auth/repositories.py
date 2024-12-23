@@ -8,11 +8,12 @@ from src.services.auth.interfaces import ISQLAlchemyRepository
 from src.models.interfaces import IModel
 
 CreateSchema = TypeVar("CreateSchema", bound=BaseModel)
-UpdateSchema = TypeVar("UpdateSchema", bound=BaseModel)
 
 
 class SQLAlchemyAuthRepository(ISQLAlchemyRepository):
     """Репозиторий для работы с базой данных с использованием SQLAlchemy."""
+
+    exclude_fields = ("id", "created_at", "updated_at")
 
     async def add(self, schema: CreateSchema) -> IModel:
         """
@@ -27,9 +28,7 @@ class SQLAlchemyAuthRepository(ISQLAlchemyRepository):
         )
         return result.scalar_one()
 
-    async def update(
-        self, object_id: str | UUID, schema: UpdateSchema
-    ) -> IModel | None:
+    async def update(self, object_id: str | UUID, model: IModel) -> IModel | None:
         """
         Обновляет запись в базе данных по ее идентификатору.
 
@@ -41,7 +40,7 @@ class SQLAlchemyAuthRepository(ISQLAlchemyRepository):
         result: Result = await self._session.execute(
             update(self._model)
             .filter_by(id=object_id)
-            .values(**schema.model_dump())
+            .values(**await model.to_dict(exclude=self.exclude_fields))
             .returning(self._model)
         )
         return result.scalar_one_or_none()
