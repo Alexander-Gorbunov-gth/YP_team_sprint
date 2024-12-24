@@ -6,7 +6,7 @@ from src.models.users import User
 from src.core.config import settings
 
 
-engine = create_engine(settings.postgres.db_sync_url)
+engine = create_engine(settings.db.db_url)
 
 session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

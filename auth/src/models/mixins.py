@@ -1,14 +1,14 @@
+from dataclasses import dataclass, field
 from datetime import datetime
-from sqlalchemy import Column, DateTime
-from sqlalchemy.ext.declarative import declared_attr
+from uuid import UUID
 
 
-class TimestampMixin:
+@dataclass
+class IdMixinModel:
+    id: UUID = field(init=False)
 
-    @declared_attr
-    def created_at(cls):
-        return Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    @declared_attr
-    def updated_at(cls):
-        return Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+@dataclass
+class TimestampMixinModel:
+    created_at: datetime = field(init=False)
+    updated_at: datetime = field(init=False)
