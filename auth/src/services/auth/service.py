@@ -112,9 +112,14 @@ class AuthService(IAuthService):
         :param user: Объект пользователя.
         :return: Данные токена в виде модели TokenUserData.
         """
+        permissions = (
+            [permission.slug for permission in user.role.permissions]
+            if user.role is not None
+            else []
+        )
         return Payload(
             sub=str(user.id),
-            scope=[permission.slug for permission in user.role.permissions],
+            scope=permissions,
             iat=datetime.utcnow(),
             exp=datetime.utcnow() + timedelta(days=REFRESH_EXPIRE_DAYS),
             jti=str(uuid.uuid4()),
