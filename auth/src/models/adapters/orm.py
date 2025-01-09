@@ -48,7 +48,7 @@ users_table = Table(
     Column("email", String(255), nullable=False, unique=True),
     Column("password", String(255), nullable=False),
     Column("full_name", String(255), nullable=True),
-    Column("role_id", ForeignKey("roles.id"), nullable=True),
+    Column("role_id", ForeignKey("roles.id", ondelete="SET NULL"), nullable=True),
     *TimestampMixin.create_timestamp_columns(),
     Index("ix_users_email", "email"),
 )
@@ -109,7 +109,7 @@ def map_users():
         local_table=users_table,
         properties={
             "sessions": relationship(Session, back_populates="user", lazy="selectin"),
-            "role": relationship(Role, back_populates="users", lazy="selectin"),
+            "role": relationship(Role, back_populates="users", lazy="joined"),
         },
     )
 
@@ -132,7 +132,7 @@ def map_roles_permissions():
                 Permission,
                 secondary=role_permission_table,
                 back_populates="role",
-                lazy="joined",
+                lazy="selectin",
             ),
         },
     )

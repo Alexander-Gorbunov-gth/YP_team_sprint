@@ -1,7 +1,8 @@
 from datetime import datetime
+from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator, EmailStr
+from pydantic import BaseModel, Field, field_validator, EmailStr, ConfigDict
 
 
 class UserBase(BaseModel):
@@ -33,6 +34,26 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfile(UserBase):
+    pass
+
+
+class RoleEnum(str, Enum):
+    ADMIN = "Admin"
+    MANAGER = "Manager"
+    EDITOR = "Editor"
+    VIEWER = "Viewer"
+    MODERATOR = "Moderator"
+    DEVELOPER = "Developer"
+    SUPPORT = "Support"
+    GUEST = "Guest"
+    AUDITOR = "Auditor"
+    CONTRIBUTOR = "Contributor"
+
+
+class UserRole(BaseModel):
+    id: UUID
+    title: RoleEnum

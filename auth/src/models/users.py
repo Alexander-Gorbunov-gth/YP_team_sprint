@@ -10,4 +10,4 @@ class User(IdMixinModel, TimestampMixinModel, IModel):
     email: str
     password: str
     full_name: str | None
-    role_id: UUID
+    role_id: UUID | None

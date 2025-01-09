@@ -22,11 +22,7 @@ def createsuperuser(login: str, password: str):
         if existing_user:
             typer.echo("Пользователь с таким именем уже существует.")
             return
-        new_admin = User(
-            login=login,
-            password=password,
-            is_superuser=True
-        )
+        new_admin = User(login=login, password=password, is_superuser=True)
         db.add(new_admin)
         db.commit()
         db.refresh(new_admin)

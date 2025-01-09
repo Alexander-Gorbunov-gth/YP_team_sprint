@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, Form, Request, status
 
+from src.schemas.users import TokenResponse, Payload
+from src.services.auth.helpers import extract_and_validate_token
+from src.services.auth.interfaces import IAuthService
 from src.services.auth.service import AuthService, get_auth_service
 from src.services.users.schemas import UserCreate
-from src.schemas.users import TokenResponse, Payload
-from src.services.auth.interfaces import IAuthService
-from src.services.auth.helpers import extract_and_validate_token
-
 
 auth_router = APIRouter()
 

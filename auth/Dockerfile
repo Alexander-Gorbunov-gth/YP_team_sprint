@@ -1,14 +1,14 @@
-FROM python:3.12
+FROM python:3.10
+
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 
-COPY requirements.txt .
-
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt --no-cache-dir
+COPY requirements.txt requirements.txt
+RUN pip install --upgrade pip --no-cache-dir \
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 

@@ -11,9 +11,10 @@ from src.models.users import User
 from src.services.users.exceptions import (
     EntityNotFoundError,
     EntityAlreadyExistsError,
-    PermissionAssociationError,
 )
-from .interfacies import UserRepository
+from .interfacies import UserRepository, IRoleRepository
+from .schemas import RoleEnum
+from ...models.roles import RolePermission
 
 Model = TypeVar("Model")
 CreateSchema = TypeVar("CreateSchema", bound=BaseModel)
@@ -69,35 +70,6 @@ class SqlmodelUserRepository(
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    # async def add_permission(self, instance: Model, slug: str):
-    #     permission = await self._session.get(Permission, slug)
-    #     if not permission:
-    #         raise EntityNotFoundError(f"Объект с slug - {slug} не найден")
-
-    #     association = UserPermissionsAssociation(
-    #         user_id=instance.id, permission_slug=permission
-    #     )
-    #     self._session.add(association)
-    #     await self._session.commit()
-    #     await self._session.refresh(association)
-    #     return association
-
-    # async def remove_permission(self, instance: Model, slug: str):
-    #     stmt = select(UserPermissionsAssociation).where(
-    #         UserPermissionsAssociation.user_id == instance.id,
-    #         UserPermissionsAssociation.permission_slug == slug,
-    #     )
-    #     result = await self._session.execute(stmt)
-    #     association = result.scalar_one_or_none()
-
-    #     if not association:
-    #         raise PermissionAssociationError(
-    #             f"Разрешение {slug} не привязано к пользователю {instance.login}"
-    #         )
-
-    #     await self._session.delete(association)
-    #     await self._session.commit()
-
     async def get_by_email(self, email: str) -> User | None:
         """
         Асинхронный метод для получения пользователя из базы данных по его email.
@@ -113,3 +85,63 @@ class SqlmodelUserRepository(
             select(User).filter_by(email=email)
         )
         return result.scalar_one_or_none()
+
+    async def add_role(self, instance: Model, role):
+        try:
+            setattr(instance, "role_id", role.id)
+            await self._session.commit()
+            await self._session.refresh(instance)
+            return instance
+        except IntegrityError:
+            await self._session.rollback()
+            raise EntityAlreadyExistsError(
+                f"{self._model.__name__} с такими данными уже существует"
+            )
+
+
+class RoleRepository(IRoleRepository):
+
+    def __init__(self, session: AsyncSession, model: Model):
+        self._session = session
+        self._model = model
+
+    async def create(self, role_title: RoleEnum) -> Model:
+        try:
+            instance = self._model(title=role_title)
+            self._session.add(instance)
+            await self._session.commit()
+            return instance
+        except IntegrityError:
+            await self._session.rollback()
+            raise EntityAlreadyExistsError(
+                f"{self._model.__name__} с такими названием уже существует"
+            )
+
+    async def get_by_id(self, role_id: UUID):
+        instance = await self._session.get(self._model, role_id)
+        if not instance:
+            raise EntityNotFoundError(
+                f"{self._model.__name__} с id={role_id} не найден"
+            )
+        return instance
+
+    async def assign_permissions(self, role, permission_slug):
+        stmt = select(Permission).where(Permission.slug == permission_slug)
+        result = await self._session.execute(stmt)
+        permission = result.scalar_one_or_none()
+        if not permission:
+            raise EntityNotFoundError(f"Объект с slug - {permission_slug} не найден")
+
+        try:
+            role_permission = RolePermission(
+                role_id=role.id, permission_id=permission.id
+            )
+            self._session.add(role_permission)
+            await self._session.commit()
+
+            return role_permission
+        except IntegrityError:
+            await self._session.rollback()
+            raise EntityAlreadyExistsError(
+                f"{self._model.__name__} с такими данными уже существует"
+            )

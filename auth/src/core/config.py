@@ -1,5 +1,6 @@
 from logging import config as logging_config
 from pathlib import Path
+from dotenv import find_dotenv
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -14,11 +15,12 @@ class ModelConfig(BaseSettings):
     Базовый класс конфигурации для всех настроек.
 
     Attributes:
-        model_config (SettingsConfigDict): Указывает настройки для работы с .env файлом и игнорирование дополнительных параметров.
+        model_config (SettingsConfigDict): Указывает настройки для работы с .env файлом и
+        игнорирование дополнительных параметров.
     """
 
     model_config = SettingsConfigDict(
-        env_file=(".env.dev"),  # Указывает путь к .env файлу
+        env_file=find_dotenv(".env.dev"),  # Указывает путь к .env файлу
         env_file_encoding="utf-8",  # Кодировка .env файла
         extra="ignore",  # Игнорировать параметры, не описанные в модели
     )
@@ -41,9 +43,11 @@ class ServiceSettings(ModelConfig):
     jwt_algorithm: str = Field(..., validation_alias="JWT_ALGORITHM")
     debug: bool = Field(default=False, validation_alias="DEBAG")
     refresh_token_expire: int = Field(
-        default=60, validation_alias="REFRESH_TOKEN_EXPIRE"
+        default=6000, validation_alias="REFRESH_TOKEN_EXPIRE"
     )
-    access_token_expire: int = Field(default=30, validation_alias="ACCESS_TOKEN_EXPIRE")
+    access_token_expire: int = Field(
+        default=6000, validation_alias="ACCESS_TOKEN_EXPIRE"
+    )
 
 
 class DBSettings(ModelConfig):

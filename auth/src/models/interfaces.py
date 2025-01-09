@@ -18,7 +18,8 @@ class IModel(ABC):
 
         Args:
             exclude (tuple[str] | None, optional): Набор полей, которые нужно исключить из словаря. По умолчанию None.
-            include (dict[str, Any] | None, optional): Дополнительные поля, которые нужно включить или заменить в словаре. По умолчанию None.
+            include (dict[str, Any] | None, optional): Дополнительные поля, которые нужно включить
+            или заменить в словаре. По умолчанию None.
 
         Returns:
             dict[str, Any]: Словарь, представляющий объект модели.

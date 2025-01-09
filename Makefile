@@ -5,3 +5,7 @@ run:
 .PHONY: auth
 auth:
 	@docker compose -f docker-compose.auth_sprint.yaml build && docker compose -f docker-compose.auth_sprint.yaml up
+
+.PHONY: auth_test
+auth_test:
+	@docker compose -f docker-compose.auth_test.yaml --build && docker compose -f docker-compose.auth_sprint.yaml up

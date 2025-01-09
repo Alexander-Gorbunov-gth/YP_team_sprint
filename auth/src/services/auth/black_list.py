@@ -49,6 +49,6 @@ def get_black_list_service(redis: Redis = Depends(get_redis)):
 
     :redis: экземпляр подключения к Redis
     """
-    
+
     black_list_service = BlackList(redis=redis)
     return black_list_service

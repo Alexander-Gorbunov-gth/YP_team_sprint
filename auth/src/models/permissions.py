@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from src.models.interfaces import IModel
 from src.models.mixins import IdMixinModel
@@ -7,5 +7,5 @@ from src.models.mixins import IdMixinModel
 @dataclass
 class Permission(IdMixinModel, IModel):
     slug: str
-    title: str = field(init=False)
-    description: str = field(init=False)
+    title: str
+    description: str

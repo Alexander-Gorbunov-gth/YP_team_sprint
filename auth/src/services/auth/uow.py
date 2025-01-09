@@ -3,7 +3,7 @@ from functools import lru_cache
 from fastapi import Depends
 from src.db.postgres import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.services.auth.interfaces import IAuthUoW, ISQLAlchemyUoW, ISQLAlchemyRepository
+from src.services.auth.interfaces import IAuthUoW, ISQLAlchemyUoW
 from src.services.auth.repositories import SQLAlchemyAuthRepository
 from src.models.users import User
 from src.models.permissions import Permission

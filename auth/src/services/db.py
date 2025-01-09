@@ -8,10 +8,7 @@ from sqlmodel import select
 
 
 async def update_or_create(
-        session: AsyncSession,
-        model: SQLModel,
-        data: dict,
-        search: str
+    session: AsyncSession, model: SQLModel, data: dict, search: str
 ) -> Tuple[SQLModel, bool]:
     try:
         obj = await session.exec(

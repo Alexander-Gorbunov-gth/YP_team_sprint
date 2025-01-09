@@ -11,5 +11,5 @@ def get_password_hash(password):
 
 def verify_password(password: str, hashed_password) -> bool:
     """Проверяет подлинность пароля"""
-    
+
     return context.verify(password, hashed_password)

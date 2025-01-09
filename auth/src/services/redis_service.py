@@ -17,7 +17,9 @@ class AbstractCache(ABC):
         self.redis_client = redis_client
 
     @abstractmethod
-    async def get_object(self, object_key: str) -> dict[str, Any] | list[dict[str, Any]]:
+    async def get_object(
+        self, object_key: str
+    ) -> dict[str, Any] | list[dict[str, Any]]:
         """
         Получить объект из кэша по ключу.
         :param object_key: Ключ объекта.
@@ -26,7 +28,12 @@ class AbstractCache(ABC):
         pass
 
     @abstractmethod
-    async def set_object(self, object_key: str, value: dict[str, Any] | list[dict[str, Any]], expire: int = 60) -> None:
+    async def set_object(
+        self,
+        object_key: str,
+        value: dict[str, Any] | list[dict[str, Any]],
+        expire: int = 60,
+    ) -> None:
         """
         Установить объект в кэш.
         :param object_key: Ключ объекта.
@@ -66,10 +73,17 @@ class RedisCache(AbstractCache):
                 return None
             return json.loads(value)
         except Exception as e:
-            logger.error('Ошибка при получении объекта с ключом {}: {}'.format(object_key, e))
+            logger.error(
+                "Ошибка при получении объекта с ключом {}: {}".format(object_key, e)
+            )
             return None
 
-    async def set_object(self, object_key: str, value: dict[str, Any] | list[dict[str, Any]], expire: int = 60) -> None:
+    async def set_object(
+        self,
+        object_key: str,
+        value: dict[str, Any] | list[dict[str, Any]],
+        expire: int = 60,
+    ) -> None:
         """
         Установить объект в Redis.
         :param object_key: Ключ объекта.
@@ -78,12 +92,12 @@ class RedisCache(AbstractCache):
         """
         try:
             await self.redis_client.set(
-                name=object_key,
-                value=json.dumps(value),
-                ex=expire  # Время жизни ключа
+                name=object_key, value=json.dumps(value), ex=expire  # Время жизни ключа
             )
         except Exception as e:
-            logger.error('Ошибка при установке объекта с ключом {}: {}'.format(object_key, e))
+            logger.error(
+                "Ошибка при установке объекта с ключом {}: {}".format(object_key, e)
+            )
 
     def get_query_key(self, *args, **kwargs) -> str:
         """
@@ -93,7 +107,7 @@ class RedisCache(AbstractCache):
         :return: Сформированный ключ.
         """
 
-        key = ':'.join(map(str, args))
+        key = ":".join(map(str, args))
         if kwargs:
-            key += ':'.join(f'{k}={v}' for k, v in sorted(kwargs.items()))
+            key += ":".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
         return key

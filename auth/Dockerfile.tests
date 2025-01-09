@@ -1,0 +1,28 @@
+FROM --platform=linux/amd64 python:3.10.2-buster
+
+RUN groupadd -r web && useradd -r -g web web
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH=/app
+
+RUN pip install --upgrade pip
+
+# Копируем зависимости проекта
+COPY ./requirements.txt requirements.txt
+COPY ./tests/functional/requirements.txt /tests/functional/requirements.txt
+
+# Устанавливаем зависимости проекта и тестовые зависимости
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /tests/functional/requirements.txt
+
+COPY ./tests/entrypoint.sh /web/entrypoint.sh
+RUN chmod +x /web/entrypoint.sh
+
+COPY . .
+
+USER web
+
+ENTRYPOINT ["/web/entrypoint.sh"]

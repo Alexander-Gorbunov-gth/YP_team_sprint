@@ -1,8 +1,7 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import exists, select
-from pydantic import BaseModel
 
 
 from src.db.postgres import get_session
@@ -33,7 +32,9 @@ class PermissionsService:
         return permission
 
     async def get(self, slug: str, db: AsyncSession = Depends(get_session)):
-        permission = await db.get(Permission, slug)
+        stmt = select(Permission).where(Permission.slug == slug)
+        result = await db.execute(stmt)
+        permission = result.scalar_one_or_none()
         if not permission:
             raise HTTPException(
                 status_code=404, detail=f"Объект с slug - {slug} не найден"
@@ -48,7 +49,9 @@ class PermissionsService:
     async def update(
         self, slug: str, data: PermissionUpdate, db: AsyncSession = Depends(get_session)
     ):
-        permission = await db.get(Permission, slug)
+        stmt = select(Permission).where(Permission.slug == slug)
+        result = await db.execute(stmt)
+        permission = result.scalar_one_or_none()
         if not permission:
             raise HTTPException(
                 status_code=404, detail=f"Объект с slug - {slug} не найден"
@@ -62,7 +65,9 @@ class PermissionsService:
         return permission
 
     async def delete(self, slug: str, db: AsyncSession = Depends(get_session)):
-        permission = await db.get(Permission, slug)
+        stmt = select(Permission).where(Permission.slug == slug)
+        result = await db.execute(stmt)
+        permission = result.scalar_one_or_none()
         if not permission:
             raise HTTPException(
                 status_code=404, detail=f"Объект с slug - {slug} не найден"
