@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.users import User
 
-# Глобальная переменная для URL
 BASE_URL = "/api/v1"
 
 
