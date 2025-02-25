@@ -1,0 +1,95 @@
+import uuid
+import logging
+from datetime import timedelta, datetime
+
+import jwt
+
+from src.domain.entities import User, Token
+
+logger = logging.getLogger(__name__)
+
+
+class JWTService:
+    def __init__(
+        self,
+        secret_key: str,
+        algorithm: str = "HS256",
+        access_token_lifetime: timedelta = timedelta(minutes=15),
+        refresh_token_lifetime: timedelta = timedelta(days=60),
+    ) -> None:
+        """
+        Инициализирует JWT сервис с заданными параметрами.
+
+        :param secret_key: Секретный ключ для подписи токенов.
+        :param algorithm: Алгоритм шифрования (по умолчанию "H256").
+        :param access_token_lifetime: Время жизни access токена.
+        :param refresh_token_lifetime: Время жизни refresh токена.
+        """
+
+        self.secret_key = secret_key
+        self.algorithm = algorithm
+        self.access_token_lifetime = access_token_lifetime
+        self.refresh_token_lifetime = refresh_token_lifetime
+        self.jti = str(uuid.uuid4())
+
+    def _generate_token(self, user: User, token_lifetime: timedelta) -> str:
+        """
+        Генерирует JWT токен для указанного пользователя с заданным временем жизни.
+
+        :param user: Объект пользователя, для которого создаётся токен.
+        :param token_lifetime: Время жизни токена.
+        :return: Сгенерированный JWT токен в виде строки.
+        """
+
+        now = datetime.now()
+        payload = {
+            "user_uuid": user.id,
+            "iat": now.timestamp(),
+            "exp": (now + token_lifetime).timestamp(),
+            "jti": self.jti,
+            "scope": [],
+        }
+        return jwt.encode(payload=payload, key=self.secret_key, algorithm=self.algorithm)
+
+    def generate_access_token(self, user: User) -> str:
+        """
+        Генерирует access токен для указанного пользователя.
+
+        :param user: Объект пользователя, для которого создаётся access токен.
+        :return: Сгенерированный access JWT токен в виде строки.
+        """
+
+        return self._generate_token(user=user, token_lifetime=self.access_token_lifetime)
+
+    def generate_refresh_token(self, user: User) -> str:
+        """
+        Генерирует refresh токен для указанного пользователя.
+
+        :param user: Объект пользователя, для которого создаётся refresh токен.
+        :return: Сгенерированный refresh JWT токен в виде строки.
+        """
+
+        return self._generate_token(
+            user=user, token_lifetime=self.refresh_token_lifetime
+        )
+
+    def decode_token(self, jwt_token: str) -> Token:
+        """
+        Декодирует и валидирует JWT токен.
+
+        :param jwt_token: JWT токен в виде строки.
+        :return: Объект Token с полезной нагрузкой из токена.
+        :raises jwt.ExpiredSignatureError: Если токен просрочен.
+        :raises jwt.PyJWTError: Если произошла ошибка при декодировании токена.
+        """
+
+        try:
+            payload = jwt.decode(jwt=jwt_token, key=self.secret_key, algorithms=[self.algorithm])
+            token = Token(**payload)
+        except jwt.ExpiredSignatureError:
+            logger.error("Токен %s просрочен.", jwt_token)
+            raise
+        except (jwt.PyJWTError, TypeError):
+            logger.error("Ошибка декодирования токена %s", jwt_token)
+            raise jwt.PyJWTError
+        return token
