@@ -1,9 +1,8 @@
-import uuid
+import asyncio
 from datetime import timedelta
 
 import pytest
 import jwt
-import time
 
 from src.domain.entities import User
 from src.domain.services import JWTService
@@ -48,14 +47,15 @@ def test_generate_and_decode_refresh_token(jwt_service, user):
     assert token_obj.exp - token_obj.iat == pytest.approx(60 * 24 * 60 * 60, abs=1)
 
 
-def test_expired_token(secret_key, user):
+@pytest.mark.asyncio
+async def test_expired_token(secret_key, user):
     short_lived_jwt_service = JWTService(
         secret_key=secret_key,
         algorithm="HS256",
         access_token_lifetime=timedelta(seconds=1),
     )
     access_token = short_lived_jwt_service.generate_access_token(user)
-    time.sleep(1.1)
+    await asyncio.sleep(1.1)
 
     with pytest.raises(jwt.ExpiredSignatureError):
         short_lived_jwt_service.decode_token(access_token)
