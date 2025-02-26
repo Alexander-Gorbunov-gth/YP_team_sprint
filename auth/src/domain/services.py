@@ -99,7 +99,7 @@ class JWTService:
 class AuthService:
     def __init__(self, user_repository: AbstractUserRepository):
         self._user_repository: AbstractUserRepository = user_repository
-        self._context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self._context: CryptContext = CryptContext(schemes=["bcrypt"])
 
     async def registration_new_user(self, email: str, password: str) -> User:
         """
