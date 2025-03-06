@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from src.domain.entities import User
 from src.domain.repositories import AbstractUserRepository
 from src.domain.exceptions import WrongOldPassword, WrongEmailOrPassword
-from infrastructure.repositories.user import get_user_repository
+from src.infrastructure.repositories.user import get_user_repository
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class AuthService:
         new_user = await self._user_repository.create(email=email, password=hashed_password)
         return new_user
 
-    async def login_user(self, email: str, password: str) -> bool:
+    async def login_user(self, email: str, password: str) -> User | None:
         """
         Проверяет учетные данные пользователя при входе.
 
@@ -43,7 +43,7 @@ class AuthService:
         if user is None or not self._verify_password(password, user.password):
             logger.error("Неверный логин для пользователя %s", email)
             raise WrongEmailOrPassword
-        return True
+        return user
 
     async def change_password(
         self, user_id: str, old_password: str, new_password: str
