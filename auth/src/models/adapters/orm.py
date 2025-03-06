@@ -109,7 +109,7 @@ def map_users():
         local_table=users_table,
         properties={
             "sessions": relationship(Session, back_populates="user", lazy="selectin"),
-            "role": relationship(Role, back_populates="users", lazy="selectin"),
+            "role": relationship(Role, back_populates="users", lazy="joined"),
         },
     )
 
@@ -132,7 +132,7 @@ def map_roles_permissions():
                 Permission,
                 secondary=role_permission_table,
                 back_populates="role",
-                lazy="joined",
+                lazy="selectin",
             ),
         },
     )
