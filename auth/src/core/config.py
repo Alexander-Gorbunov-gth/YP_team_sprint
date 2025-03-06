@@ -18,7 +18,7 @@ class ModelConfig(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=(".env.dev"),  # Указывает путь к .env файлу
+        env_file=(".env"),  # Указывает путь к .env файлу
         env_file_encoding="utf-8",  # Кодировка .env файла
         extra="ignore",  # Игнорировать параметры, не описанные в модели
     )
@@ -61,11 +61,11 @@ class DBSettings(ModelConfig):
     """
 
     db_type: str = Field(default="postgres", validation_alias="DB_TYPE")
-    db_name: str = Field(default="auth_db", validation_alias="DB_NAME")
-    db_user: str = Field(default="auth_user", validation_alias="DB_USER")
-    db_password: SecretStr = Field(..., validation_alias="DB_PASSWORD")
-    db_host: str = Field(default="127.0.0.1", validation_alias="DB_HOST")
-    db_port: int = Field(default=5432, validation_alias="DB_PORT")
+    db_name: str = Field(default="auth_db", validation_alias="POSTGRES_DB")
+    db_user: str = Field(default="auth_user", validation_alias="POSTGRES_USER")
+    db_password: SecretStr = Field(..., validation_alias="POSTGRES_PASSWORD")
+    db_host: str = Field(default="127.0.0.1", validation_alias="SQL_HOST")
+    db_port: int = Field(default=5432, validation_alias="SQL_PORT")
     db_echo: bool = Field(default=True, validation_alias="DB_ECHO")
 
     @property

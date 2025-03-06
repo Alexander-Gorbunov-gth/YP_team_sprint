@@ -1,7 +1,7 @@
 import pytest
 
 from src.domain.entities import User
-from src.domain.services import AuthService
+from src.services.authhh import AuthService
 from src.domain.exceptions import UserIsExists, WrongEmailOrPassword, WrongOldPassword
 from tests.unit.repositories import FakeUserRepository
 

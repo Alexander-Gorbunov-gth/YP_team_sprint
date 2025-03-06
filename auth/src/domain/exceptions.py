@@ -8,3 +8,7 @@ class WrongEmailOrPassword(Exception):
 
 class WrongOldPassword(Exception):
     pass
+
+
+class PasswordsNotMatch(Exception):
+    pass

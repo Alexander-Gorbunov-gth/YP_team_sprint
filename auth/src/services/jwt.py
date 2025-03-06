@@ -4,13 +4,15 @@ from datetime import timedelta, datetime
 
 import jwt
 
+from src.core.config import settings
 from src.domain.entities import User, Token
+from src.domain.interfaces import AbstractJWTService
 
 
 logger = logging.getLogger(__name__)
 
 
-class JWTService:
+class JWTService(AbstractJWTService):
     def __init__(
         self,
         secret_key: str,
@@ -27,11 +29,11 @@ class JWTService:
         :param refresh_token_lifetime: Время жизни refresh токена.
         """
 
-        self.secret_key = secret_key
-        self.algorithm = algorithm
-        self.access_token_lifetime = access_token_lifetime
-        self.refresh_token_lifetime = refresh_token_lifetime
-        self.jti = str(uuid.uuid4())
+        self._secret_key = secret_key
+        self._algorithm = algorithm
+        self._access_token_lifetime = access_token_lifetime
+        self._refresh_token_lifetime = refresh_token_lifetime
+        self._jti = str(uuid.uuid4())
 
     def _generate_token(self, user: User, token_lifetime: timedelta) -> str:
         """
@@ -43,14 +45,15 @@ class JWTService:
         """
 
         now = datetime.now()
+        print(user)
         payload = {
-            "user_uuid": user.id,
+            "user_uuid": str(user.id),
             "iat": now.timestamp(),
             "exp": (now + token_lifetime).timestamp(),
-            "jti": self.jti,
+            "jti": self._jti,
             "scope": [],
         }
-        return jwt.encode(payload=payload, key=self.secret_key, algorithm=self.algorithm)
+        return jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
 
     def generate_access_token(self, user: User) -> str:
         """
@@ -60,7 +63,7 @@ class JWTService:
         :return: Сгенерированный access JWT токен в виде строки.
         """
 
-        return self._generate_token(user=user, token_lifetime=self.access_token_lifetime)
+        return self._generate_token(user=user, token_lifetime=self._access_token_lifetime)
 
     def generate_refresh_token(self, user: User) -> str:
         """
@@ -70,7 +73,7 @@ class JWTService:
         :return: Сгенерированный refresh JWT токен в виде строки.
         """
 
-        return self._generate_token(user=user, token_lifetime=self.refresh_token_lifetime)
+        return self._generate_token(user=user, token_lifetime=self._refresh_token_lifetime)
 
     def decode_token(self, jwt_token: str) -> Token:
         """
@@ -83,7 +86,7 @@ class JWTService:
         """
 
         try:
-            payload = jwt.decode(jwt=jwt_token, key=self.secret_key, algorithms=[self.algorithm])
+            payload = jwt.decode(jwt=jwt_token, key=self._secret_key, algorithms=[self._algorithm])
             token = Token(**payload)
         except jwt.ExpiredSignatureError:
             logger.error("Токен %s просрочен.", jwt_token)
@@ -92,3 +95,17 @@ class JWTService:
             logger.error("Ошибка декодирования токена %s", jwt_token)
             raise jwt.PyJWTError
         return token
+
+    @property
+    def jti(self):
+        return self._jti
+
+
+def get_jwt_service() -> JWTService:
+    jwt_service = JWTService(
+        secret_key=settings.service.secret_key.get_secret_value(),
+        algorithm=settings.service.jwt_algorithm,
+        access_token_lifetime=timedelta(minutes=30),
+        refresh_token_lifetime=timedelta(days=30),
+    )
+    return jwt_service

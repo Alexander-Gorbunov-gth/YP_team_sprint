@@ -5,7 +5,7 @@ import pytest
 import jwt
 
 from src.domain.entities import User
-from src.domain.services import JWTService
+from src.services.jwt import JWTService
 
 
 @pytest.fixture
