@@ -18,7 +18,7 @@ class AbstractJWTService(ABC):
         raise NotImplementedError
 
 
-class AbstractAuthToken(ABC):
+class AbstractAuthService(ABC):
     @abstractmethod
     async def registration_new_user(self, email: str, password: str) -> User:
         raise NotImplementedError
