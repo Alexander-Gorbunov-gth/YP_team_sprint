@@ -1,57 +1,61 @@
-from fastapi import APIRouter, Depends, Form, Request, status
+from fastapi import APIRouter, Depends, Request, status
 
-from src.services.auth.service import AuthService, get_auth_service
-from src.services.users.schemas import UserCreate
-from src.schemas.users import TokenResponse, Payload
-from src.services.auth.interfaces import IAuthService
-from src.services.auth.helpers import extract_and_validate_token
+from src.domain.entities import Token
+from src.domain.exceptions import PasswordsNotMatch
+from src.domain.interfaces import AbstractJWTService, AbstractAuthService
+from src.services.auth import get_auth_service
+from src.services.jwt import get_jwt_service
+from src.api.v1.schemas.auth_schemas import (
+    RegisterForm,
+    UserResponse,
+    TokenResponse,
+    LoginForm,
+)
 
 
 auth_router = APIRouter()
 
 
-@auth_router.post("/register/")
+@auth_router.post(
+    "/register/", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
 async def register(
-    user_data: UserCreate,
-    auth_service: IAuthService = Depends(get_auth_service),
-):
-    user = await auth_service.register(user=user_data)
+    register_form: RegisterForm,
+    auth_service: AbstractAuthService = Depends(get_auth_service),
+) -> UserResponse:
+    if register_form.password != register_form.confirm_password:
+        raise PasswordsNotMatch
+    user = await auth_service.registration_new_user(
+        register_form.email, register_form.password
+    )
     return user
 
 
-@auth_router.post("/login/")
+@auth_router.post(
+    "/login/", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
+)
 async def login(
     request: Request,
-    email: str = Form(...),
-    password: str = Form(...),
-    auth_service: AuthService = Depends(get_auth_service),
+    login_form: LoginForm,
+    auth_service: AbstractAuthService = Depends(get_auth_service),
+    jwt_service: AbstractJWTService = Depends(get_jwt_service),
 ) -> TokenResponse:
-    headers = request.headers
-    refresh_token, access_token = await auth_service.login(
-        email=email, password=password, headers=headers
+    user = await auth_service.login_user(
+        email=login_form.email, password=login_form.password
     )
-    return access_token
+    access_token = jwt_service.generate_access_token(user)
+    refresh_token = jwt_service.generate_refresh_token(user)
+    return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
 
-@auth_router.post("/logout/", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(
-    payload: Payload = Depends(extract_and_validate_token),
-    auth_service: AuthService = Depends(get_auth_service),
-) -> None:
-    await auth_service.logout(jti=payload.jti)
-    return
+# @auth_router.post("/logout/", status_code=status.HTTP_204_NO_CONTENT)
+# async def logout(
+#     token_data: Token = Depends(get_token_data),
+#     black_list_service: AbstractBlackListService = Depends(get_black_list_service),
+# ) -> None:
+#     pass
 
 
-@auth_router.post("/change-password/")
-async def change_password():
-    pass
-
-
-@auth_router.post("/token/refresh/")
-async def token_refresh():
-    pass
-
-
-@auth_router.post("/close-sessions/")
-async def close_sessions():
-    pass
+# @auth_router.post("/change-password/")
+# async def change_password():
+#     pass
