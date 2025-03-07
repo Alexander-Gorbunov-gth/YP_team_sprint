@@ -17,3 +17,14 @@ class Token:
     exp: str
     jti: str
     scope: list[str]
+
+
+@dataclass
+class Session:
+    id: UUID | None
+    user_id: UUID
+    user_agent: str
+    jti: UUID
+    refresh_token: str
+    user_ip: str | None
+    is_active: bool
