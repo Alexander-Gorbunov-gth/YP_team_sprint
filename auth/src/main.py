@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from src.db import redis
 from src.db import postgres
 from src.api.v1.auth import auth_router
-from temp.cli_commands import typer_app
 from src.core.exception_handlers import exception_handlers
 from src.core.config import settings
 
@@ -42,4 +41,4 @@ app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 # app.include_router(perm_router, prefix="/permissions", tags=["permissions"])
 
 if __name__ == "__main__":
-    typer_app()
+    app()
