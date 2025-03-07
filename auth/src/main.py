@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from src.db import redis
 from src.db import postgres
 from src.api.v1.auth import auth_router
-from src.services.cli_commands import typer_app
+from temp.cli_commands import typer_app
 from src.core.exception_handlers import exception_handlers
 from src.core.config import settings
 
