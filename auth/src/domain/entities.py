@@ -17,3 +17,17 @@ class Token:
     exp: str
     jti: str
     scope: list[str]
+
+
+@dataclass
+class Permission:
+    slug: str
+    description: str
+
+
+@dataclass
+class Role:
+    slug: str
+    title: str
+    description: str
+    permissions: list[Permission]
