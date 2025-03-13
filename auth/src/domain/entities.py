@@ -1,5 +1,6 @@
 from uuid import UUID
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
@@ -8,6 +9,8 @@ class User:
     email: str
     password: str
     is_active: bool
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 @dataclass
@@ -28,3 +31,5 @@ class Session:
     refresh_token: str
     user_ip: str | None
     is_active: bool
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
