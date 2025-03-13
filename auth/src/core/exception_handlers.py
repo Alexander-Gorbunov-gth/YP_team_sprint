@@ -4,7 +4,7 @@ from typing import Any, NoReturn
 
 from fastapi import HTTPException, Request, Response
 
-from src.domain.exceptions import UserIsExists, PasswordsNotMatch
+from src.domain.exceptions import UserIsExists, PasswordsNotMatch, Forbidden
 
 
 def create_exception_handler(
@@ -33,26 +33,15 @@ passwords_not_match_handler = create_exception_handler(
     status_code=HTTPStatus.BAD_REQUEST, detail="Пароли не совпадают"
 )
 
-# jwt_error_handler = create_exception_handler(
-#     HTTPStatus.UNAUTHORIZED, "Необходимо пройти аутентификацию пользователя."
-# )
+forbidden_handler = create_exception_handler(
+    status_code=HTTPStatus.FORBIDDEN, detail="Время жизни сессии истекло."
+)
 
-# jwt_expired_handler = create_exception_handler(
-#     HTTPStatus.UNAUTHORIZED,
-#     "Время жизни Вашей сессии истекло. Необходима повторная аутентификация.",
-# )
-
-# invalid_password_handler = create_exception_handler(
-#     HTTPStatus.UNAUTHORIZED,
-#     "Неверный логин или пароль пользователя. Повторите попытку.",
-# )
 
 exception_handlers: dict[
-    int | type[Exception], Callable[[Request, Exception], Coroutine[Any, Any, Response]]
+    type[Exception], Callable[[Request, Exception], Coroutine[Any, Any, Response]]
 ] = {
     UserIsExists: user_exists_handler,
     PasswordsNotMatch: passwords_not_match_handler,
-    # ExpiredSignatureError: jwt_expired_handler,
-    # PyJWTError: jwt_error_handler,
-    # BaseSessionError: jwt_expired_handler,
+    Forbidden: forbidden_handler,
 }
