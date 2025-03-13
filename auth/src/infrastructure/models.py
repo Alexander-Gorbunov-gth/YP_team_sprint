@@ -54,7 +54,7 @@ permissions_table = Table(
     Column("description", String(255), nullable=True)
 )
 
-mapper_registry.map_imperatively(Permission, permissions_table)
+# mapper_registry.map_imperatively(Permission, permissions_table)
 
 
 role_table = Table(
@@ -65,7 +65,7 @@ role_table = Table(
     Column("description", String(255), nullable=True),
 )
 
-mapper_registry.map_imperatively(Role, role_table)
+# mapper_registry.map_imperatively(Role, role_table)
 
 
 role_permissions_table = Table(

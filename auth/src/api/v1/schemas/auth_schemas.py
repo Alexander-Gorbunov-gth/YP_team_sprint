@@ -9,7 +9,7 @@ class RegisterForm(BaseModel):
     password: Annotated[str, Form(...)]
     confirm_password: Annotated[str, Form(...)]
 
-e
+
 class UserResponse(BaseModel):
     email: str
     is_active: bool
