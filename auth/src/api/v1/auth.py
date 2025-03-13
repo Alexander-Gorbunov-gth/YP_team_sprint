@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, status, Response
 
-from src.domain.entities import Token
+from src.domain.entities import User
 from src.domain.factories.session import SessionFactory
 from src.domain.exceptions import PasswordsNotMatch
-from src.domain.interfaces import (
-    AbstractJWTService,
-    AbstractAuthService,
-    AbstractSessionService,
+from src.api.v1.dependencies import (
+    set_refresh_token,
+    get_refresh_token,
+    get_current_user,
+    AuthDep,
+    JWTDep,
+    SessionDep,
 )
-from src.services.auth import get_auth_service
-from src.services.jwt import get_jwt_service
-from src.services.sessions import get_session_service
 from src.api.v1.schemas.auth_schemas import (
     RegisterForm,
     UserResponse,
@@ -22,13 +22,8 @@ from src.api.v1.schemas.auth_schemas import (
 auth_router = APIRouter()
 
 
-@auth_router.post(
-    "/register/", response_model=UserResponse, status_code=status.HTTP_201_CREATED
-)
-async def register(
-    register_form: RegisterForm,
-    auth_service: AbstractAuthService = Depends(get_auth_service),
-) -> UserResponse:
+@auth_router.post("/register/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def register(register_form: RegisterForm, auth_service: AuthDep) -> UserResponse:
     if register_form.password != register_form.confirm_password:
         raise PasswordsNotMatch
     user = await auth_service.registration_new_user(register_form.email, register_form.password)
@@ -38,34 +33,56 @@ async def register(
 @auth_router.post("/login/", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
 async def login(
     request: Request,
+    response: Response,
     login_form: LoginForm,
-    auth_service: AbstractAuthService = Depends(get_auth_service),
-    jwt_service: AbstractJWTService = Depends(get_jwt_service),
-    session_service: AbstractSessionService = Depends(get_session_service),
+    auth_service: AuthDep,
+    jwt_service: JWTDep,
+    session_service: SessionDep,
 ) -> LoginResponse:
     user = await auth_service.login_user(email=login_form.email, password=login_form.password)
     access_token = jwt_service.generate_access_token(user)
     refresh_token = jwt_service.generate_refresh_token(user)
-    print(request.headers)
     session = SessionFactory.create(
         user_id=user.id,
         jti=jwt_service.jti,
         user_agent=request.headers["user-agent"],
         refresh_token=refresh_token,
-        user_ip=request.headers["host"]
+        user_ip=request.headers["host"],
     )
     await session_service.create_new_session(session=session)
+    set_refresh_token(response=response, refresh_token=refresh_token)
     return LoginResponse(access_token=access_token, refresh_token=refresh_token)
 
 
-# @auth_router.post("/logout/", status_code=status.HTTP_204_NO_CONTENT)
-# async def logout(
-#     token_data: Token = Depends(get_token_data),
-#     black_list_service: AbstractBlackListService = Depends(get_black_list_service),
-# ) -> None:
-#     pass
+@auth_router.post("/logout/", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(
+    session_service: SessionDep,
+    refresh_token: str = Depends(get_refresh_token),
+):
+    _ = await session_service.deactivate_current_session(refresh_token)
+    return
 
 
-# @auth_router.post("/change-password/")
-# async def change_password():
-#     pass
+@auth_router.post("/refresh/", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+async def refresh(
+    response: Response,
+    session_service: SessionDep, 
+    jwt_service: JWTDep, 
+    refresh_token: str = Depends(get_refresh_token),
+    current_user: User = Depends(get_current_user),
+) -> LoginResponse:
+    print(refresh_token)
+    print(current_user)
+    new_refresh_token = jwt_service.generate_refresh_token(user=current_user)
+    new_access_token = jwt_service.generate_access_token(user=current_user)
+    _ = await session_service.update_session_refresh_token(refresh_token, new_refresh_token)
+    set_refresh_token(response=response, refresh_token=new_refresh_token)
+    return LoginResponse(access_token=new_access_token, refresh_token=new_refresh_token)
+
+
+@auth_router.post("/logout-others/", status_code=status.HTTP_204_NO_CONTENT)
+async def logout_others(session_service: SessionDep, current_refresh_token: str = Depends(get_refresh_token)):
+    deactivate_sessions = await session_service.deactivate_all_without_current(current_refresh_token)
+    return
+
+
