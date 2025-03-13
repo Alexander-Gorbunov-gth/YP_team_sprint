@@ -1,5 +1,4 @@
 from uuid import UUID
-from dataclasses import asdict
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
