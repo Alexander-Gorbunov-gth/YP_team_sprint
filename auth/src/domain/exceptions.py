@@ -32,3 +32,10 @@ class PermissionNotFound(Exception):
 
 class UserNotFound(Exception):
     pass
+
+class Forbidden(Exception):
+    pass
+
+
+class NotAuthorized(Exception):
+    pass

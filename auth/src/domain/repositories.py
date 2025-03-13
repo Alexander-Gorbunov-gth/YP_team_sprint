@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
+from uuid import UUID
 from datetime import timedelta
+from abc import ABC, abstractmethod
 
-from src.domain.entities import User, Permission, Role
+from src.domain.entities import User, Session, Permission, Role
 
 
 class AbstractUserRepository(ABC):
@@ -22,7 +23,25 @@ class AbstractUserRepository(ABC):
         raise NotImplementedError
 
 
-class BlackListRepository(ABC):
+class AbstractSessionRepository(ABC):
+    @abstractmethod
+    async def create(self, session: Session) -> Session:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_by_refresh_token(self, refresh_token: str) -> Session | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_sessions_by_user_id(self, user_id: str | UUID) -> list[Session]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update(self, session: Session) -> Session | None:
+        raise NotImplementedError
+
+
+class AbstractBlackListRepository(ABC):
     @abstractmethod
     async def exists(self, token: str) -> bool:
         raise NotImplementedError
