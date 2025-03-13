@@ -1,6 +1,6 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from .session import Session
+from src.domain.entities import Session
 
 
 class SessionFactory:
@@ -19,6 +19,5 @@ class SessionFactory:
             user_agent=user_agent,
             user_ip=user_ip,
             refresh_token=refresh_token,
-            created_at=None,
-            updated_at=None,
+            is_active=True
         )
