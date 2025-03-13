@@ -18,8 +18,13 @@ class SessionService(AbstractSessionService):
     
     async def deactivate_all_without_current(self, refresh_token: str) -> list[Session]:
         current_session = await self._session_repository.get_by_refresh_token(refresh_token)
-        others_session = await self._session_repository.get_other_sessions_by_user_id(current_session.user_id, current_session)
-        for session in others_session:
+        user_sessions = await self._session_repository.get_sessions_by_user_id(current_session.user_id)
+        deactivate_sessions = []
+        for session in user_sessions:
+            if session.id == current_session.id:
+                continue
             session.is_active = False
-        return others_session
+            await self._session_repository.update(session)
+            deactivate_sessions.append(session)
+        return deactivate_sessions
 
