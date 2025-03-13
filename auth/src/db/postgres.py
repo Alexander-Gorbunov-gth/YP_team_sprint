@@ -19,4 +19,6 @@ async def create_database() -> None:
 
 
 async def purge_database() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(mapper_registry.metadata.drop_all)
     clear_mappers()
