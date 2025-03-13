@@ -22,7 +22,7 @@ class LoginForm(BaseModel):
     password: Annotated[str, Form(...)]
 
 
-class TokenResponse(BaseModel):
+class LoginResponse(BaseModel):
     refresh_token: str
     access_token: str
     token_type: str = Field(default="jwt")
