@@ -4,7 +4,12 @@ from typing import Any, NoReturn
 
 from fastapi import HTTPException, Request, Response
 
-from src.domain.exceptions import UserIsExists, PasswordsNotMatch, Forbidden
+from src.domain.exceptions import (
+    UserIsExists,
+    PasswordsNotMatch,
+    Forbidden,
+    NotAuthorized,
+)
 
 
 def create_exception_handler(
@@ -34,7 +39,11 @@ passwords_not_match_handler = create_exception_handler(
 )
 
 forbidden_handler = create_exception_handler(
-    status_code=HTTPStatus.FORBIDDEN, detail="Время жизни сессии истекло."
+    status_code=HTTPStatus.FORBIDDEN, detail="Доступ запрещен."
+)
+
+not_authorized_handler = create_exception_handler(
+    status_code=HTTPStatus.UNAUTHORIZED, detail="Время жизни сессии истекло."
 )
 
 
@@ -44,4 +53,5 @@ exception_handlers: dict[
     UserIsExists: user_exists_handler,
     PasswordsNotMatch: passwords_not_match_handler,
     Forbidden: forbidden_handler,
+    NotAuthorized: not_authorized_handler,
 }

@@ -16,3 +16,7 @@ class PasswordsNotMatch(Exception):
 
 class Forbidden(Exception):
     pass
+
+
+class NotAuthorized(Exception):
+    pass
