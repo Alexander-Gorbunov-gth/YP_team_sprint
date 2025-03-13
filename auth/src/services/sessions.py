@@ -25,12 +25,17 @@ class SessionService(AbstractSessionService):
         user_sessions = await self._session_repository.get_sessions_by_user_id(current_session.user_id)
         deactivate_sessions = []
         for session in user_sessions:
-            if session.id == current_session.id:
-                continue
-            session.is_active = False
-            await self._session_repository.update(session)
-            deactivate_sessions.append(session)
+            if session.id != current_session.id:
+                session.is_active = False
+                await self._session_repository.update(session)
+                deactivate_sessions.append(session)
         return deactivate_sessions
+    
+    async def update_session_refresh_token(self, old_refresh_token: str, new_refresh_token: str) -> Session | None:
+        current_session = await self._session_repository.get_by_refresh_token(old_refresh_token)
+        current_session.refresh_token = new_refresh_token
+        updated_session = await self._session_repository.update(session=current_session)
+        return updated_session
 
 
 def get_session_service(

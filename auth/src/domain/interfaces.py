@@ -44,3 +44,7 @@ class AbstractSessionService(ABC):
     @abstractmethod
     async def deactivate_all_without_current(self, refresh_token: str) -> list[Session]:
         raise NotImplementedError
+    
+    @abstractmethod
+    async def update_session_refresh_token(self, old_refresh_token: str, new_refresh_token: str) -> Session | None:
+        raise NotImplementedError
