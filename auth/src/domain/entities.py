@@ -38,6 +38,19 @@ class Token:
 
 
 @dataclass
+class Permission:
+    slug: str
+    description: str
+
+
+@dataclass
+class Role:
+    slug: str
+    title: str
+    description: str
+    permissions: list[Permission]
+
+@dataclass
 class Session(BaseEntity):
     id: UUID | None
     user_id: UUID

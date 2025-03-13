@@ -1,18 +1,18 @@
 services:
 
-  fast_api_auth:
-    build: ./auth
-    env_file:
-      - ./.auth.env
-    depends_on:
-      - auth_postgres
-      - redis
-    ports:
-      - 8000:8000
+  # fast_api_auth:
+  #   build: ./auth
+  #   env_file:
+  #     - ./.auth.env
+  #   depends_on:
+  #     - auth_postgres
+  #     - redis
+  #   ports:
+  #     - 8000:8000
 
   auth_postgres:
-    image: postgres:14
-    restart: always
+    image: postgres:latest
+    # restart: always
     volumes:
       - pg_auth:/var/lib/postgresql/data/
     env_file:
