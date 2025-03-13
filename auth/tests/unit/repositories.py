@@ -7,7 +7,7 @@ from src.domain.repositories import AbstractUserRepository, AbstractSessionRepos
 
 class FakeUserRepository(AbstractUserRepository):
     """Фейковый репозиторий для пользователей"""
-    
+
     def __init__(self):
         self._users = {}
 
@@ -57,10 +57,6 @@ class FakeSessionRepository(AbstractSessionRepository):
             None,
         )
 
-    async def get_other_sessions(self, user_id: UUID, current_session: Session) -> list[Session]:
-        other_sessions = [
-            session
-            for session in self._sessions.values()
-            if session.user_id == user_id and session != current_session
-        ]
-        return other_sessions
+    async def get_sessions_by_user_id(self, user_id: str | UUID) -> list[Session]:
+        user_sessions = [session for session in self._sessions.values() if session.user_id == user_id]
+        return user_sessions
