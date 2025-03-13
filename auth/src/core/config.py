@@ -67,6 +67,7 @@ class DBSettings(ModelConfig):
     db_host: str = Field(default="127.0.0.1", validation_alias="SQL_HOST")
     db_port: int = Field(default=5432, validation_alias="SQL_PORT")
     db_echo: bool = Field(default=True, validation_alias="DB_ECHO")
+    db_url: str
 
     @property
     def db_url(self) -> str:

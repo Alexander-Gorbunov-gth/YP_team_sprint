@@ -1,5 +1,6 @@
 services:
 
+
   # fast_api_auth:
   #   build: ./auth
   #   env_file:
@@ -11,7 +12,7 @@ services:
   #     - 8000:8000
 
   auth_postgres:
-    image: postgres:latest
+    image: postgres:15
     # restart: always
     volumes:
       - pg_auth:/var/lib/postgresql/data/
