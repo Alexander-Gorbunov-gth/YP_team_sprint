@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
+from uuid import UUID
 from datetime import timedelta
+from abc import ABC, abstractmethod
 
 from src.domain.entities import User, Session
 
@@ -32,7 +33,7 @@ class AbstractSessionRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_other_sessions(self, refresh_token: str) -> list[Session]:
+    async def get_sessions_by_user_id(self, user_id: str | UUID) -> list[Session]:
         raise NotImplementedError
 
     @abstractmethod
