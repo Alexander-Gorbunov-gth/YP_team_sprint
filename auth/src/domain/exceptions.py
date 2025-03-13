@@ -12,3 +12,11 @@ class WrongOldPassword(Exception):
 
 class PasswordsNotMatch(Exception):
     pass
+
+
+class Forbidden(Exception):
+    pass
+
+
+class NotAuthorized(Exception):
+    pass
