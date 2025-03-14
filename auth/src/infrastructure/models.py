@@ -91,6 +91,6 @@ mapper_registry.map_imperatively(
     role_table,
     properties={
         "permissions": relationship("Permission", secondary=role_permissions_table, back_populates="roles"),
-        "users": relationship("User", secondary=role_permissions_table, back_populates="roles"),
+        "users": relationship("User", secondary=user_roles_table, back_populates="roles"),
     },
 )
