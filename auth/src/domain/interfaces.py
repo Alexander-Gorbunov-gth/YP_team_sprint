@@ -52,13 +52,13 @@ class AbstractSessionService(ABC):
 
 class AbstractBlackListService(ABC):
     @abstractmethod
-    async def is_exists(self, value: str) -> bool:
+    async def is_exists(self, key: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    async def set_one_value(self, value: str, exp: timedelta) -> None:
+    async def set_one_value(self, key: str, value: str, exp: timedelta) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    async def set_many_values(self, values: list[str], exp: timedelta) -> None:
+    async def set_many_values(self, values: list[dict[str, str]], exp: timedelta) -> None:
         raise NotImplementedError
