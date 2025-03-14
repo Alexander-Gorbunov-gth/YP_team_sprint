@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 
 from src.domain.entities import Session, User
 from src.domain.exceptions import UserIsExists
-from src.domain.repositories import AbstractSessionRepository, AbstractUserRepository, AbstractBlackListRepository
+from src.domain.repositories import AbstractSessionRepository, AbstractUserRepository, AbstractBlacklistRepository
 
 
 class FakeUserRepository(AbstractUserRepository):
@@ -60,7 +60,7 @@ class FakeSessionRepository(AbstractSessionRepository):
         return user_sessions
 
 
-class FakeBlackListRepository(AbstractBlackListRepository):
+class FakeBlacklistRepository(AbstractBlacklistRepository):
     def __init__(self):
         self._storage: dict[str, dict[str, Any]] = {}
 

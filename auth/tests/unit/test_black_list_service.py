@@ -3,7 +3,7 @@ from datetime import timedelta
 
 import pytest
 
-from src.services.black_list import BlackListService
+from services.blacklist import BlacklistService
 from tests.unit.repositories import FakeBlackListRepository
 
 
@@ -14,7 +14,7 @@ def fake_repository() -> FakeBlackListRepository:
 
 @pytest.fixture
 def black_list_service(fake_repository):
-    return BlackListService(fake_repository)
+    return BlacklistService(fake_repository)
 
 
 @pytest.mark.asyncio

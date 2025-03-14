@@ -91,7 +91,7 @@ class AbstractRoleRepository(ABC):
         raise NotImplementedError
 
 
-class AbstractBlackListRepository(ABC):
+class AbstractBlacklistRepository(ABC):
     @abstractmethod
     def get_value(self, key: str) -> str:
         raise NotImplementedError

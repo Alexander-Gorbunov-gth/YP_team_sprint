@@ -4,10 +4,10 @@ from fastapi import Depends
 from redis.asyncio import Redis
 
 from src.db.redis import get_redis
-from src.domain.repositories import AbstractBlackListRepository
+from src.domain.repositories import AbstractBlacklistRepository
 
 
-class RedisBlackListRepository(AbstractBlackListRepository):
+class RedisBlacklistRepository(AbstractBlacklistRepository):
     def __init__(self, redis: Redis):
         self._redis = redis
 
@@ -47,6 +47,6 @@ class RedisBlackListRepository(AbstractBlackListRepository):
             await pipe.execute()
 
 
-def get_black_list_repository(redis_client: Redis = Depends(get_redis)):
-    black_list_service = RedisBlackListRepository(redis=redis_client)
+def get_blacklist_repository(redis_client: Redis = Depends(get_redis)):
+    black_list_service = RedisBlacklistRepository(redis=redis_client)
     return black_list_service

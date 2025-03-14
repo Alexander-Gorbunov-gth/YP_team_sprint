@@ -50,7 +50,7 @@ class AbstractSessionService(ABC):
         raise NotImplementedError
 
 
-class AbstractBlackListService(ABC):
+class AbstractBlacklistService(ABC):
     @abstractmethod
     async def is_exists(self, key: str) -> bool:
         raise NotImplementedError

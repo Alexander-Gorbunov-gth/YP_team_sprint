@@ -2,15 +2,15 @@ from datetime import timedelta
 
 from fastapi import Depends
 
-from src.domain.interfaces import AbstractBlackListService
-from src.domain.repositories import AbstractBlackListRepository
-from src.infrastructure.repositories.black_list import get_black_list_repository
+from src.domain.interfaces import AbstractBlacklistService
+from src.domain.repositories import AbstractBlacklistRepository
+from infrastructure.repositories.blacklist import get_blacklist_repository
 
 
-class BlackListService(AbstractBlackListService):
+class BlacklistService(AbstractBlacklistService):
     """Сервис для работы с черным списком токенов."""
 
-    def __init__(self, black_list_repository: AbstractBlackListRepository):
+    def __init__(self, black_list_repository: AbstractBlacklistRepository):
         """
         Инициализация сервиса.
         :param black_list_repository: Репозиторий черного списка (реализация хранилища).
@@ -47,12 +47,12 @@ class BlackListService(AbstractBlackListService):
 
 
 def get_black_list_service(
-    repository: AbstractBlackListRepository = Depends(get_black_list_repository),
-) -> AbstractBlackListService:
+    repository: AbstractBlacklistRepository = Depends(get_blacklist_repository),
+) -> AbstractBlacklistService:
     """
     Фабричный метод для получения экземпляра BlackListService.
     :param repository: Репозиторий черного списка.
     :return: Экземпляр сервиса черного списка.
     """
-    black_list_service = BlackListService(repository)
+    black_list_service = BlacklistService(repository)
     return black_list_service
