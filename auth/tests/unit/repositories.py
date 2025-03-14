@@ -1,8 +1,10 @@
+from typing import Any
 from uuid import UUID, uuid4
+from datetime import timedelta, datetime
 
 from src.domain.entities import Session, User
 from src.domain.exceptions import UserIsExists
-from src.domain.repositories import AbstractSessionRepository, AbstractUserRepository
+from src.domain.repositories import AbstractSessionRepository, AbstractUserRepository, AbstractBlackListRepository
 
 
 class FakeUserRepository(AbstractUserRepository):
@@ -56,3 +58,25 @@ class FakeSessionRepository(AbstractSessionRepository):
     async def get_sessions_by_user_id(self, user_id: str | UUID) -> list[Session]:
         user_sessions = [session for session in self._sessions.values() if session.user_id == user_id]
         return user_sessions
+
+
+class FakeBlackListRepository(AbstractBlackListRepository):
+    def __init__(self):
+        self._storage: dict[str, dict[str, Any]] = {}
+
+    async def get_value(self, key: str) -> str | None:
+        if (value := self._storage.get(key)) is not None:
+            if (expire_at := value.get("expire_at")) and datetime.now() > expire_at:
+                del self._storage[key]
+                return None
+            return value["value"]
+        return None
+
+    async def set_value(self, key: str, value: str, exp: timedelta | None = None):
+        expires_at = datetime.now() + exp if exp else None
+        self._storage[key] = {"value": value, "expire_at": expires_at}
+
+    async def set_many_values(self, values: dict[str, str], exp: timedelta):
+        expires_at = datetime.now() + exp if exp else None
+        for key, value in values.items():
+            self._storage[key] = {"value": value, "expire_at": expires_at}
