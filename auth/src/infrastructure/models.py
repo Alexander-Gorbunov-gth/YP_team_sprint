@@ -42,18 +42,12 @@ sessions_table = Table(
 )
 
 
-mapper_registry.map_imperatively(User, users_table)
-
-mapper_registry.map_imperatively(Session, sessions_table)
-
 permissions_table = Table(
     "permissions",
     mapper_registry.metadata,
     Column("slug", String(255), primary_key=True),
     Column("description", String(255), nullable=True),
 )
-
-# mapper_registry.map_imperatively(Permission, permissions_table)
 
 
 role_table = Table(
@@ -64,14 +58,26 @@ role_table = Table(
     Column("description", String(255), nullable=True),
 )
 
-# mapper_registry.map_imperatively(Role, role_table)
-
 
 role_permissions_table = Table(
     "role_permissions",
     mapper_registry.metadata,
     Column("role_slug", String(255), ForeignKey("roles.slug", ondelete="CASCADE"), primary_key=True),
     Column("permission_slug", String(255), ForeignKey("permissions.slug", ondelete="CASCADE"), primary_key=True),
+)
+
+user_roles_table = Table(
+    "user_roles",
+    mapper_registry.metadata,
+    Column("role_slug", String(255), ForeignKey("roles.slug", ondelete="CASCADE"), primary_key=True),
+    Column("user_id", UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+)
+
+
+mapper_registry.map_imperatively(Session, sessions_table)
+
+mapper_registry.map_imperatively(
+    User, users_table, properties={"roles": relationship("Role", secondary=user_roles_table, back_populates="users")}
 )
 
 mapper_registry.map_imperatively(
@@ -83,5 +89,8 @@ mapper_registry.map_imperatively(
 mapper_registry.map_imperatively(
     Role,
     role_table,
-    properties={"permissions": relationship("Permission", secondary=role_permissions_table, back_populates="roles")},
+    properties={
+        "permissions": relationship("Permission", secondary=role_permissions_table, back_populates="roles"),
+        "users": relationship("User", secondary=role_permissions_table, back_populates="roles"),
+    },
 )
