@@ -4,12 +4,8 @@ from typing import Any, NoReturn
 
 from fastapi import HTTPException, Request, Response
 
-from src.domain.exceptions import (
-    UserIsExists,
-    PasswordsNotMatch,
-    Forbidden,
-    NotAuthorized,
-)
+from src.domain.exceptions import (Forbidden, NotAuthorized, PasswordsNotMatch,
+                                   UserIsExists)
 
 
 def create_exception_handler(
@@ -34,22 +30,16 @@ user_exists_handler = create_exception_handler(
     detail="Пользователь с таким email уже существует.",
 )
 
-passwords_not_match_handler = create_exception_handler(
-    status_code=HTTPStatus.BAD_REQUEST, detail="Пароли не совпадают"
-)
+passwords_not_match_handler = create_exception_handler(status_code=HTTPStatus.BAD_REQUEST, detail="Пароли не совпадают")
 
-forbidden_handler = create_exception_handler(
-    status_code=HTTPStatus.FORBIDDEN, detail="Доступ запрещен."
-)
+forbidden_handler = create_exception_handler(status_code=HTTPStatus.FORBIDDEN, detail="Доступ запрещен.")
 
 not_authorized_handler = create_exception_handler(
     status_code=HTTPStatus.UNAUTHORIZED, detail="Время жизни сессии истекло."
 )
 
 
-exception_handlers: dict[
-    type[Exception], Callable[[Request, Exception], Coroutine[Any, Any, Response]]
-] = {
+exception_handlers: dict[type[Exception], Callable[[Request, Exception], Coroutine[Any, Any, Response]]] = {
     UserIsExists: user_exists_handler,
     PasswordsNotMatch: passwords_not_match_handler,
     Forbidden: forbidden_handler,

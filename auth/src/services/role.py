@@ -1,19 +1,23 @@
 import logging
+
 from fastapi import Depends
 from pydantic import BaseModel
 
-from src.domain.entities import Role, User, Permission
-from src.domain.repositories import AbstractRoleRepository, AbstractUserRepository, AbstractPermissionRepository
-from src.domain.exceptions import RoleNotFound, UserNotFound, PermissionNotFound
-from src.infrastructure.repositories.user import get_user_repository
-from src.infrastructure.repositories.role import get_role_repository
+from src.domain.entities import Role
+from src.domain.exceptions import RoleNotFound, UserNotFound
+from src.domain.repositories import (AbstractPermissionRepository,
+                                     AbstractRoleRepository,
+                                     AbstractUserRepository)
 from src.infrastructure.repositories.permisson import get_permission_repository
+from src.infrastructure.repositories.role import get_role_repository
+from src.infrastructure.repositories.user import get_user_repository
 
 logger = logging.getLogger(__name__)
 
 
 class RoleCreateOrUpdate(BaseModel):
     """Схема для создания и обновления роли"""
+
     slug: str
     title: str
     description: str | None
@@ -25,7 +29,7 @@ class RoleService:
         self,
         role_repository: AbstractRoleRepository,
         user_repository: AbstractUserRepository,
-        permission_repository: AbstractPermissionRepository
+        permission_repository: AbstractPermissionRepository,
     ):
         self._role_repository: AbstractRoleRepository = role_repository
         self._user_repository: AbstractUserRepository = user_repository
@@ -33,7 +37,7 @@ class RoleService:
 
     async def create_or_update(self, data: RoleCreateOrUpdate, slug: str | None = None) -> Role:
         """Создаёт новую роль или обновляет существующую, связывая с разрешениями"""
-        
+
         existing_role = await self._role_repository.get_role(slug)
         permissions = []
         for perm_slug in data.permissions:
@@ -130,11 +134,9 @@ class RoleService:
 def get_role_service(
     role_repository: AbstractRoleRepository = Depends(get_role_repository),
     user_repository: AbstractUserRepository = Depends(get_user_repository),
-    permission_repository: AbstractPermissionRepository = Depends(get_permission_repository)
+    permission_repository: AbstractPermissionRepository = Depends(get_permission_repository),
 ) -> RoleService:
     """Фабричная функция для получения экземпляра сервиса ролей"""
     return RoleService(
-        role_repository=role_repository,
-        user_repository=user_repository,
-        permission_repository=permission_repository
+        role_repository=role_repository, user_repository=user_repository, permission_repository=permission_repository
     )

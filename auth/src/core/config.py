@@ -40,9 +40,7 @@ class ServiceSettings(ModelConfig):
     secret_key: SecretStr = Field(..., validation_alias="SECRET_KEY")
     jwt_algorithm: str = Field(..., validation_alias="JWT_ALGORITHM")
     debug: bool = Field(default=False, validation_alias="DEBAG")
-    refresh_token_expire: int = Field(
-        default=60, validation_alias="REFRESH_TOKEN_EXPIRE"
-    )
+    refresh_token_expire: int = Field(default=60, validation_alias="REFRESH_TOKEN_EXPIRE")
     access_token_expire: int = Field(default=30, validation_alias="ACCESS_TOKEN_EXPIRE")
 
 

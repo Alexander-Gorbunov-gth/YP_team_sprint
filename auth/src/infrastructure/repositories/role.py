@@ -1,14 +1,13 @@
 import logging
-from typing import Any
 
 from fastapi import Depends
+from sqlalchemy import delete, insert, select, update
+from sqlalchemy.engine import Result
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, select, update, delete
-from sqlalchemy.engine import Result
 
-from src.domain.entities import Role, Permission
 from src.db.postgres import get_session
+from src.domain.entities import Permission, Role
 from src.domain.exceptions import RoleIsExists
 from src.domain.repositories import AbstractRoleRepository
 
@@ -21,22 +20,20 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create_role(
-        self, slug: str, title: str, permissions: list[Permission], description: str | None
-    ) -> Role:
+    async def create_role(self, slug: str, title: str, permissions: list[Permission], description: str | None) -> Role:
         """Создаёт новую роль с заданными разрешениями"""
         insert_data = {"slug": slug, "title": title, "description": description}
         query = insert(Role).values(insert_data).returning(Role)
         try:
             result: Result = await self._session.execute(query)
             role = result.scalar_one()
-            
+
             # Добавляем разрешения к роли
             for permission in permissions:
                 await self._session.execute(
                     insert(Role.permissions).values(role_slug=role.slug, permission_slug=permission.slug)
                 )
-            
+
             await self._commit()
         except IntegrityError:
             logger.error("Роль с slug %s уже существует.", slug)

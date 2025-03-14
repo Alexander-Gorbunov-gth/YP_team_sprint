@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Form
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class PermissionBase(BaseModel):

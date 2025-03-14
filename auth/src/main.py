@@ -1,15 +1,15 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 
-from src.db import redis
-from src.db import postgres
 from src.api.v1.auth import auth_router
-from src.core.exception_handlers import exception_handlers
 from src.core.config import settings
-
-from contextlib import asynccontextmanager
+from src.core.exception_handlers import exception_handlers
+from src.db import postgres, redis
 
 
 @asynccontextmanager

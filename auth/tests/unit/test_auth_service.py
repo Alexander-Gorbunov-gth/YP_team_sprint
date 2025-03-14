@@ -1,8 +1,9 @@
 import pytest
 
 from src.domain.entities import User
+from src.domain.exceptions import (UserIsExists, WrongEmailOrPassword,
+                                   WrongOldPassword)
 from src.services.auth import AuthService
-from src.domain.exceptions import UserIsExists, WrongEmailOrPassword, WrongOldPassword
 from tests.unit.repositories import FakeUserRepository
 
 
@@ -78,7 +79,9 @@ async def test_change_password(auth_service):
     new_password = "newpassword"
 
     user = await auth_service.registration_new_user(email=email, password=old_password)
-    updated_user = await auth_service.change_password(user_id=user.id, old_password=old_password, new_password=new_password)
+    updated_user = await auth_service.change_password(
+        user_id=user.id, old_password=old_password, new_password=new_password
+    )
 
     assert auth_service._verify_password(new_password, updated_user.password)
 

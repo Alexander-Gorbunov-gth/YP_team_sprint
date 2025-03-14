@@ -2,9 +2,9 @@ from uuid import uuid4
 
 import pytest
 
-from tests.unit.repositories import FakeSessionRepository
 from src.domain.entities import Session
 from src.services.sessions import SessionService
+from tests.unit.repositories import FakeSessionRepository
 
 
 @pytest.fixture
@@ -55,9 +55,7 @@ async def test_create_new_session(session, session_service):
 @pytest.mark.asyncio
 async def test_deactivate_current_session(session_service, session):
     created_session = await session_service.create_new_session(session)
-    deactivate_session = await session_service.deactivate_current_session(
-        created_session.refresh_token
-    )
+    deactivate_session = await session_service.deactivate_current_session(created_session.refresh_token)
     assert created_session.jti == deactivate_session.jti
     assert created_session.refresh_token == deactivate_session.refresh_token
     assert not deactivate_session.is_active

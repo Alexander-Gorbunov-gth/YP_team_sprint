@@ -19,5 +19,5 @@ class SessionFactory:
             user_agent=user_agent,
             user_ip=user_ip,
             refresh_token=refresh_token,
-            is_active=True
+            is_active=True,
         )

@@ -1,8 +1,8 @@
 import asyncio
 from datetime import timedelta
 
-import pytest
 import jwt
+import pytest
 
 from src.domain.entities import User
 from src.services.jwt import JWTService

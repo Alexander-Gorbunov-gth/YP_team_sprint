@@ -1,13 +1,12 @@
-import uuid
 import logging
-from datetime import timedelta, datetime
+import uuid
+from datetime import datetime, timedelta
 
 import jwt
 
 from src.core.config import settings
-from src.domain.entities import User, Token
+from src.domain.entities import Token, User
 from src.domain.interfaces import AbstractJWTService
-
 
 logger = logging.getLogger(__name__)
 

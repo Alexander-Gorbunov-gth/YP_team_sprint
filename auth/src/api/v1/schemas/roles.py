@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Form
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from .permissions import PermissionResponse
 
@@ -22,6 +22,5 @@ class RoleResponse(BaseModel):
 
 class PermissionCreate(RoleBase):
     pass
-
 
     permissions: list[Permission]
