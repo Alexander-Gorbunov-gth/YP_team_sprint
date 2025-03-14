@@ -20,18 +20,16 @@ class BlackListService(AbstractBlackListService):
     async def is_exists(self, key: str) -> bool:
         """
         Проверяет, существует ли ключ в черном списке.
-
         :param key: Ключ (например, идентификатор токена).
         :return: True, если ключ существует, иначе False.
         """
 
-        value = self._repository.get_value(key=key)
-        return value is None
+        value = await self._repository.get_value(key=key)
+        return value is not None
 
     async def set_one_value(self, key: str, value: str, exp: timedelta | None = None):
         """
         Добавляет один ключ в черный список.
-
         :param key: Ключ (например, идентификатор токена).
         :param value: Значение, связанное с ключом.
         :param exp: Время жизни ключа (если не указано, ключ будет без срока действия).
@@ -42,7 +40,6 @@ class BlackListService(AbstractBlackListService):
     async def set_many_values(self, values: list[dict[str, str]], exp: timedelta | None = None):
         """
         Добавляет несколько значений в хранилище.
-
         :param values: Словарь {ключ: значение}.
         :param exp: Время жизни ключей (если указано, будет установлено время истечения).
         """
