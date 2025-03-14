@@ -38,5 +38,5 @@ class Forbidden(Exception):
     pass
 
 
-class NotAuthorized(Exception):
+class SessionHasExpired(Exception):
     pass
