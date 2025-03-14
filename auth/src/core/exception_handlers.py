@@ -4,8 +4,7 @@ from typing import Any, NoReturn
 
 from fastapi import HTTPException, Request, Response
 
-from src.domain.exceptions import (Forbidden, NotAuthorized, PasswordsNotMatch,
-                                   UserIsExists)
+from src.domain.exceptions import Forbidden, SessionHasExpired, PasswordsNotMatch, UserIsExists
 
 
 def create_exception_handler(
@@ -43,5 +42,5 @@ exception_handlers: dict[type[Exception], Callable[[Request, Exception], Corouti
     UserIsExists: user_exists_handler,
     PasswordsNotMatch: passwords_not_match_handler,
     Forbidden: forbidden_handler,
-    NotAuthorized: not_authorized_handler,
+    SessionHasExpired: not_authorized_handler,
 }

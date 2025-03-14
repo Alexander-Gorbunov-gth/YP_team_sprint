@@ -41,16 +41,6 @@ class AbstractSessionRepository(ABC):
         raise NotImplementedError
 
 
-class AbstractBlackListRepository(ABC):
-    @abstractmethod
-    async def exists(self, token: str) -> bool:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def add(self, token: str, expire: timedelta) -> None:
-        raise NotImplementedError
-
-
 class AbstractPermissionRepository(ABC):
     @abstractmethod
     async def create_permission(self, slug: str, description: str | None) -> Permission:
@@ -75,7 +65,13 @@ class AbstractPermissionRepository(ABC):
 
 class AbstractRoleRepository(ABC):
     @abstractmethod
-    async def create_role(self, slug: str, title: str, permissions: list[Permission], description: str | None) -> Role:
+    async def create_role(
+        self,
+        slug: str,
+        title: str,
+        permissions: list[Permission],
+        description: str | None,
+    ) -> Role:
         raise NotImplementedError
 
     @abstractmethod
@@ -92,4 +88,18 @@ class AbstractRoleRepository(ABC):
 
     @abstractmethod
     async def update_role(self, role: Role) -> Role:
+        raise NotImplementedError
+
+
+class AbstractBlacklistRepository(ABC):
+    @abstractmethod
+    def get_value(self, key: str) -> str:
+        raise NotImplementedError
+
+    @abstractmethod
+    def set_value(self, key: str, value: str, exp: timedelta) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def set_many_values(self, values: list[dict[str, str]], exp: timedelta) -> None:
         raise NotImplementedError

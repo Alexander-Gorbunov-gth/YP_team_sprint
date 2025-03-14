@@ -12,5 +12,8 @@ while ! nc -z $REDIS_HOST $REDIS_PORT; do
 done
 echo "Redis готов!"
 
-exec "$@"
+echo "Применение миграций Alembic..."
+alembic upgrade head
 
+echo "Запуск приложения..."
+exec "$@"

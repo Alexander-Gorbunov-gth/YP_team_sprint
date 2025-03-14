@@ -5,9 +5,7 @@ from pydantic import BaseModel
 
 from src.domain.entities import Role
 from src.domain.exceptions import RoleNotFound, UserNotFound
-from src.domain.repositories import (AbstractPermissionRepository,
-                                     AbstractRoleRepository,
-                                     AbstractUserRepository)
+from src.domain.repositories import AbstractPermissionRepository, AbstractRoleRepository, AbstractUserRepository
 from src.infrastructure.repositories.permisson import get_permission_repository
 from src.infrastructure.repositories.role import get_role_repository
 from src.infrastructure.repositories.user import get_user_repository
