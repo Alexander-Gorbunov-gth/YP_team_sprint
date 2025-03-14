@@ -19,11 +19,9 @@ async def lifespan(_: FastAPI):
     redis.redis = Redis(host=settings.redis.redis_host, port=settings.redis.redis_port)
     postgres.engine = create_async_engine(settings.db.db_url, echo=True)
     postgres.async_session_maker = async_sessionmaker(bind=postgres.engine, expire_on_commit=False, class_=AsyncSession)
-    await postgres.create_database()
 
     yield
 
-    await postgres.purge_database()
     await redis.redis.close()
 
 
