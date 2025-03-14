@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import timedelta
 
 from src.domain.entities import Session, Token, User
 
@@ -46,4 +47,18 @@ class AbstractSessionService(ABC):
 
     @abstractmethod
     async def update_session_refresh_token(self, old_refresh_token: str, new_refresh_token: str) -> Session | None:
+        raise NotImplementedError
+
+
+class AbstractBlackListService(ABC):
+    @abstractmethod
+    async def is_exists(self, value: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def set_one_value(self, value: str, exp: timedelta) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def set_many_values(self, values: list[str], exp: timedelta) -> None:
         raise NotImplementedError
