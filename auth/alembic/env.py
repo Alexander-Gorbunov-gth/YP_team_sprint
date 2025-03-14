@@ -14,9 +14,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-config.set_main_option(
-    "sqlalchemy.url", settings.db.db_url.replace("asyncpg", "psycopg2")
-)
+config.set_main_option("sqlalchemy.url", settings.db.db_url.replace("asyncpg", "psycopg2"))
 
 target_metadata = mapper_registry.metadata
 
