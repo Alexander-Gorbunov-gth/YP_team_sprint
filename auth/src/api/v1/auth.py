@@ -1,10 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response, status
 
-from src.api.v1.dependencies import (AuthDep, JWTDep, SessionDep,
-                                     get_current_user, get_refresh_token,
-                                     set_refresh_token)
-from src.api.v1.schemas.auth_schemas import (LoginForm, LoginResponse,
-                                             RegisterForm, UserResponse)
+from src.api.v1.dependencies import AuthDep, JWTDep, SessionDep, get_current_user, get_refresh_token, set_refresh_token
+from src.api.v1.schemas.auth_schemas import LoginForm, LoginResponse, RegisterForm, UserResponse
 from src.domain.entities import User
 from src.domain.exceptions import PasswordsNotMatch
 from src.domain.factories.session import SessionFactory

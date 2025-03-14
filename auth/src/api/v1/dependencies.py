@@ -7,8 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from src.core.config import settings
 from src.domain.entities import Token, User
 from src.domain.exceptions import Forbidden, NotAuthorized
-from src.domain.interfaces import (AbstractAuthService, AbstractJWTService,
-                                   AbstractSessionService)
+from src.domain.interfaces import AbstractAuthService, AbstractJWTService, AbstractSessionService
 from src.domain.repositories import AbstractUserRepository
 from src.infrastructure.repositories.user import get_user_repository
 from src.services.auth import get_auth_service

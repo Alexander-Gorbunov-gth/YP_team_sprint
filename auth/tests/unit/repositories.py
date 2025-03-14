@@ -2,8 +2,7 @@ from uuid import UUID, uuid4
 
 from src.domain.entities import Session, User
 from src.domain.exceptions import UserIsExists
-from src.domain.repositories import (AbstractSessionRepository,
-                                     AbstractUserRepository)
+from src.domain.repositories import AbstractSessionRepository, AbstractUserRepository
 
 
 class FakeUserRepository(AbstractUserRepository):
