@@ -1,17 +1,19 @@
 import logging
+
 from fastapi import Depends
 from pydantic import BaseModel
 
 from src.domain.entities import Permission
+from src.domain.exceptions import PermissionNotFound
 from src.domain.repositories import AbstractPermissionRepository
 from src.infrastructure.repositories.permisson import get_permission_repository
-from src.domain.exceptions import PermissionIsExists, PermissionNotFound
 
 logger = logging.getLogger(__name__)
 
 
 class PermissionCreateUpdateSchema(BaseModel):
     """Схема для создания и обновления разрешения"""
+
     slug: str
     description: str | None = None
 

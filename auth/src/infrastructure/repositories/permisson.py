@@ -1,13 +1,13 @@
 import logging
 
 from fastapi import Depends
+from sqlalchemy import delete, insert, select, update
+from sqlalchemy.engine import Result
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, select, update, delete
-from sqlalchemy.engine import Result
 
-from src.domain.entities import Permission
 from src.db.postgres import get_session
+from src.domain.entities import Permission
 from src.domain.exceptions import PermissionIsExists
 from src.domain.repositories import AbstractPermissionRepository
 

@@ -1,7 +1,7 @@
-from uuid import UUID
-from typing import Any
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from typing import Any
+from uuid import UUID
 
 
 @dataclass
@@ -49,6 +49,7 @@ class Role:
     title: str
     description: str
     permissions: list[Permission]
+
 
 @dataclass
 class Session(BaseEntity):

@@ -1,23 +1,19 @@
-from typing import Annotated
 from functools import wraps
+from typing import Annotated
 
-from fastapi import Response, Request, Depends, Security
+from fastapi import Depends, Request, Response, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.core.config import settings
-from src.services.auth import get_auth_service
-from src.services.sessions import get_session_service
-from src.services.jwt import get_jwt_service
-from src.domain.repositories import AbstractUserRepository
 from src.domain.entities import Token, User
-from src.infrastructure.repositories.user import get_user_repository
 from src.domain.exceptions import Forbidden, NotAuthorized
-from src.domain.interfaces import (
-    AbstractAuthService,
-    AbstractJWTService,
-    AbstractSessionService,
-)
-
+from src.domain.interfaces import (AbstractAuthService, AbstractJWTService,
+                                   AbstractSessionService)
+from src.domain.repositories import AbstractUserRepository
+from src.infrastructure.repositories.user import get_user_repository
+from src.services.auth import get_auth_service
+from src.services.jwt import get_jwt_service
+from src.services.sessions import get_session_service
 
 SessionDep = Annotated[AbstractSessionService, Depends(get_session_service)]
 AuthDep = Annotated[AbstractAuthService, Depends(get_auth_service)]
@@ -42,7 +38,7 @@ def get_refresh_token(request: Request) -> str | None:
     refresh_token = request.cookies.get("refresh_token")
     if refresh_token is None:
         raise NotAuthorized
-    return 
+    return
 
 
 def get_refresh_token_data(jwt_service: JWTDep, refresh_token: str = Depends(get_refresh_token)) -> Token:

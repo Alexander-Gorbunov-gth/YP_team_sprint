@@ -1,8 +1,9 @@
 from uuid import UUID, uuid4
 
-from src.domain.entities import User, Session
+from src.domain.entities import Session, User
 from src.domain.exceptions import UserIsExists
-from src.domain.repositories import AbstractUserRepository, AbstractSessionRepository
+from src.domain.repositories import (AbstractSessionRepository,
+                                     AbstractUserRepository)
 
 
 class FakeUserRepository(AbstractUserRepository):
@@ -49,11 +50,7 @@ class FakeSessionRepository(AbstractSessionRepository):
 
     async def get_by_refresh_token(self, refresh_token: str) -> Session | None:
         return next(
-            (
-                session
-                for session in self._sessions.values()
-                if session.refresh_token == refresh_token
-            ),
+            (session for session in self._sessions.values() if session.refresh_token == refresh_token),
             None,
         )
 

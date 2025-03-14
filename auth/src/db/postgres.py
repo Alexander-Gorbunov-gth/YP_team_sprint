@@ -1,8 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, AsyncEngine
+from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
+                                    async_sessionmaker)
 from sqlalchemy.orm import clear_mappers
 
 from src.infrastructure.models import mapper_registry
-
 
 engine: AsyncEngine | None = None
 async_session_maker: async_sessionmaker[AsyncSession] | None = None

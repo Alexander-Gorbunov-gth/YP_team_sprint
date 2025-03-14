@@ -1,23 +1,13 @@
-from fastapi import APIRouter, Depends, Request, status, Response
+from fastapi import APIRouter, Depends, Request, Response, status
 
+from src.api.v1.dependencies import (AuthDep, JWTDep, SessionDep,
+                                     get_current_user, get_refresh_token,
+                                     set_refresh_token)
+from src.api.v1.schemas.auth_schemas import (LoginForm, LoginResponse,
+                                             RegisterForm, UserResponse)
 from src.domain.entities import User
-from src.domain.factories.session import SessionFactory
 from src.domain.exceptions import PasswordsNotMatch
-from src.api.v1.dependencies import (
-    set_refresh_token,
-    get_refresh_token,
-    get_current_user,
-    AuthDep,
-    JWTDep,
-    SessionDep,
-)
-from src.api.v1.schemas.auth_schemas import (
-    RegisterForm,
-    UserResponse,
-    LoginResponse,
-    LoginForm,
-)
-
+from src.domain.factories.session import SessionFactory
 
 auth_router = APIRouter()
 
@@ -66,13 +56,11 @@ async def logout(
 @auth_router.post("/refresh/", response_model=LoginResponse, status_code=status.HTTP_200_OK)
 async def refresh(
     response: Response,
-    session_service: SessionDep, 
-    jwt_service: JWTDep, 
+    session_service: SessionDep,
+    jwt_service: JWTDep,
     refresh_token: str = Depends(get_refresh_token),
     current_user: User = Depends(get_current_user),
 ) -> LoginResponse:
-    print(refresh_token)
-    print(current_user)
     new_refresh_token = jwt_service.generate_refresh_token(user=current_user)
     new_access_token = jwt_service.generate_access_token(user=current_user)
     _ = await session_service.update_session_refresh_token(refresh_token, new_refresh_token)
@@ -84,5 +72,3 @@ async def refresh(
 async def logout_others(session_service: SessionDep, current_refresh_token: str = Depends(get_refresh_token)):
     deactivate_sessions = await session_service.deactivate_all_without_current(current_refresh_token)
     return
-
-
