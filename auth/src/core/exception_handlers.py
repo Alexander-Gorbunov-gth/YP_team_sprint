@@ -33,7 +33,9 @@ passwords_not_match_handler = create_exception_handler(status_code=HTTPStatus.BA
 
 forbidden_handler = create_exception_handler(status_code=HTTPStatus.FORBIDDEN, detail="Доступ запрещен.")
 
-not_authorized_handler = create_exception_handler(status_code=HTTPStatus.UNAUTHORIZED, detail="Время жизни сессии истекло.")
+not_authorized_handler = create_exception_handler(
+    status_code=HTTPStatus.UNAUTHORIZED, detail="Время жизни сессии истекло."
+)
 
 
 exception_handlers: dict[type[Exception], Callable[[Request, Exception], Coroutine[Any, Any, Response]]] = {

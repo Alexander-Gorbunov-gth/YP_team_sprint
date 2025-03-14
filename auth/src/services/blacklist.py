@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from src.domain.interfaces import AbstractBlacklistService
 from src.domain.repositories import AbstractBlacklistRepository
-from infrastructure.repositories.blacklist import get_blacklist_repository
+from src.infrastructure.repositories.blacklist import get_blacklist_repository
 
 
 class BlacklistService(AbstractBlacklistService):
@@ -46,7 +46,7 @@ class BlacklistService(AbstractBlacklistService):
         await self._repository.set_many_values(values=values, exp=exp)
 
 
-def get_black_list_service(
+def get_blacklist_service(
     repository: AbstractBlacklistRepository = Depends(get_blacklist_repository),
 ) -> AbstractBlacklistService:
     """
