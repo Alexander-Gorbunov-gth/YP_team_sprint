@@ -11,9 +11,9 @@ async def get_all_roles(role_service: RoleService = Depends(get_role_service)):
     return await role_service.get()
 
 
-@roles_router.get("/{slug}/", response_model=[PermissionResponse])
-async def get_role(slug: str, permisson_service: RoleService = Depends(get_role_service)):
-    return await permisson_service.get(slug=slug)
+@roles_router.get("/{slug}/", response_model=PermissionResponse)
+async def get_role(slug: str, role_service: RoleService = Depends(get_role_service)):
+    return await role_service.get(slug=slug)
 
 
 @roles_router.post("/", response_model=PermissionResponse)
