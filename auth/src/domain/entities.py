@@ -60,5 +60,6 @@ class Session(BaseEntity):
     refresh_token: str
     user_ip: str | None
     is_active: bool
+    device_type: str = "other"
     created_at: datetime | None = None
     updated_at: datetime | None = None
