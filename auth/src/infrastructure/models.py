@@ -33,19 +33,6 @@ def timestamp_columns():
     ]
 
 
-def create_partition(target, connection, **kwargs) -> None:
-    connection.execute(
-        text("""CREATE TABLE IF NOT EXISTS "sessions_desktop" PARTITION OF "sessions" FOR VALUES IN ('desktop');""")
-    )
-    connection.execute(
-        text("""CREATE TABLE IF NOT EXISTS "sessions_smart" PARTITION OF "sessions" FOR VALUES IN ('smart');""")
-    )
-    connection.execute(
-        text("""CREATE TABLE IF NOT EXISTS "sessions_mobile" PARTITION OF "sessions" FOR VALUES IN ('mobile');""")
-    )
-    connection.execute(text("""CREATE TABLE "sessions_other" PARTITION OF "sessions" DEFAULT;"""))
-
-
 users_table = Table(
     "users",
     mapper_registry.metadata,
@@ -76,7 +63,6 @@ sessions_table = Table(
     Index("idx_session_user_id", "user_id"),
     Index("idx_session_refresh_token", "refresh_token"),
     UniqueConstraint("id", "device_type"),
-    **({"postgresql_partition_by": "LIST (device_type)", "listeners": [("after_create", create_partition)]}),
 )
 
 
