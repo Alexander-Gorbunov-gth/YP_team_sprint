@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -24,6 +24,7 @@ class User(BaseEntity):
     email: str
     password: str
     is_active: bool
+    roles: list = field(default_factory=list)
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -48,7 +49,7 @@ class Role:
     slug: str
     title: str
     description: str
-    permissions: list[Permission]
+    permissions: list[Permission] = field(default_factory=list)
 
 
 @dataclass
