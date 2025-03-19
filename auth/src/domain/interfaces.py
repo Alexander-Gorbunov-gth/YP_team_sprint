@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
+from uuid import UUID
 
 from src.domain.entities import Session, Token, User
 
@@ -49,6 +50,10 @@ class AbstractSessionService(ABC):
     async def update_session_refresh_token(self, old_refresh_token: str, new_refresh_token: str) -> Session | None:
         raise NotImplementedError
 
+    @abstractmethod
+    async def get_current_user_sessions(self, user_id: UUID | str) -> list[Session]:
+        raise NotImplementedError
+
 
 class AbstractBlacklistService(ABC):
     @abstractmethod
@@ -61,4 +66,10 @@ class AbstractBlacklistService(ABC):
 
     @abstractmethod
     async def set_many_values(self, values: list[dict[str, str]], exp: timedelta) -> None:
+        raise NotImplementedError
+
+
+class AbstractUserService(ABC):
+    @abstractmethod
+    async def get_current_user_profile(self, user_id: UUID | str) -> User:
         raise NotImplementedError
