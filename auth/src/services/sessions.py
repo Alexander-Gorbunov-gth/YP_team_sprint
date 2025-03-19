@@ -1,6 +1,8 @@
 import logging
+from uuid import UUID
 
 from fastapi import Depends
+from user_agents import parse
 
 from src.domain.entities import Session
 from src.domain.exceptions import SessionHasExpired
@@ -27,6 +29,8 @@ class SessionService(AbstractSessionService):
         :param session: Объект сессии
         :return: Созданная сессия
         """
+        device_type = self.get_user_device(user_agent=session.user_agent)
+        session.device_type = device_type
         new_session = await self._session_repository.create(session)
         return new_session
 
@@ -88,6 +92,33 @@ class SessionService(AbstractSessionService):
         updated_session = await self._session_repository.update(session=current_session)
         return updated_session
 
+    async def get_current_user_sessions(self, user_id: UUID | str) -> list[Session]:
+        """
+        Получает все сессии пользователя по user_id
+        :param user_id: ID пользователя
+        :return: Список сессий пользователя
+        """
+        sessions = await self._session_repository.get_sessions_by_user_id(user_id=user_id)
+        return sessions
+
+    @staticmethod
+    def get_user_device(user_agent: str) -> str:
+        """
+        Получает тип устройства из отпечатка браузера (user_agent)
+        :param user_agent: Отпечаток браузера пользователя
+        :return: Тип устройства пользователя
+        """
+        ua = parse(user_agent)
+        match (ua.is_mobile, ua.is_tablet, ua.is_pc):
+            case (True, _, _):
+                return "mobile"
+            case (_, True, _):
+                return "smart"
+            case (_, _, True):
+                return "desktop"
+            case _:
+                return "other"
+
 
 def get_session_service(
     session_repository: AbstractSessionRepository = Depends(get_session_repository),
@@ -97,5 +128,4 @@ def get_session_service(
     :param session_repository: Репозиторий сессий
     :return: Экземпляр SessionService
     """
-    session_service = SessionService(session_repository=session_repository)
-    return session_service
+    return SessionService(session_repository=session_repository)
