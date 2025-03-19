@@ -4,6 +4,7 @@ from fastapi import Depends
 from pydantic import BaseModel
 
 from src.domain.entities import Role
+from src.api.v1.schemas.roles import RoleCreateOrUpdate, AddOrDeleteRoleToUser
 from src.domain.exceptions import RoleNotFound, UserNotFound
 from src.domain.repositories import AbstractPermissionRepository, AbstractRoleRepository, AbstractUserRepository
 from src.infrastructure.repositories.permisson import get_permission_repository
@@ -11,15 +12,6 @@ from src.infrastructure.repositories.role import get_role_repository
 from src.infrastructure.repositories.user import get_user_repository
 
 logger = logging.getLogger(__name__)
-
-
-class RoleCreateOrUpdate(BaseModel):
-    """Схема для создания и обновления роли"""
-
-    slug: str
-    title: str
-    description: str | None
-    permissions: list[str]  # Список slug разрешений
 
 
 class RoleService:
@@ -76,43 +68,25 @@ class RoleService:
         else:
             return await self._role_repository.get_all_roles()
 
-    async def add_role_to_user(self, user_id: str, role_slug: str) -> bool:
+    async def add_role_to_user(self, data: AddOrDeleteRoleToUser) -> bool:
         """Добавляет роль пользователю"""
-        user = await self._user_repository.get_by_id(user_id)
-        if not user:
-            logger.error(f"Пользователь {user_id} не найден")
-            raise UserNotFound(f"Пользователь '{user_id}' не найден")
 
-        role = await self._role_repository.get_role(role_slug)
-        if not role:
-            logger.error(f"Роль {role_slug} не найдена")
-            raise RoleNotFound(f"Роль '{role_slug}' не найдена")
-
-        user.roles.append(role)
-        await self._user_repository.update_user(user)
-        logger.info(f"Роль {role_slug} добавлена пользователю {user_id}")
-        return True
-
-    async def delete_role_from_user(self, user_id: str, role_slug: str) -> bool:
-        """Удаляет роль у пользователя"""
-        user = await self._user_repository.get_by_id(user_id)
-        if not user:
-            logger.error(f"Пользователь {user_id} не найден")
-            raise UserNotFound(f"Пользователь '{user_id}' не найден")
-
-        role = await self._role_repository.get_role(role_slug)
-        if not role:
-            logger.error(f"Роль {role_slug} не найдена")
-            raise RoleNotFound(f"Роль '{role_slug}' не найдена")
-
-        if role in user.roles:
-            user.roles.remove(role)
-            await self._user_repository.update_user(user)
-            logger.info(f"Роль {role_slug} удалена у пользователя {user_id}")
+        result = await self._role_repository.add_role_to_user(data.user_id, data.role_slug)
+        if result:
+            logger.info(f"Роль {data.role_slug} добавлена пользователю {data.user_id}")
             return True
-        else:
-            logger.warning(f"Пользователь {user_id} не имеет роли {role_slug}")
-            return False
+        logger.info(f"Пользователь {data.user_id} уже имеет роль {data.role_slug}")
+        return False
+
+    async def delete_role_from_user(self, data: AddOrDeleteRoleToUser) -> bool:
+        """Удаляет роль у пользователя"""
+        
+        result = await self._role_repository.delete_role_to_user(data.user_id, data.role_slug)
+        if result:
+            logger.info(f"Роль {data.role_slug} удалена у пользователя {data.user_id}")
+            return True
+        logger.info(f"Пользователь {data.user_id} не имеет роли {data.role_slug}")
+        return False
 
     async def check_role_for_user(self, user_id: str, role_slug: str) -> bool:
         """Проверяет, есть ли у пользователя определённая роль"""

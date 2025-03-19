@@ -1,6 +1,6 @@
 .PHONY: run
 run:
-	@docker compose -f docker-compose.tests.yaml build && docker compose -f docker-compose.tests.yaml up
+	@docker compose -f docker-compose.override.yml build && docker compose -f docker-compose.override.yml up
 
 .PHONY: auth
 auth:
