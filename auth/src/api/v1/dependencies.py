@@ -12,6 +12,7 @@ from src.domain.interfaces import (
     AbstractBlacklistService,
     AbstractJWTService,
     AbstractSessionService,
+    AbstractUserService,
 )
 from src.domain.repositories import AbstractUserRepository
 from src.infrastructure.repositories.user import get_user_repository
@@ -19,11 +20,13 @@ from src.services.auth import get_auth_service
 from src.services.blacklist import get_blacklist_service
 from src.services.jwt import get_jwt_service
 from src.services.sessions import get_session_service
+from src.services.user import get_user_service
 
 SessionDep = Annotated[AbstractSessionService, Depends(get_session_service)]
 AuthDep = Annotated[AbstractAuthService, Depends(get_auth_service)]
 JWTDep = Annotated[AbstractJWTService, Depends(get_jwt_service)]
 BlacklistDep = Annotated[AbstractBlacklistService, Depends(get_blacklist_service)]
+UserServiceDep = Annotated[AbstractUserService, Depends(get_user_service)]
 
 UserRepoDep = Annotated[AbstractUserRepository, Depends(get_user_repository)]
 
@@ -66,7 +69,9 @@ def get_refresh_token(request: Request) -> str | None:
 
 
 def get_refresh_token_data(
-    request: Request, jwt_service: JWTDep, refresh_token: str = Depends(get_refresh_token)
+    request: Request,
+    jwt_service: JWTDep,
+    refresh_token: str = Depends(get_refresh_token),
 ) -> Token:
     """
     Декодирует refresh-токен и сохраняет его данные в request.state.
@@ -93,6 +98,17 @@ async def get_current_user(user_repository: UserRepoDep, payload: Token = Depend
         logger.error("Ошибка при получении пользователя с id %s из БД", payload.user_uuid)
         raise UserNotFound
     return user
+
+
+def get_access_token_data(
+    request: Request,
+    jwt_service: JWTDep,
+    credentials: HTTPAuthorizationCredentials = Security(security),
+) -> Token:
+    access_token = credentials.credentials
+    access_token_payload: Token = jwt_service.decode_token(access_token)
+    request.state.access_token_payload = access_token_payload
+    return access_token_payload
 
 
 def require_permissions(required_permissions: list[str] | None = None):
