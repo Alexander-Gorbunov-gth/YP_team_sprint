@@ -2,6 +2,10 @@ class UserIsExists(Exception):
     pass
 
 
+class NotAuthorized(Exception):
+    pass
+
+
 class WrongEmailOrPassword(Exception):
     pass
 

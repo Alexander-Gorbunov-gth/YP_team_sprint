@@ -1,4 +1,5 @@
 from logging import config as logging_config
+from logging import getLogger
 from pathlib import Path
 
 from pydantic import Field, SecretStr
@@ -7,6 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from src.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
+
 
 
 class ModelConfig(BaseSettings):
