@@ -20,7 +20,7 @@ class RedisBlacklistRepository(AbstractBlacklistRepository):
         value = await self._redis.get(name=key)
         return value
 
-    async def set_value(self, key: str, value: str, exp: timedelta | None = None) -> None:
+    async def set_value(self, key: str, value: str, exp: timedelta | int | None = None) -> None:
         """
         Устанавливает одиночное значение в Redis с возможным временем жизни.
         :param key: Ключ
@@ -29,6 +29,7 @@ class RedisBlacklistRepository(AbstractBlacklistRepository):
         """
 
         if exp:
+            exp = timedelta(minutes=exp)
             await self._redis.set(name=key, value=value, ex=int(exp.total_seconds()))
         else:
             await self._redis.set(name=key, value=value)
@@ -42,6 +43,7 @@ class RedisBlacklistRepository(AbstractBlacklistRepository):
         async with self._redis.pipeline() as pipe:
             await pipe.mset(values)
             if exp:
+                exp = timedelta(minutes=exp)
                 for key in values.keys():
                     await pipe.expire(name=key, time=int(exp.total_seconds()))
             await pipe.execute()

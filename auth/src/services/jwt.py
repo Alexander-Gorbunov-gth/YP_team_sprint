@@ -6,6 +6,7 @@ import jwt
 
 from src.core.config import settings
 from src.domain.entities import Token, User
+from src.domain.exceptions import SessionHasExpired
 from src.domain.interfaces import AbstractJWTService
 
 logger = logging.getLogger(__name__)
@@ -44,13 +45,12 @@ class JWTService(AbstractJWTService):
         """
 
         now = datetime.now()
-        print(user)
         payload = {
             "user_uuid": str(user.id),
             "iat": now.timestamp(),
             "exp": (now + token_lifetime).timestamp(),
             "jti": self._jti,
-            "scope": [],
+            "scope": [perm.slug for role in user.roles for perm in role.permissions],
         }
         return jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
 
@@ -80,8 +80,7 @@ class JWTService(AbstractJWTService):
 
         :param jwt_token: JWT токен в виде строки.
         :return: Объект Token с полезной нагрузкой из токена.
-        :raises jwt.ExpiredSignatureError: Если токен просрочен.
-        :raises jwt.PyJWTError: Если произошла ошибка при декодировании токена.
+        :raises SessionHasExpired: Если токен просрочен.
         """
 
         try:
@@ -89,10 +88,10 @@ class JWTService(AbstractJWTService):
             token = Token(**payload)
         except jwt.ExpiredSignatureError:
             logger.error("Токен %s просрочен.", jwt_token)
-            raise
+            raise SessionHasExpired
         except (jwt.PyJWTError, TypeError):
             logger.error("Ошибка декодирования токена %s", jwt_token)
-            raise jwt.PyJWTError
+            raise SessionHasExpired
         return token
 
     @property

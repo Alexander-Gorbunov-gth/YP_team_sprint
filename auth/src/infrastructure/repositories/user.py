@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class SQLAlchemyUserRepository(AbstractUserRepository):
+    exclude_fields = ("roles", "created_at", "updated_at")
 
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
@@ -32,7 +33,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
     async def get_by_email(self, email: str) -> User | None:
         query = select(User).filter_by(email=email)
         result: Result = await self._session.execute(query)
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_by_id(self, user_id: str) -> User | None:
         """
@@ -44,7 +45,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
 
         query = select(User).filter_by(id=user_id)
         result: Result = await self._session.execute(query)
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def update(self, user: User) -> User | None:
         """
@@ -55,14 +56,9 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
         :return: обновленный объект модели или None, если запись не найдена.
         """
 
-        result: Result = await self._session.execute(
-            update(self._model)
-            .filter_by(id=user.id)
-            .values(**await user.to_dict(exclude=self.exclude_fields))
-            .returning(self._model)
-        )
+        await self._session.execute(update(User).filter_by(id=user.id).values(**user.to_dict(self.exclude_fields)))
         await self._commit()
-        return result.scalar_one_or_none()
+        return
 
     async def _commit(self) -> None:
         await self._session.commit()
@@ -71,5 +67,4 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
 def get_user_repository(
     session: SQLAlchemyUserRepository = Depends(get_session),
 ) -> SQLAlchemyUserRepository:
-    user_repository = SQLAlchemyUserRepository(session=session)
-    return user_repository
+    return SQLAlchemyUserRepository(session=session)

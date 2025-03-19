@@ -1,10 +1,10 @@
+from datetime import datetime, timedelta
 from typing import Any
 from uuid import UUID, uuid4
-from datetime import timedelta, datetime
 
 from src.domain.entities import Session, User
 from src.domain.exceptions import UserIsExists
-from src.domain.repositories import AbstractSessionRepository, AbstractUserRepository, AbstractBlacklistRepository
+from src.domain.repositories import AbstractBlacklistRepository, AbstractSessionRepository, AbstractUserRepository
 
 
 class FakeUserRepository(AbstractUserRepository):
