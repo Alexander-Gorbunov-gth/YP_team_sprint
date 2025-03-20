@@ -1,10 +1,6 @@
-from typing import Annotated
-
-from fastapi import Form
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, Field
 
 from .permissions import PermissionResponse
-from src.domain.entities import Permission
 
 
 class RoleCreateOrUpdate(BaseModel):

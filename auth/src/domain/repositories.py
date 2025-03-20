@@ -89,11 +89,12 @@ class AbstractRoleRepository(ABC):
     @abstractmethod
     async def update_role(self, role: Role) -> Role:
         raise NotImplementedError
-    
+
     @abstractmethod
     async def add_role_to_user(self, user_id: UUID, role_slug: str) -> bool:
         raise NotImplementedError
-    
+
+    @abstractmethod
     async def delete_role_to_user(self, user_id: UUID, role_slug: str) -> bool:
         raise NotImplementedError
 

@@ -1,5 +1,4 @@
 from logging.config import fileConfig
-from logging import getLogger
 
 from sqlalchemy import engine_from_config, pool
 
@@ -7,14 +6,13 @@ from alembic import context
 from src.core.config import settings
 from src.infrastructure.models import mapper_registry
 
-logger = getLogger(__name__)
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-# config.set_main_option("sqlalchemy.url", settings.db.db_url.replace("asyncpg", "psycopg2"))
+config.set_main_option("sqlalchemy.url", settings.db.db_url.replace("asyncpg", "psycopg2"))
 
 
 target_metadata = mapper_registry.metadata
