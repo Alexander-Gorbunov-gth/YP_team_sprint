@@ -22,31 +22,41 @@ class JsonFileStorage(BaseStorage):
     _file_path: str
     _logger: Logger
 
-    def __init__(self, logger: Logger, file_path: str | None = './storage/state_storage.json') -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        file_path: str | None = "./storage/state_storage.json",
+    ) -> None:
         if file_path is None:
             raise ValueError("file_path can't be None")
 
         self._file_path = file_path
 
         self._logger = logger
-        create_directory('./storage')
+        create_directory("./storage")
 
     def save_state(self, state: dict[str, Any]) -> None:
         """Сохранить состояние в хранилище."""
-        lock = FileLock(f'{self._file_path}.lock')
+        lock = FileLock(f"{self._file_path}.lock")
         with lock:
-            with open(file=self._file_path, mode='w', encoding='utf-8') as json_storage:
+            with open(
+                file=self._file_path, mode="w", encoding="utf-8"
+            ) as json_storage:
                 json.dump(state, json_storage)
 
     def retrieve_state(self) -> dict[str, Any]:
         """Получить состояние из хранилища."""
         try:
-            lock = FileLock(f'{self._file_path}.lock')
+            lock = FileLock(f"{self._file_path}.lock")
             with lock:
-                with open(file=self._file_path, mode='r', encoding='utf-8') as json_storage:
+                with open(
+                    file=self._file_path, mode="r", encoding="utf-8"
+                ) as json_storage:
                     return json.load(json_storage)
         except (FileNotFoundError, JSONDecodeError):
-            self._logger.warning('No state file provided. Continue with default file')
+            self._logger.warning(
+                "No state file provided. Continue with default file"
+            )
             return {}
         except Exception as e:
             self._logger.exception(e)

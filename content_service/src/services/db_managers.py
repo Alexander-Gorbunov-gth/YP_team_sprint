@@ -1,12 +1,10 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Any
-import logging
 
-from elasticsearch import (
-    AsyncElasticsearch,
-    NotFoundError,
-    ConnectionError as ESConnectionError,
-)
+from elasticsearch import AsyncElasticsearch
+from elasticsearch import ConnectionError as ESConnectionError
+from elasticsearch import NotFoundError
 from elasticsearch_dsl import AsyncSearch, Q
 
 logger = logging.getLogger(__name__)
@@ -100,15 +98,20 @@ class ElasticManager(DBManager):
             )
             response = await search.execute()
             documents = [hit.to_dict() for hit in response]
-            logger.info("Запрос выполнен успешно. Найдено %s объектов.", len(documents))
+            logger.info(
+                "Запрос выполнен успешно. Найдено %s объектов.", len(documents)
+            )
             return documents
         except ESConnectionError as e:
             logger.error(
-                "Ошибка подключения к Elasticsearch при выполнении запроса: %s", e
+                "Ошибка подключения к Elasticsearch при выполнении запроса: %s",
+                e,
             )
             return None
         except Exception as e:
-            logger.exception("Неизвестная ошибка при выполнении запроса: %s", e)
+            logger.exception(
+                "Неизвестная ошибка при выполнении запроса: %s", e
+            )
             return None
 
     async def _generate_query(
@@ -137,7 +140,9 @@ class ElasticManager(DBManager):
 
         # Основной запрос
         if query and fields:
-            must_queries = [Q("match", **{field: query}) for field in fields if field]
+            must_queries = [
+                Q("match", **{field: query}) for field in fields if field
+            ]
             search = search.query("bool", must=must_queries)
             logger.debug("Сформирован запрос с поисковой строкой: %s", query)
         else:
@@ -154,7 +159,9 @@ class ElasticManager(DBManager):
                         query=Q("term", **{f"{nested_field}.id": person_uuid}),
                     )
                 )
-            search = search.query("bool", should=nested_queries, minimum_should_match=1)
+            search = search.query(
+                "bool", should=nested_queries, minimum_should_match=1
+            )
             logger.debug(
                 "Добавлены вложенные фильтры для UUID %s: %s",
                 person_uuid,
@@ -168,5 +175,5 @@ class ElasticManager(DBManager):
                 search = search.sort({field: {"order": order}})
                 logger.debug("Добавлена сортировка: %s (%s).", field, order)
 
-        search = search[(page - 1) * page_size : page * page_size]
+        search = search[(page - 1) * page_size: page * page_size]
         return search

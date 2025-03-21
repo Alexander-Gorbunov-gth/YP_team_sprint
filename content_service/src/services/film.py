@@ -4,13 +4,12 @@ from functools import lru_cache
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
-
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
-from src.services.db_managers import ElasticManager, DBManager
 from src.models.film import Film
 from src.models.person import ShortFilm
-from src.services.redis_service import RedisCache, AbstractCache
+from src.services.db_managers import DBManager, ElasticManager
+from src.services.redis_service import AbstractCache, RedisCache
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +35,9 @@ class FilmService:
             )
             if not films_list:
                 return None
-            await self.cache_manager.set_object(object_key=key, value=films_list)
+            await self.cache_manager.set_object(
+                object_key=key, value=films_list
+            )
         return [Film(**film) for film in films_list]
 
     async def get_by_id(self, film_id: str) -> Film | None:
@@ -48,11 +49,17 @@ class FilmService:
             if film is None:
                 return None
             else:
-                await self.cache_manager.set_object(object_key=film_id, value=film)
+                await self.cache_manager.set_object(
+                    object_key=film_id, value=film
+                )
         return Film(**film)
 
     async def get_films_by_query(
-        self, query: str, sort: str = "-imdb_rating", page_size: int = 10, page: int = 1
+        self,
+        query: str,
+        sort: str = "-imdb_rating",
+        page_size: int = 10,
+        page: int = 1,
     ) -> list[Film] | None:
         """Получаем фильмы по запросу."""
         search_fields = ["title", "description"]
@@ -79,15 +86,20 @@ class FilmService:
     ) -> list[ShortFilm] | None:
         """Получает все фильмы персоны по id"""
 
-        person_films_key = self.cache_manager.get_query_key(person_id, nested_filters)
-        person_films = await self.cache_manager.get_object(object_key=person_films_key)
+        person_films_key = self.cache_manager.get_query_key(
+            person_id, nested_filters
+        )
+        person_films = await self.cache_manager.get_object(
+            object_key=person_films_key
+        )
         if person_films is None:
             person_films = await self.db_manager.get_objects_by_query(
                 person_uuid=person_id, nested_filters=nested_filters
             )
             if person_films is None:
                 logger.warning(
-                    "Не найдено фильмов персоны по запросу: %s", person_films_key
+                    "Не найдено фильмов персоны по запросу: %s",
+                    person_films_key,
                 )
                 return None
             await self.cache_manager.set_object(

@@ -3,10 +3,13 @@ from typing import Annotated
 
 from fastapi import Depends, Request, Response, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
 from src.core.config import settings
 from src.domain.entities import Token, User
-from src.domain.exceptions import Forbidden, SessionHasExpired, UserNotFound
+from src.domain.exceptions import (
+    Forbidden,
+    SessionHasExpired,
+    UserNotFound,
+)
 from src.domain.interfaces import (
     AbstractAuthService,
     AbstractBlacklistService,
@@ -15,23 +18,30 @@ from src.domain.interfaces import (
     AbstractSessionService,
     AbstractUserService,
 )
-from src.domain.repositories import AbstractUserRepository
+from src.domain.repositories import (
+    AbstractRoleRepository,
+    AbstractUserRepository,
+)
 from src.infrastructure.repositories.user import get_user_repository
 from src.services.auth import get_auth_service
 from src.services.blacklist import get_blacklist_service
 from src.services.jwt import get_jwt_service
 from src.services.oauth import get_yandex_oauth_service
+from src.services.role import get_role_service
 from src.services.sessions import get_session_service
 from src.services.user import get_user_service
 
 SessionDep = Annotated[AbstractSessionService, Depends(get_session_service)]
 AuthDep = Annotated[AbstractAuthService, Depends(get_auth_service)]
 JWTDep = Annotated[AbstractJWTService, Depends(get_jwt_service)]
-BlacklistDep = Annotated[AbstractBlacklistService, Depends(get_blacklist_service)]
+BlacklistDep = Annotated[
+    AbstractBlacklistService, Depends(get_blacklist_service)
+]
 UserServiceDep = Annotated[AbstractUserService, Depends(get_user_service)]
 YandexOAuthDep = Annotated[AbstractOAuthService, Depends(get_yandex_oauth_service)]
 
 UserRepoDep = Annotated[AbstractUserRepository, Depends(get_user_repository)]
+RoleServ = Annotated[AbstractRoleRepository, Depends(get_role_service)]
 
 security = HTTPBearer()
 
@@ -88,7 +98,10 @@ def get_refresh_token_data(
     return payload
 
 
-async def get_current_user(user_repository: UserRepoDep, payload: Token = Depends(get_refresh_token_data)) -> User:
+async def get_current_user(
+    user_repository: UserRepoDep,
+    payload: Token = Depends(get_refresh_token_data),
+) -> User:
     """
     Получает пользователя из базы по UUID из токена.
     :param user_repository: Репозиторий пользователей
@@ -98,7 +111,10 @@ async def get_current_user(user_repository: UserRepoDep, payload: Token = Depend
     """
     user: User = await user_repository.get_by_id(payload.user_uuid)
     if user is None:
-        logger.error("Ошибка при получении пользователя с id %s из БД", payload.user_uuid)
+        logger.error(
+            "Ошибка при получении пользователя с id %s из БД",
+            payload.user_uuid,
+        )
         raise UserNotFound
     return user
 
@@ -135,7 +151,9 @@ def require_permissions(required_permissions: list[str] | None = None):
         if await blacklist_service.is_exists(payload.jti):
             raise SessionHasExpired
 
-        if required_permissions and not set(required_permissions).issubset(set(payload.scope)):
+        if required_permissions and not set(required_permissions).issubset(
+            set(payload.scope)
+        ):
             raise Forbidden
 
         request.state.user = payload.user_uuid

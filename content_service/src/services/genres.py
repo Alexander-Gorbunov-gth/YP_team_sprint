@@ -5,14 +5,11 @@ from uuid import UUID
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
-
-
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
+from src.models.genre import Genre
 from src.services.db_managers import DBManager, ElasticManager
 from src.services.redis_service import AbstractCache, RedisCache
-from src.models.genre import Genre
-
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +33,9 @@ class GenreService:
     async def get_all_genres(
         self, sort: str | None = "-name", page: int = 1, page_size: int = 10
     ) -> list[Genre]:
-        genres_key = self.redis.get_query_key(sort=sort, page_size=page_size, page=page)
+        genres_key = self.redis.get_query_key(
+            sort=sort, page_size=page_size, page=page
+        )
         genres = await self.redis.get_object(object_key=genres_key)
         if genres is None:
             genres = await self.db_client.get_objects_by_query(
@@ -45,7 +44,8 @@ class GenreService:
 
             if genres is None:
                 logger.warning(
-                    "Не найдено данных при запросе с параметрами: %s.", genres_key
+                    "Не найдено данных при запросе с параметрами: %s.",
+                    genres_key,
                 )
                 return None
             await self.redis.set_object(object_key=genres_key, value=genres)

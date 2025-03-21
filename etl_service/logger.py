@@ -20,15 +20,15 @@ def create_directory(path):
         os.makedirs(path)
 
 
-create_directory('./logs')
+create_directory("./logs")
 
 handlers = [
     RotatingFileHandler(
-        filename='./logs/log.txt',
-        mode='w',
+        filename="./logs/log.txt",
+        mode="w",
         maxBytes=512000,
         backupCount=4,
-        encoding='utf-8',
+        encoding="utf-8",
     ),
     logging.StreamHandler(stream=sys.stdout),
 ]
@@ -36,8 +36,8 @@ handlers = [
 logging.basicConfig(
     handlers=handlers,
     level=log_level,
-    format='%(asctime)s - %(levelname)s - %(name)s: %(message)s',
-    datefmt='%Y-%m-%dT%H:%M:%S%z',
+    format="%(asctime)s - %(levelname)s - %(name)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S%z",
 )
 
-logger = logging.getLogger('postgres_to_es')
+logger = logging.getLogger("postgres_to_es")

@@ -4,7 +4,6 @@ from fastapi import Depends
 from sqlalchemy import Result, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.db.postgres import get_session
 from src.domain.entities import User
 from src.domain.exceptions import UserIsExists
@@ -56,7 +55,11 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
         :return: обновленный объект модели или None, если запись не найдена.
         """
 
-        await self._session.execute(update(User).filter_by(id=user.id).values(**user.to_dict(self.exclude_fields)))
+        await self._session.execute(
+            update(User)
+            .filter_by(id=user.id)
+            .values(**user.to_dict(self.exclude_fields))
+        )
         await self._commit()
         return
 
