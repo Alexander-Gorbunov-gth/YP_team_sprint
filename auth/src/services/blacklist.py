@@ -35,14 +35,16 @@ class BlacklistService(AbstractBlacklistService):
         :param exp: Время жизни ключа (если не указано, ключ будет без срока действия).
         """
 
-        await self._repository.set_value(key=key, value=value, exp=exp)
+        await self._repository.set_value(key=str(key), value=str(value), exp=exp)
 
-    async def set_many_values(self, values: list[dict[str, str]], exp: timedelta | None = None):
+    async def set_many_values(self, values: dict[str, str], exp: timedelta | None = None):
         """
-        Добавляет несколько значений в хранилище.
+        Добавляет несколько значений в храниРепозиторий для управления данными слище.
         :param values: Словарь {ключ: значение}.
         :param exp: Время жизни ключей (если указано, будет установлено время истечения).
         """
+
+        values = {str(k): str(v) for k, v in values.items()}
         await self._repository.set_many_values(values=values, exp=exp)
 
 

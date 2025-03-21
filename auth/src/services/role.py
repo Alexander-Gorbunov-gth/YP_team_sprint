@@ -1,10 +1,9 @@
 import logging
 
 from fastapi import Depends
-from pydantic import BaseModel
 
+from src.api.v1.schemas.roles import AddOrDeleteRoleToUser, RoleCreateOrUpdate
 from src.domain.entities import Role
-from src.api.v1.schemas.roles import RoleCreateOrUpdate, AddOrDeleteRoleToUser
 from src.domain.exceptions import RoleNotFound, UserNotFound
 from src.domain.repositories import AbstractPermissionRepository, AbstractRoleRepository, AbstractUserRepository
 from src.infrastructure.repositories.permisson import get_permission_repository
@@ -80,7 +79,7 @@ class RoleService:
 
     async def delete_role_from_user(self, data: AddOrDeleteRoleToUser) -> bool:
         """Удаляет роль у пользователя"""
-        
+
         result = await self._role_repository.delete_role_to_user(data.user_id, data.role_slug)
         if result:
             logger.info(f"Роль {data.role_slug} удалена у пользователя {data.user_id}")

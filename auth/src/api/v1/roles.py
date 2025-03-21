@@ -36,16 +36,12 @@ async def delete_role(slug: str, role_service: RoleService = Depends(get_role_se
 
 
 @roles_router.post("/add-role-to-user/", response_model=bool)
-async def add_role_to_user(
-    data: roles.AddOrDeleteRoleToUser,
-    role_service: RoleService = Depends(get_role_service)
-):
+async def add_role_to_user(data: roles.AddOrDeleteRoleToUser, role_service: RoleService = Depends(get_role_service)):
     return await role_service.add_role_to_user(data=data)
 
 
 @roles_router.post("/delete-role-from-user/", response_model=bool)
 async def delete_role_from_user(
-    data: roles.AddOrDeleteRoleToUser,
-    role_service: RoleService = Depends(get_role_service)
+    data: roles.AddOrDeleteRoleToUser, role_service: RoleService = Depends(get_role_service)
 ):
     return await role_service.delete_role_from_user(data=data)

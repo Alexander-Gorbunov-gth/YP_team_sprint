@@ -4,12 +4,12 @@ from datetime import timedelta
 import pytest
 
 from services.blacklist import BlacklistService
-from tests.unit.repositories import FakeBlackListRepository
+from tests.unit.repositories import FakeBlacklistRepository
 
 
 @pytest.fixture
-def fake_repository() -> FakeBlackListRepository:
-    return FakeBlackListRepository()
+def fake_repository() -> FakeBlacklistRepository:
+    return FakeBlacklistRepository()
 
 
 @pytest.fixture

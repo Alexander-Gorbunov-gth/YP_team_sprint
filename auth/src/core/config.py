@@ -10,7 +10,6 @@ from src.core.logger import LOGGING
 logging_config.dictConfig(LOGGING)
 
 
-
 class ModelConfig(BaseSettings):
     """
     Базовый класс конфигурации для всех настроек.
@@ -44,6 +43,11 @@ class ServiceSettings(ModelConfig):
     debug: bool = Field(default=False, validation_alias="DEBAG")
     refresh_token_expire: int = Field(default=60, validation_alias="REFRESH_TOKEN_EXPIRE")
     access_token_expire: int = Field(default=30, validation_alias="ACCESS_TOKEN_EXPIRE")
+
+
+class JaegerSettings(ModelConfig):
+    host: str = Field(default="127.0.0.1", validation_alias="JAEGER_HOST")
+    port: int = Field(default=6831, validation_alias="JAEGER_PORT")
 
 
 class DBSettings(ModelConfig):
@@ -119,6 +123,7 @@ class Settings(BaseSettings):
     service: ServiceSettings = ServiceSettings()
     db: DBSettings = DBSettings()
     redis: RedisSettings = RedisSettings()
+    jaeger: JaegerSettings = JaegerSettings()
 
 
 settings: Settings = Settings()

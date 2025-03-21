@@ -1,7 +1,4 @@
-from typing import Annotated
-
-from fastapi import Form
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel
 
 
 class PermissionBase(BaseModel):
