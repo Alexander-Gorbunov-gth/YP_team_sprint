@@ -17,7 +17,7 @@ from src.db import postgres, redis
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     redis.redis = Redis(host=settings.redis.redis_host, port=settings.redis.redis_port)
-    postgres.engine = create_async_engine(settings.db.db_url, echo=True)
+    postgres.engine = create_async_engine(settings.db.db_url)
     postgres.async_session_maker = async_sessionmaker(bind=postgres.engine, expire_on_commit=False, class_=AsyncSession)
 
     yield

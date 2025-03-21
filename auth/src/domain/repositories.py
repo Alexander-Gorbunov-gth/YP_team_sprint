@@ -96,6 +96,9 @@ class AbstractRoleRepository(ABC):
     
     async def delete_role_to_user(self, user_id: UUID, role_slug: str) -> bool:
         raise NotImplementedError
+    
+    async def get_user_roles(self, user_id: str) -> list[Role]:
+        raise NotImplementedError
 
 
 class AbstractBlacklistRepository(ABC):

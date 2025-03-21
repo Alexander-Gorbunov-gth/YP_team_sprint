@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response, status
 
-from src.api.v1.dependencies import AuthDep, JWTDep, SessionDep, get_current_user, get_refresh_token, set_refresh_token
-from src.api.v1.schemas.auth_schemas import LoginForm, LoginResponse, RegisterForm, UserResponse
+from src.api.v1.dependencies import AuthDep, JWTDep, SessionDep, RoleServ, get_current_user, get_refresh_token, set_refresh_token
+from src.api.v1.schemas.auth_schemas import LoginForm, LoginResponse, RegisterForm, UserResponse, DjangoLoginResponse
 from src.domain.entities import User
 from src.domain.exceptions import PasswordsNotMatch
 from src.domain.factories.session import SessionFactory
@@ -69,3 +69,21 @@ async def refresh(
 async def logout_others(session_service: SessionDep, current_refresh_token: str = Depends(get_refresh_token)):
     deactivate_sessions = await session_service.deactivate_all_without_current(current_refresh_token)
     return
+
+
+@auth_router.post("/django-login/", response_model=DjangoLoginResponse, status_code=status.HTTP_200_OK)
+async def django_login(
+    request: Request,
+    response: Response,
+    login_form: LoginForm,
+    auth_service: AuthDep,
+    role_service: RoleServ,
+) -> LoginResponse:
+    user = await auth_service.login_user(email=login_form.email, password=login_form.password)
+    roles = await role_service.get_user_roles(user.id)
+    return DjangoLoginResponse(
+        id=user.id,
+        email=user.email,
+        roles=[role.slug for role in roles],
+        is_active=user.is_active,
+    )

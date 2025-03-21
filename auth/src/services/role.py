@@ -101,7 +101,14 @@ class RoleService:
             raise RoleNotFound(f"Роль '{role_slug}' не найдена")
 
         return role in user.roles
+    
+    async def get_user_roles(self, user_id: str) -> list[Role]:
+        """Возвращает список ролей пользователя"""
 
+        roles = await self._role_repository.get_user_roles(user_id)
+
+        logger.info(f"Найдено {len(roles)} ролей у пользователя {user_id}")
+        return roles
 
 def get_role_service(
     role_repository: AbstractRoleRepository = Depends(get_role_repository),
