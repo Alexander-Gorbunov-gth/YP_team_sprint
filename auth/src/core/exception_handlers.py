@@ -6,6 +6,10 @@ from fastapi import HTTPException, Request, Response
 
 from src.domain.exceptions import (
     Forbidden,
+    OAuthAccessTokenNotFound,
+    OAuthResponseDecodeError,
+    OAuthTokenExchangeError,
+    OAuthUserInfoError,
     PasswordsNotMatch,
     SessionHasExpired,
     UserIsExists,
@@ -53,6 +57,26 @@ wrong_email_or_password = create_exception_handler(
 
 wrong_old_password = create_exception_handler(status_code=HTTPStatus.BAD_REQUEST, detail="Неправильный текущий пароль")
 
+oauth_token_exchange_error_handler = create_exception_handler(
+    status_code=HTTPStatus.BAD_REQUEST,
+    detail="Ошибка при обмене кода на токен от Yandex.",
+)
+
+oauth_decode_error_handler = create_exception_handler(
+    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+    detail="Ошибка при декодировании ответа от Yandex.",
+)
+
+oauth_token_missing_handler = create_exception_handler(
+    status_code=HTTPStatus.BAD_REQUEST,
+    detail="Отсутствует access token в ответе от Yandex.",
+)
+
+oauth_user_info_error_handler = create_exception_handler(
+    status_code=HTTPStatus.BAD_GATEWAY,
+    detail="Ошибка при получении информации о пользователе от Yandex.",
+)
+
 
 exception_handlers: dict[type[Exception], Callable[[Request, Exception], Coroutine[Any, Any, Response]]] = {
     UserIsExists: user_exists_handler,
@@ -62,4 +86,8 @@ exception_handlers: dict[type[Exception], Callable[[Request, Exception], Corouti
     UserNotFound: user_not_found_handler,
     WrongEmailOrPassword: wrong_email_or_password,
     WrongOldPassword: wrong_old_password,
+    OAuthTokenExchangeError: oauth_token_exchange_error_handler,
+    OAuthResponseDecodeError: oauth_decode_error_handler,
+    OAuthAccessTokenNotFound: oauth_token_missing_handler,
+    OAuthUserInfoError: oauth_user_info_error_handler,
 }
