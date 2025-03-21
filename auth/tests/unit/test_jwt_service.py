@@ -3,7 +3,6 @@ from datetime import timedelta
 
 import jwt
 import pytest
-
 from src.domain.entities import User
 from src.services.jwt import JWTService
 
@@ -44,7 +43,9 @@ def test_generate_and_decode_refresh_token(jwt_service, user):
 
     assert token_obj.user_uuid == user.id
     assert isinstance(token_obj.scope, list)
-    assert token_obj.exp - token_obj.iat == pytest.approx(60 * 24 * 60 * 60, abs=1)
+    assert token_obj.exp - token_obj.iat == pytest.approx(
+        60 * 24 * 60 * 60, abs=1
+    )
 
 
 @pytest.mark.asyncio

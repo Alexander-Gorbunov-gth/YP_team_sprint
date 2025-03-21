@@ -1,33 +1,33 @@
 services:
-  # nginx:
-  #   build:
-  #     context: ./nginx
-  #     dockerfile: Dockerfile
-  #   container_name: nginx_movies
-  #   restart: always
-  #   volumes:
-  #     - static_volume:/code/static:ro
-  #   ports:
-  #     - "80:80"
-    # depends_on:
-    #   - admin
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx_movies
+    restart: always
+    volumes:
+      - static_volume:/code/static:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - admin
 
-  # admin:
-  #   build:
-  #     context: .
-  #     dockerfile: movies_admin/Dockerfile
-  #   container_name: admin_movies
-  #   restart: always
-  #   volumes:
-  #     - ./movies_admin:/code
-  #     - static_volume:/code/static
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - 8000:8000
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  admin:
+    build:
+      context: .
+      dockerfile: movies_admin/Dockerfile
+    container_name: admin_movies
+    restart: always
+    volumes:
+      - ./movies_admin:/code
+      - static_volume:/code/static
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   fast_api_auth:
     build: ./auth
@@ -48,9 +48,8 @@ services:
     ports:
       - 5432:5432
 
-  fast_api:
-    build: ./fast_api
-    container_name: fast_api_movies
+  content_service:
+    build: ./content_service
     env_file:
       - .env
     ports:

@@ -6,24 +6,35 @@ from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+    ConsoleSpanExporter,
+)
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from src.api.v1.auth import auth_router
 from src.api.v1.me import me_router
 from src.api.v1.permission import perm_router
 from src.api.v1.roles import roles_router
 from src.core.config import settings
 from src.core.exception_handlers import exception_handlers
+from src.core.middlewares import RateLimiterMiddleware
 from src.db import postgres, redis
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    redis.redis = Redis(host=settings.redis.redis_host, port=settings.redis.redis_port)
+    redis.redis = Redis(
+        host=settings.redis.redis_host, port=settings.redis.redis_port
+    )
     postgres.engine = create_async_engine(settings.db.db_url)
-    postgres.async_session_maker = async_sessionmaker(bind=postgres.engine, expire_on_commit=False, class_=AsyncSession)
+    postgres.async_session_maker = async_sessionmaker(
+        bind=postgres.engine, expire_on_commit=False, class_=AsyncSession
+    )
 
     yield
 
@@ -33,9 +44,16 @@ async def lifespan(_: FastAPI):
 def configure_tracer() -> None:
     trace.set_tracer_provider(TracerProvider())
     trace.get_tracer_provider().add_span_processor(
-        BatchSpanProcessor(JaegerExporter(agent_host_name=settings.jaeger.host, agent_port=settings.jaeger.port))
+        BatchSpanProcessor(
+            JaegerExporter(
+                agent_host_name=settings.jaeger.host,
+                agent_port=settings.jaeger.port,
+            )
+        )
     )
-    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+    trace.get_tracer_provider().add_span_processor(
+        BatchSpanProcessor(ConsoleSpanExporter())
+    )
 
 
 configure_tracer()
@@ -61,13 +79,22 @@ async def before_request(request: Request, call_next):
     return response
 
 
+app.add_middleware(
+    RateLimiterMiddleware,
+    limit=settings.service.rate_limit,
+    window=settings.service.rate_window,
+)
+
+
 FastAPIInstrumentor.instrument_app(app=app)
 
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(me_router, prefix="/api/v1/me", tags=["me"])
 app.include_router(roles_router, prefix="/api/v1/roles", tags=["roles"])
-app.include_router(perm_router, prefix="/api/v1/permissions", tags=["permissions"])
+app.include_router(
+    perm_router, prefix="/api/v1/permissions", tags=["permissions"]
+)
 
 if __name__ == "__main__":
     app()

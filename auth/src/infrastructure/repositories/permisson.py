@@ -5,7 +5,6 @@ from sqlalchemy import delete, insert, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.db.postgres import get_session
 from src.domain.entities import Permission
 from src.domain.exceptions import PermissionIsExists
@@ -20,7 +19,9 @@ class SQLAlchemyPermissionRepository(AbstractPermissionRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create_permission(self, slug: str, description: str | None) -> Permission:
+    async def create_permission(
+        self, slug: str, description: str | None
+    ) -> Permission:
         """Создаёт новое разрешение"""
         insert_data = {"slug": slug, "description": description}
         query = insert(Permission).values(insert_data).returning(Permission)
@@ -44,7 +45,9 @@ class SQLAlchemyPermissionRepository(AbstractPermissionRepository):
         result: Result = await self._session.execute(query)
         return result.scalars().all()
 
-    async def update_permission(self, permission: Permission) -> Permission | None:
+    async def update_permission(
+        self, permission: Permission
+    ) -> Permission | None:
         """Обновляет данные разрешения"""
         result: Result = await self._session.execute(
             update(Permission)
