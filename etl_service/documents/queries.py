@@ -1,6 +1,7 @@
-from .movie import Movie
-from .genre import Genre
 from documents.person import Person
+
+from .genre import Genre
+from .movie import Movie
 
 queries = {
     Movie: """
@@ -86,5 +87,5 @@ queries = {
             cross join lateral (values (pwf.created), (p.modified)) v(last_change_date)
             GROUP BY p.id
             having max(v.last_change_date) > %s
-        """
+        """,
 }

@@ -3,7 +3,6 @@ import uuid
 from datetime import datetime, timedelta
 
 import jwt
-
 from src.core.config import settings
 from src.domain.entities import Token, User
 from src.domain.exceptions import SessionHasExpired
@@ -50,9 +49,13 @@ class JWTService(AbstractJWTService):
             "iat": now.timestamp(),
             "exp": (now + token_lifetime).timestamp(),
             "jti": self._jti,
-            "scope": [perm.slug for role in user.roles for perm in role.permissions],
+            "scope": [
+                perm.slug for role in user.roles for perm in role.permissions
+            ],
         }
-        return jwt.encode(payload=payload, key=self._secret_key, algorithm=self._algorithm)
+        return jwt.encode(
+            payload=payload, key=self._secret_key, algorithm=self._algorithm
+        )
 
     def generate_access_token(self, user: User) -> str:
         """
@@ -62,7 +65,9 @@ class JWTService(AbstractJWTService):
         :return: Сгенерированный access JWT токен в виде строки.
         """
 
-        return self._generate_token(user=user, token_lifetime=self._access_token_lifetime)
+        return self._generate_token(
+            user=user, token_lifetime=self._access_token_lifetime
+        )
 
     def generate_refresh_token(self, user: User) -> str:
         """
@@ -72,7 +77,9 @@ class JWTService(AbstractJWTService):
         :return: Сгенерированный refresh JWT токен в виде строки.
         """
 
-        return self._generate_token(user=user, token_lifetime=self._refresh_token_lifetime)
+        return self._generate_token(
+            user=user, token_lifetime=self._refresh_token_lifetime
+        )
 
     def decode_token(self, jwt_token: str) -> Token:
         """
@@ -84,7 +91,11 @@ class JWTService(AbstractJWTService):
         """
 
         try:
-            payload = jwt.decode(jwt=jwt_token, key=self._secret_key, algorithms=[self._algorithm])
+            payload = jwt.decode(
+                jwt=jwt_token,
+                key=self._secret_key,
+                algorithms=[self._algorithm],
+            )
             token = Token(**payload)
         except jwt.ExpiredSignatureError:
             logger.error("Токен %s просрочен.", jwt_token)

@@ -1,10 +1,18 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, String, Table, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Table,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import registry, relationship
-
 from src.domain.entities import Permission, Role, Session, User
 
 mapper_registry = registry()
@@ -113,14 +121,26 @@ mapper_registry.map_imperatively(Session, sessions_table)
 mapper_registry.map_imperatively(
     User,
     users_table,
-    properties={"roles": relationship("Role", secondary=user_roles_table, back_populates="users", lazy="joined")},
+    properties={
+        "roles": relationship(
+            "Role",
+            secondary=user_roles_table,
+            back_populates="users",
+            lazy="joined",
+        )
+    },
 )
 
 mapper_registry.map_imperatively(
     Permission,
     permissions_table,
     properties={
-        "roles": relationship("Role", secondary=role_permissions_table, back_populates="permissions", lazy="selectin")
+        "roles": relationship(
+            "Role",
+            secondary=role_permissions_table,
+            back_populates="permissions",
+            lazy="selectin",
+        )
     },
 )
 
@@ -129,8 +149,16 @@ mapper_registry.map_imperatively(
     role_table,
     properties={
         "permissions": relationship(
-            "Permission", secondary=role_permissions_table, back_populates="roles", lazy="selectin"
+            "Permission",
+            secondary=role_permissions_table,
+            back_populates="roles",
+            lazy="selectin",
         ),
-        "users": relationship("User", secondary=user_roles_table, back_populates="roles", lazy="selectin"),
+        "users": relationship(
+            "User",
+            secondary=user_roles_table,
+            back_populates="roles",
+            lazy="selectin",
+        ),
     },
 )

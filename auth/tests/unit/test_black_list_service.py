@@ -2,8 +2,8 @@ import asyncio
 from datetime import timedelta
 
 import pytest
-
 from services.blacklist import BlacklistService
+
 from tests.unit.repositories import FakeBlacklistRepository
 
 

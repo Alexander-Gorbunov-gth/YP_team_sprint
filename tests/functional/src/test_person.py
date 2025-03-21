@@ -1,16 +1,16 @@
-import pytest
-import aiohttp
 from http import HTTPStatus
+
+import aiohttp
+import pytest
 
 from tests.functional.settings import test_settings
 
-from ..fixtures.es_data import PERSON_UUID, PERSON_NAME
+from ..fixtures.es_data import PERSON_NAME, PERSON_UUID
 
 
 @pytest.mark.asyncio
 async def test_get_person_list(
-    add_persons,
-    http_client: aiohttp.ClientSession
+    add_persons, http_client: aiohttp.ClientSession
 ):
     async with http_client.get(
         f"{test_settings.service_url}/api/v1/persons/"
@@ -20,7 +20,7 @@ async def test_get_person_list(
 
 @pytest.mark.asyncio
 async def test_get_person(add_person, http_client):
-    url = test_settings.service_url + '/api/v1/persons/' + PERSON_UUID
+    url = test_settings.service_url + "/api/v1/persons/" + PERSON_UUID
     async with http_client.get(url) as response:
         assert response.status == HTTPStatus.OK
         result = await response.json()
