@@ -2,7 +2,7 @@ import http
 from logging import getLogger
 from typing import Annotated, Optional
 
-from fastapi import Depends, HTTPException, Request, Response, Security
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt
 from src.core.config import settings

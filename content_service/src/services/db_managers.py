@@ -175,5 +175,5 @@ class ElasticManager(DBManager):
                 search = search.sort({field: {"order": order}})
                 logger.debug("Добавлена сортировка: %s (%s).", field, order)
 
-        search = search[(page - 1) * page_size : page * page_size]
+        search = search[(page - 1) * page_size: page * page_size]
         return search

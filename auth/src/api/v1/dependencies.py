@@ -7,7 +7,6 @@ from src.core.config import settings
 from src.domain.entities import Token, User
 from src.domain.exceptions import (
     Forbidden,
-    NotAuthorized,
     SessionHasExpired,
     UserNotFound,
 )
