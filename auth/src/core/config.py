@@ -10,7 +10,6 @@ from src.core.logger import LOGGING
 logging_config.dictConfig(LOGGING)
 
 
-
 class ModelConfig(BaseSettings):
     """
     Базовый класс конфигурации для всех настроек.
