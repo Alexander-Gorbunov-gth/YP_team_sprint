@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import ORJSONResponse
+from httpx import AsyncClient
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -11,6 +12,7 @@ from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
 )
 from redis.asyncio import Redis
+from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -18,8 +20,10 @@ from sqlalchemy.ext.asyncio import (
 )
 from src.api.v1.auth import auth_router
 from src.api.v1.me import me_router
+from src.api.v1.oauth import oauth_router
 from src.api.v1.permission import perm_router
 from src.api.v1.roles import roles_router
+from src.core import http_client
 from src.core.config import settings
 from src.core.exception_handlers import exception_handlers
 from src.core.middlewares import RateLimiterMiddleware
@@ -28,6 +32,7 @@ from src.db import postgres, redis
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    http_client.http_client = AsyncClient()
     redis.redis = Redis(
         host=settings.redis.redis_host, port=settings.redis.redis_port
     )
@@ -38,6 +43,7 @@ async def lifespan(_: FastAPI):
 
     yield
 
+    await http_client.http_client.close()
     await redis.redis.close()
 
 
@@ -66,6 +72,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(SessionMiddleware, secret_key=settings.oauth.secret_key)
+
 
 @app.middleware("http")
 async def before_request(request: Request, call_next):
@@ -92,6 +100,7 @@ FastAPIInstrumentor.instrument_app(app=app)
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(me_router, prefix="/api/v1/me", tags=["me"])
 app.include_router(roles_router, prefix="/api/v1/roles", tags=["roles"])
+app.include_router(oauth_router, prefix="/api/v1/oauth", tags=["oauth"])
 app.include_router(
     perm_router, prefix="/api/v1/permissions", tags=["permissions"]
 )

@@ -1,3 +1,4 @@
+import logging
 from logging import config as logging_config
 from pathlib import Path
 
@@ -5,7 +6,7 @@ from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from src.core.logger import LOGGING
 
-logging_config.dictConfig(LOGGING)
+logging.config.dictConfig(LOGGING)
 
 
 class ModelConfig(BaseSettings):
@@ -116,6 +117,15 @@ class RedisSettings(ModelConfig):
         return f"redis://{self.redis_host}:{self.redis_port}"
 
 
+class OAuthSettings(ModelConfig):
+    """Настройки для OAuth аутентификации"""
+
+    secret_key: str = Field(..., validation_alias="OAUTH_SECRET_KEY")
+    yandex_client_id: str = Field(..., validation_alias="YANDEX_CLIENT_ID")
+    yandex_client_secret: str = Field(..., validation_alias="YANDEX_CLIENT_SECRET")
+    yandex_callback_url: str = Field(..., validation_alias="YANDEX_CALLBACK_URL")
+
+
 class Settings(BaseSettings):
     """
     Основные настройки приложения.
@@ -130,6 +140,7 @@ class Settings(BaseSettings):
     db: DBSettings = DBSettings()
     redis: RedisSettings = RedisSettings()
     jaeger: JaegerSettings = JaegerSettings()
+    oauth: OAuthSettings = OAuthSettings()
 
 
 settings: Settings = Settings()
