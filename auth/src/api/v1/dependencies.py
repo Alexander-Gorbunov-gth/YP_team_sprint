@@ -11,6 +11,7 @@ from src.domain.interfaces import (
     AbstractAuthService,
     AbstractBlacklistService,
     AbstractJWTService,
+    AbstractOAuthService,
     AbstractSessionService,
     AbstractUserService,
 )
@@ -19,6 +20,7 @@ from src.infrastructure.repositories.user import get_user_repository
 from src.services.auth import get_auth_service
 from src.services.blacklist import get_blacklist_service
 from src.services.jwt import get_jwt_service
+from src.services.oauth import get_yandex_oauth_service
 from src.services.sessions import get_session_service
 from src.services.user import get_user_service
 
@@ -27,6 +29,7 @@ AuthDep = Annotated[AbstractAuthService, Depends(get_auth_service)]
 JWTDep = Annotated[AbstractJWTService, Depends(get_jwt_service)]
 BlacklistDep = Annotated[AbstractBlacklistService, Depends(get_blacklist_service)]
 UserServiceDep = Annotated[AbstractUserService, Depends(get_user_service)]
+YandexOAuthDep = Annotated[AbstractOAuthService, Depends(get_yandex_oauth_service)]
 
 UserRepoDep = Annotated[AbstractUserRepository, Depends(get_user_repository)]
 
