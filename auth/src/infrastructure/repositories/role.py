@@ -113,6 +113,21 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
         await self._session.execute(query)
         await self._session.commit()
         return True
+    
+    async def get_user_roles(self, user_id: str) -> list[Role]:
+        """Возвращает список ролей пользователя"""
+
+        query = (
+            select(Role)
+            .join(user_roles_table, Role.slug == user_roles_table.c.role_slug)
+            .where(user_roles_table.c.user_id == user_id)
+        )
+
+        result: Result = await self._session.execute(query)
+        roles = result.scalars().all()
+
+        logger.info(f"Найдено {len(roles)} ролей у пользователя {user_id}")
+        return roles
 
     async def _commit(self) -> None:
         """Фиксирует изменения в БД"""

@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     redis_port: int = Field(6379, validation_alias='REDIS_PORT')
     redis_password: SecretStr | None = Field(None, validation_alias='REDIS_PASSWORD')
 
+    jwt_secret_key: str = Field('secret', validation_alias='SECRET_KEY')
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / '.env',
         env_file_encoding='utf-8',

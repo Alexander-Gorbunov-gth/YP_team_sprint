@@ -6,7 +6,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.core.config import settings
 from src.domain.entities import Token, User
-from src.domain.exceptions import Forbidden, SessionHasExpired, UserNotFound
+
+from src.domain.exceptions import Forbidden, SessionHasExpired, UserNotFound, NotAuthorized
 from src.domain.interfaces import (
     AbstractAuthService,
     AbstractBlacklistService,
@@ -14,12 +15,13 @@ from src.domain.interfaces import (
     AbstractSessionService,
     AbstractUserService,
 )
-from src.domain.repositories import AbstractUserRepository
+from src.domain.repositories import AbstractUserRepository, AbstractRoleRepository
 from src.infrastructure.repositories.user import get_user_repository
 from src.services.auth import get_auth_service
 from src.services.blacklist import get_blacklist_service
 from src.services.jwt import get_jwt_service
 from src.services.sessions import get_session_service
+from src.services.role import get_role_service
 from src.services.user import get_user_service
 
 SessionDep = Annotated[AbstractSessionService, Depends(get_session_service)]
@@ -29,6 +31,7 @@ BlacklistDep = Annotated[AbstractBlacklistService, Depends(get_blacklist_service
 UserServiceDep = Annotated[AbstractUserService, Depends(get_user_service)]
 
 UserRepoDep = Annotated[AbstractUserRepository, Depends(get_user_repository)]
+RoleServ = Annotated[AbstractRoleRepository, Depends(get_role_service)]
 
 security = HTTPBearer()
 

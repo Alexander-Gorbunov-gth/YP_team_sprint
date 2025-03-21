@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Form
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from uuid import UUID
 
 
 class RegisterForm(BaseModel):
@@ -26,3 +27,10 @@ class LoginResponse(BaseModel):
     refresh_token: str
     access_token: str
     token_type: str = Field(default="jwt")
+
+
+class DjangoLoginResponse(BaseModel):
+    id: UUID
+    email: str
+    roles: list[str]
+    is_active: bool

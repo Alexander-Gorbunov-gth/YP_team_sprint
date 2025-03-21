@@ -20,14 +20,16 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
 DEBUG = os.getenv('DEBUG', False) == 'True'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split()
+AUTH_API_LOGIN_URL = os.getenv('AUTH_API_LOGIN_URL', 'http://localhost:8000/api/v1/login/')
 INTERNAL_IPS = ['127.0.0.1']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
+    'users.apps.UsersConfig',
+    'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -127,23 +129,55 @@ CACHES = {
 }
 
 LOGGING = {
-    'version': 1,
-    'filters': {
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        }
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
     },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-        }
+    "handlers": {
+        "file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "logs/warnings.log",
+            "formatter": "verbose",
+        },
+        "debug_file": {  # Новый обработчик для записи всех логов
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "logs/all_logs.log",  # Имя файла для записи всех логов
+            "formatter": "verbose",
+            "maxBytes": 5 * 1024 * 1024,  # Максимальный размер файла (5 МБ)
+            "backupCount": 5,  # Количество резервных файлов
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
     },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-        }
+    "loggers": {
+        "": {  # Корневой логгер
+            "handlers": [
+                "console",
+                "debug_file",
+            ],  # Добавьте новый обработчик здесь
+            "level": "DEBUG",  # Установите уровень логирования
+            "propagate": True,
+        },
     },
 }
+
+
+AUTHENTICATION_BACKENDS = [
+    'users.auth.CustomBackend',
+    # 'django.contrib.auth.backends.ModelBackend', 
+]
+
+AUTH_USER_MODEL = "users.User"
