@@ -73,3 +73,13 @@ class AbstractUserService(ABC):
     @abstractmethod
     async def get_current_user_profile(self, user_id: UUID | str) -> User:
         raise NotImplementedError
+
+
+class AbstractOAuthService(ABC):
+    @abstractmethod
+    async def get_oauth_url(self) -> str:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_user_info(self, code: str) -> str:
+        raise NotImplementedError
