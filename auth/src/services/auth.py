@@ -2,6 +2,7 @@ import logging
 
 from fastapi import Depends
 from passlib.context import CryptContext
+
 from src.domain.entities import User
 from src.domain.exceptions import WrongEmailOrPassword, WrongOldPassword
 from src.domain.repositories import AbstractUserRepository
@@ -25,9 +26,7 @@ class AuthService:
         """
 
         hashed_password = self._get_password_hash(password)
-        new_user = await self._user_repository.create(
-            email=email, password=hashed_password
-        )
+        new_user = await self._user_repository.create(email=email, password=hashed_password)
         return new_user
 
     async def login_user(self, email: str, password: str) -> User | None:
@@ -46,9 +45,7 @@ class AuthService:
             raise WrongEmailOrPassword
         return user
 
-    async def change_password(
-        self, user_id: str, old_password: str, new_password: str
-    ) -> User:
+    async def change_password(self, user_id: str, old_password: str, new_password: str) -> User:
         """
         Изменяет пароль пользователя.
 

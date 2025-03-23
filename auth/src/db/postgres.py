@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
 )
 from sqlalchemy.orm import clear_mappers
+
 from src.infrastructure.models import mapper_registry
 
 engine: AsyncEngine | None = None

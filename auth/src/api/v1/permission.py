@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status
+
 from src.api.v1.schemas.permissions import PermissionCreate, PermissionResponse
 from src.services.permission import PermissionService, get_permission_service
 
@@ -28,9 +29,7 @@ async def get_permission(
     return await permission_service.get(slug=slug)
 
 
-@perm_router.post(
-    "/", response_model=PermissionResponse, status_code=status.HTTP_201_CREATED
-)
+@perm_router.post("/", response_model=PermissionResponse, status_code=status.HTTP_201_CREATED)
 async def create_permission(
     data: PermissionCreate,
     permission_service: PermissionService = Depends(get_permission_service),

@@ -15,11 +15,7 @@ class BaseEntity:
         """
 
         exclude = set(exclude) if exclude else set()
-        return {
-            key: value
-            for key, value in asdict(self).items()
-            if key not in exclude
-        }
+        return {key: value for key, value in asdict(self).items() if key not in exclude}
 
 
 @dataclass
@@ -66,5 +62,15 @@ class Session(BaseEntity):
     user_ip: str | None
     is_active: bool
     device_type: str = "other"
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class SocialAccount(BaseEntity):
+    id: UUID | None
+    client_id: str
+    user_id: UUID | str
+    social_name: str
     created_at: datetime | None = None
     updated_at: datetime | None = None

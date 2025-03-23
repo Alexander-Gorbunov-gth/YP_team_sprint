@@ -3,6 +3,7 @@ from http import HTTPStatus
 from typing import Any, NoReturn
 
 from fastapi import HTTPException, Request, Response
+
 from src.domain.exceptions import (
     Forbidden,
     OAuthAccessTokenNotFound,
@@ -40,29 +41,21 @@ user_exists_handler = create_exception_handler(
     detail="Пользователь с таким email уже существует.",
 )
 
-passwords_not_match_handler = create_exception_handler(
-    status_code=HTTPStatus.BAD_REQUEST, detail="Пароли не совпадают"
-)
+passwords_not_match_handler = create_exception_handler(status_code=HTTPStatus.BAD_REQUEST, detail="Пароли не совпадают")
 
-forbidden_handler = create_exception_handler(
-    status_code=HTTPStatus.FORBIDDEN, detail="Доступ запрещен."
-)
+forbidden_handler = create_exception_handler(status_code=HTTPStatus.FORBIDDEN, detail="Доступ запрещен.")
 
 not_authorized_handler = create_exception_handler(
     status_code=HTTPStatus.UNAUTHORIZED, detail="Время жизни сессии истекло."
 )
 
-user_not_found_handler = create_exception_handler(
-    status_code=HTTPStatus.NOT_FOUND, detail="Пользователь не найден"
-)
+user_not_found_handler = create_exception_handler(status_code=HTTPStatus.NOT_FOUND, detail="Пользователь не найден")
 
 wrong_email_or_password = create_exception_handler(
     status_code=HTTPStatus.UNAUTHORIZED, detail="Неверный email или пароль"
 )
 
-wrong_old_password = create_exception_handler(
-    status_code=HTTPStatus.BAD_REQUEST, detail="Неправильный текущий пароль"
-)
+wrong_old_password = create_exception_handler(status_code=HTTPStatus.BAD_REQUEST, detail="Неправильный текущий пароль")
 
 oauth_token_exchange_error_handler = create_exception_handler(
     status_code=HTTPStatus.BAD_REQUEST,

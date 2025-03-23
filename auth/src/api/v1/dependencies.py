@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends, Request, Response, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from src.core.config import settings
 from src.domain.entities import Token, User
 from src.domain.exceptions import (
@@ -34,9 +35,7 @@ from src.services.user import get_user_service
 SessionDep = Annotated[AbstractSessionService, Depends(get_session_service)]
 AuthDep = Annotated[AbstractAuthService, Depends(get_auth_service)]
 JWTDep = Annotated[AbstractJWTService, Depends(get_jwt_service)]
-BlacklistDep = Annotated[
-    AbstractBlacklistService, Depends(get_blacklist_service)
-]
+BlacklistDep = Annotated[AbstractBlacklistService, Depends(get_blacklist_service)]
 UserServiceDep = Annotated[AbstractUserService, Depends(get_user_service)]
 YandexOAuthDep = Annotated[AbstractOAuthService, Depends(get_yandex_oauth_service)]
 
@@ -151,9 +150,7 @@ def require_permissions(required_permissions: list[str] | None = None):
         if await blacklist_service.is_exists(payload.jti):
             raise SessionHasExpired
 
-        if required_permissions and not set(required_permissions).issubset(
-            set(payload.scope)
-        ):
+        if required_permissions and not set(required_permissions).issubset(set(payload.scope)):
             raise Forbidden
 
         request.state.user = payload.user_uuid

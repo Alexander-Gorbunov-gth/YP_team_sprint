@@ -9,6 +9,7 @@ Create Date: 2025-03-14 18:11:48.094529
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "036d93d8f77d"
@@ -37,9 +38,7 @@ def upgrade():
 
     for slug, desc in permissions:
         conn.execute(
-            sa.text(
-                "INSERT INTO permissions (slug, description) VALUES (:slug, :desc) ON CONFLICT (slug) DO NOTHING"
-            ),
+            sa.text("INSERT INTO permissions (slug, description) VALUES (:slug, :desc) ON CONFLICT (slug) DO NOTHING"),
             {"slug": slug, "desc": desc},
         )
 
@@ -99,16 +98,8 @@ def upgrade():
 def downgrade():
     conn = op.get_bind()
 
-    conn.execute(
-        sa.text(
-            "DELETE FROM role_permissions WHERE role_slug IN ('admin', 'moderator', 'viewer', 'user')"
-        )
-    )
+    conn.execute(sa.text("DELETE FROM role_permissions WHERE role_slug IN ('admin', 'moderator', 'viewer', 'user')"))
 
-    conn.execute(
-        sa.text(
-            "DELETE FROM roles WHERE slug IN ('admin', 'moderator', 'viewer', 'user')"
-        )
-    )
+    conn.execute(sa.text("DELETE FROM roles WHERE slug IN ('admin', 'moderator', 'viewer', 'user')"))
 
     conn.execute(sa.text("DELETE FROM permissions WHERE slug LIKE 'can_%'"))

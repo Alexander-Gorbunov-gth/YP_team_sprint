@@ -1,12 +1,16 @@
 import logging
+import string
 from json import JSONDecodeError
+from secrets import choice as secrets_choice
 from urllib.parse import urlencode
 
 from fastapi import Depends
 from httpx import AsyncClient
+from passlib.context import CryptContext
 
 from src.core.config import settings
 from src.core.http_client import get_http_client
+from src.domain.entities import SocialAccount, User
 from src.domain.exceptions import (
     OAuthAccessTokenNotFound,
     OAuthResponseDecodeError,
@@ -14,8 +18,12 @@ from src.domain.exceptions import (
     OAuthUserInfoError,
 )
 from src.domain.interfaces import AbstractOAuthService
+from src.infrastructure.repositories.user import get_user_repository
+from src.infrastructure.repositories.social_account import get_social_account_repository
+from src.domain.repositories import AbstractSocialAccountRepository, AbstractUserRepository
 
 logger = logging.getLogger(__name__)
+
 
 
 class YandexOAuthService(AbstractOAuthService):
@@ -23,9 +31,18 @@ class YandexOAuthService(AbstractOAuthService):
     YANDEX_OAUTH_TOKEN_URL = "https://oauth.yandex.ru/token"
     YANDEX_USER_INFO_URL = "https://login.yandex.ru/info"
     SCOPE = "login:email login:info"
+    SOCIAL_NAME = "yandex"
 
-    def __init__(self, http_client: AsyncClient):
+    def __init__(
+        self,
+        http_client: AsyncClient,
+        social_repository: AbstractSocialAccountRepository,
+        user_repository: AbstractUserRepository,
+    ):
         self._client = http_client
+        self._social_repository: AbstractSocialAccountRepository = social_repository
+        self._user_repository: AbstractUserRepository = user_repository
+        self._context: CryptContext = CryptContext(schemes=["bcrypt"])
 
     async def get_oauth_url(self) -> str:
         """
@@ -77,7 +94,7 @@ class YandexOAuthService(AbstractOAuthService):
         logger.info("Успешно получен access_token")
         return access_token
 
-    async def get_user_info(self, code: str) -> dict[str, str]:
+    async def _get_user_info(self, code: str) -> dict[str, str]:
         """
         Получает информацию о пользователе от Яндекса используя access_token.
         :param code: Код авторизации от Яндекса
@@ -103,6 +120,64 @@ class YandexOAuthService(AbstractOAuthService):
         logger.info("Успешно получены данные пользователя от Яндекса")
         return user_info
 
+    async def create_user_by_social_account(self, code: str) -> User:
+        """Создание или получение пользователя и привязка соц. аккаунта."""
+        client_id, user_email = await self._validate_user_info(code=code)
+        user, created = await self._get_or_create_user(email=user_email)
+        if not created:
+            social_account = SocialAccount(
+                id=None,
+                client_id=client_id,
+                user_id=user.id,
+                social_name=self.SOCIAL_NAME,
+            )
+            await self._social_repository.save_social_account(social_account=social_account)
+        return user
 
-def get_yandex_oauth_service(http_client: AsyncClient = Depends(get_http_client)) -> AbstractOAuthService:
-    return YandexOAuthService(http_client=http_client)
+    async def _get_or_create_user(self, email: str) -> tuple[str, bool]:
+        """
+        Получить пользователя из БД или создать нового.
+        Возвращает кортеж (пользователь, был_ли_создан).
+        """
+        hashed_password = self._get_password_hash()
+        created = False
+        user = await self._user_repository.get_by_email(email=email)
+        if user is None:
+            logger.info("Пользователь с email '%s' уже существует", email)
+            user = await self._user_repository.create(email=email, password=hashed_password)
+            created = True
+        return user, created
+
+    async def _validate_user_info(self, code: str) -> tuple[str, str]:
+        """Извлекает client_id и email из user_info."""
+        user_info = await self._get_user_info(code=code)
+        user_email = user_info.get("default_email")
+        if user_email is None:
+            logger.error("Email пользователя не найден, code=%s", code)
+            raise OAuthResponseDecodeError
+        client_id = user_info.get("client_id")
+        if client_id is None:
+            logger.error("client_id не найден, code=%s", code)
+            raise OAuthResponseDecodeError
+        return client_id, user_email
+
+    def _get_password_hash(self) -> str:
+        """
+        Генерирует пароль и его хэш с использованием bcrypt.
+        :return: Захешированный пароль.
+        """
+        alphabet = string.ascii_letters + string.digits
+        random_password = ''.join(secrets_choice(alphabet) for _ in range(16)) 
+        return self._context.hash(random_password)
+
+
+def get_yandex_oauth_service(
+    http_client: AsyncClient = Depends(get_http_client),
+    social_repository: AbstractSocialAccountRepository = Depends(get_social_account_repository),
+    user_repository: AbstractUserRepository = Depends(get_user_repository),
+) -> AbstractOAuthService:
+    return YandexOAuthService(
+        http_client=http_client,
+        social_repository=social_repository,
+        user_repository=user_repository,
+    )

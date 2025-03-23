@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from src.api.v1.schemas import roles
 from src.services.role import RoleService, get_role_service
 
@@ -11,9 +12,7 @@ async def get_all_roles(role_service: RoleService = Depends(get_role_service)):
 
 
 @roles_router.get("/{slug}/", response_model=roles.RoleResponse)
-async def get_role(
-    slug: str, role_service: RoleService = Depends(get_role_service)
-):
+async def get_role(slug: str, role_service: RoleService = Depends(get_role_service)):
     return await role_service.get(slug=slug)
 
 
@@ -35,9 +34,7 @@ async def change_role(
 
 
 @roles_router.delete("/{slug}/", response_model=bool)
-async def delete_role(
-    slug: str, role_service: RoleService = Depends(get_role_service)
-):
+async def delete_role(slug: str, role_service: RoleService = Depends(get_role_service)):
     return await role_service.delete(slug=slug)
 
 
