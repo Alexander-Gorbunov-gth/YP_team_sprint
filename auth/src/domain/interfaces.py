@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from uuid import UUID
 
-from src.domain.entities import Session, Token, User
+from src.domain.entities import Session, SocialAccount, Token, User
 
 
 class AbstractJWTService(ABC):
@@ -81,5 +81,5 @@ class AbstractOAuthService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_user_info(self, code: str) -> str:
+    async def create_user_by_social_account(self, code: str) -> User:
         raise NotImplementedError
