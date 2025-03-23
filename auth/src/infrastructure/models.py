@@ -21,13 +21,7 @@ mapper_registry = registry()
 def timestamp_columns():
     return [
         Column("created_at", DateTime, nullable=False, default=datetime.now()),
-        Column(
-            "updated_at",
-            DateTime,
-            nullable=False,
-            default=datetime.now(),
-            onupdate=datetime.now(),
-        ),
+        Column("updated_at", DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now()),
     ]
 
 
@@ -45,12 +39,7 @@ sessions_table = Table(
     "sessions",
     mapper_registry.metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-    Column(
-        "user_id",
-        UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-    ),
+    Column("user_id", UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
     Column("user_agent", String(255), nullable=False),
     Column("jti", UUID(as_uuid=True), nullable=False, unique=True),
     Column("refresh_token", String(1055), nullable=False, unique=True),
@@ -80,39 +69,30 @@ role_table = Table(
     Column("description", String(255), nullable=True),
 )
 
+social_account_table = Table(
+    "social_account",
+    mapper_registry.metadata,
+    Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
+    Column("user_id", UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("client_id", String(255), nullable=True),
+    Column("social_name", String(55), nullable=True),
+    *timestamp_columns(),
+    UniqueConstraint("client_id", "social_name", name="uq_social_client"),
+)
+
 
 role_permissions_table = Table(
     "role_permissions",
     mapper_registry.metadata,
-    Column(
-        "role_slug",
-        String(255),
-        ForeignKey("roles.slug", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    Column(
-        "permission_slug",
-        String(255),
-        ForeignKey("permissions.slug", ondelete="CASCADE"),
-        primary_key=True,
-    ),
+    Column("role_slug", String(255), ForeignKey("roles.slug", ondelete="CASCADE"), primary_key=True),
+    Column("permission_slug", String(255), ForeignKey("permissions.slug", ondelete="CASCADE"), primary_key=True),
 )
 
 user_roles_table = Table(
     "user_roles",
     mapper_registry.metadata,
-    Column(
-        "role_slug",
-        String(255),
-        ForeignKey("roles.slug", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    Column(
-        "user_id",
-        UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
+    Column("role_slug", String(255), ForeignKey("roles.slug", ondelete="CASCADE"), primary_key=True),
+    Column("user_id", UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
@@ -135,12 +115,7 @@ mapper_registry.map_imperatively(
     Permission,
     permissions_table,
     properties={
-        "roles": relationship(
-            "Role",
-            secondary=role_permissions_table,
-            back_populates="permissions",
-            lazy="selectin",
-        )
+        "roles": relationship("Role", secondary=role_permissions_table, back_populates="permissions", lazy="selectin")
     },
 )
 
