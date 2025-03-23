@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from httpx import AsyncClient
 from opentelemetry import trace
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -43,7 +44,9 @@ async def lifespan(_: FastAPI):
 
 
 def configure_tracer() -> None:
-    trace.set_tracer_provider(TracerProvider())
+    resource = Resource(attributes={SERVICE_NAME: 'auth-service'})
+    provider = TracerProvider(resource=resource)
+    trace.set_tracer_provider(provider)
     trace.get_tracer_provider().add_span_processor(
         BatchSpanProcessor(
             JaegerExporter(
