@@ -16,7 +16,6 @@ from src.domain.exceptions import (
     OAuthResponseDecodeError,
     OAuthTokenExchangeError,
     OAuthUserInfoError,
-    UserIsExists,
 )
 from src.domain.interfaces import AbstractOAuthService
 from src.infrastructure.repositories.user import get_user_repository
