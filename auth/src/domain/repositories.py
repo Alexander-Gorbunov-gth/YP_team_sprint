@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from uuid import UUID
 
-from src.domain.entities import Permission, Role, Session, User
+from src.domain.entities import Permission, Role, Session, SocialAccount, User
 
 
 class AbstractUserRepository(ABC):
@@ -113,4 +113,14 @@ class AbstractBlacklistRepository(ABC):
 
     @abstractmethod
     def set_many_values(self, values: list[dict[str, str]], exp: timedelta) -> None:
+        raise NotImplementedError
+
+
+class AbstractSocialAccountRepository(ABC):
+    @abstractmethod
+    async def save_social_account(self, social_account: SocialAccount) -> SocialAccount:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_social_account_by_client_id(self, client_id: str) -> SocialAccount | None:
         raise NotImplementedError
