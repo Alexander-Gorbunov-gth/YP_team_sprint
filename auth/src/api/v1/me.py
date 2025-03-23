@@ -11,16 +11,12 @@ from src.domain.entities import Token
 me_router = APIRouter()
 
 
-@me_router.get(
-    "/", response_model=ProfileResponse, status_code=status.HTTP_200_OK
-)
+@me_router.get("/", response_model=ProfileResponse, status_code=status.HTTP_200_OK)
 async def my_profile(
     user_service: UserServiceDep,
     payload: Token = Depends(get_access_token_data),
 ):
-    user_data = await user_service.get_current_user_profile(
-        user_id=payload.user_uuid
-    )
+    user_data = await user_service.get_current_user_profile(user_id=payload.user_uuid)
     return user_data
 
 
@@ -33,9 +29,7 @@ async def my_sessions(
     session_service: SessionDep,
     payload: Token = Depends(get_access_token_data),
 ):
-    sessions = await session_service.get_current_user_sessions(
-        user_id=payload.user_uuid
-    )
+    sessions = await session_service.get_current_user_sessions(user_id=payload.user_uuid)
     return sessions
 
 

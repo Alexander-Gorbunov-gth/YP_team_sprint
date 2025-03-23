@@ -19,9 +19,7 @@ class RedisBlacklistRepository(AbstractBlacklistRepository):
         value = await self._redis.get(name=key)
         return value
 
-    async def set_value(
-        self, key: str, value: str, exp: timedelta | int | None = None
-    ) -> None:
+    async def set_value(self, key: str, value: str, exp: timedelta | int | None = None) -> None:
         """
         Устанавливает одиночное значение в Redis с возможным временем жизни.
         :param key: Ключ
@@ -31,15 +29,11 @@ class RedisBlacklistRepository(AbstractBlacklistRepository):
 
         if exp:
             exp = timedelta(minutes=exp)
-            await self._redis.set(
-                name=key, value=value, ex=int(exp.total_seconds())
-            )
+            await self._redis.set(name=key, value=value, ex=int(exp.total_seconds()))
         else:
             await self._redis.set(name=key, value=value)
 
-    async def set_many_values(
-        self, values: dict[str, str], exp: timedelta | None = None
-    ):
+    async def set_many_values(self, values: dict[str, str], exp: timedelta | None = None):
         """
         Устанавливает несколько значений в Redis.
         :param values: Словарь {ключ: значение}

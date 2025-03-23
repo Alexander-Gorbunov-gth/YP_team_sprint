@@ -37,9 +37,7 @@ def upgrade():
 
     for slug, desc in permissions:
         conn.execute(
-            sa.text(
-                "INSERT INTO permissions (slug, description) VALUES (:slug, :desc) ON CONFLICT (slug) DO NOTHING"
-            ),
+            sa.text("INSERT INTO permissions (slug, description) VALUES (:slug, :desc) ON CONFLICT (slug) DO NOTHING"),
             {"slug": slug, "desc": desc},
         )
 
@@ -99,16 +97,8 @@ def upgrade():
 def downgrade():
     conn = op.get_bind()
 
-    conn.execute(
-        sa.text(
-            "DELETE FROM role_permissions WHERE role_slug IN ('admin', 'moderator', 'viewer', 'user')"
-        )
-    )
+    conn.execute(sa.text("DELETE FROM role_permissions WHERE role_slug IN ('admin', 'moderator', 'viewer', 'user')"))
 
-    conn.execute(
-        sa.text(
-            "DELETE FROM roles WHERE slug IN ('admin', 'moderator', 'viewer', 'user')"
-        )
-    )
+    conn.execute(sa.text("DELETE FROM roles WHERE slug IN ('admin', 'moderator', 'viewer', 'user')"))
 
     conn.execute(sa.text("DELETE FROM permissions WHERE slug LIKE 'can_%'"))

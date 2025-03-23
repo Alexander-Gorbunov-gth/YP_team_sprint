@@ -55,30 +55,20 @@ async def test_create_new_session(session, session_service):
 @pytest.mark.asyncio
 async def test_deactivate_current_session(session_service, session):
     created_session = await session_service.create_new_session(session)
-    deactivate_session = await session_service.deactivate_current_session(
-        created_session.refresh_token
-    )
+    deactivate_session = await session_service.deactivate_current_session(created_session.refresh_token)
     assert created_session.jti == deactivate_session.jti
     assert created_session.refresh_token == deactivate_session.refresh_token
     assert not deactivate_session.is_active
 
 
 @pytest.mark.asyncio
-async def test_deactivate_all_without_current(
-    session, current_session, session_service
-):
+async def test_deactivate_all_without_current(session, current_session, session_service):
     created_session = await session_service.create_new_session(session=session)
     current_session.user_id = session.user_id
-    current_session = await session_service.create_new_session(
-        session=current_session
-    )
-    deactivate_sessions = await session_service.deactivate_all_without_current(
-        current_session.refresh_token
-    )
+    current_session = await session_service.create_new_session(session=current_session)
+    deactivate_sessions = await session_service.deactivate_all_without_current(current_session.refresh_token)
 
-    first_deactivated_session = (
-        deactivate_sessions[0] if deactivate_sessions else None
-    )
+    first_deactivated_session = deactivate_sessions[0] if deactivate_sessions else None
     assert first_deactivated_session is not None
     assert first_deactivated_session.jti == created_session.jti
     assert not first_deactivated_session.is_active

@@ -55,11 +55,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
         :return: обновленный объект модели или None, если запись не найдена.
         """
 
-        await self._session.execute(
-            update(User)
-            .filter_by(id=user.id)
-            .values(**user.to_dict(self.exclude_fields))
-        )
+        await self._session.execute(update(User).filter_by(id=user.id).values(**user.to_dict(self.exclude_fields)))
         await self._commit()
         return
 

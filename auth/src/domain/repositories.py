@@ -33,9 +33,7 @@ class AbstractSessionRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_sessions_by_user_id(
-        self, user_id: str | UUID
-    ) -> list[Session]:
+    async def get_sessions_by_user_id(self, user_id: str | UUID) -> list[Session]:
         raise NotImplementedError
 
     @abstractmethod
@@ -45,9 +43,7 @@ class AbstractSessionRepository(ABC):
 
 class AbstractPermissionRepository(ABC):
     @abstractmethod
-    async def create_permission(
-        self, slug: str, description: str | None
-    ) -> Permission:
+    async def create_permission(self, slug: str, description: str | None) -> Permission:
         raise NotImplementedError
 
     @abstractmethod
@@ -116,7 +112,5 @@ class AbstractBlacklistRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set_many_values(
-        self, values: list[dict[str, str]], exp: timedelta
-    ) -> None:
+    def set_many_values(self, values: list[dict[str, str]], exp: timedelta) -> None:
         raise NotImplementedError

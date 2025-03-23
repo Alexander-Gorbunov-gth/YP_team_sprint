@@ -15,11 +15,7 @@ class BaseEntity:
         """
 
         exclude = set(exclude) if exclude else set()
-        return {
-            key: value
-            for key, value in asdict(self).items()
-            if key not in exclude
-        }
+        return {key: value for key, value in asdict(self).items() if key not in exclude}
 
 
 @dataclass

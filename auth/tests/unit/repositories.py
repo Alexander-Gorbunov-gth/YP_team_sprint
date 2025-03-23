@@ -20,9 +20,7 @@ class FakeUserRepository(AbstractUserRepository):
     async def create(self, email: str, password: str) -> User:
         if email in self._users:
             raise UserIsExists
-        user = User(
-            id="test-user-id", email=email, password=password, is_active=False
-        )
+        user = User(id="test-user-id", email=email, password=password, is_active=False)
         self._users[email] = user
         return user
 
@@ -30,9 +28,7 @@ class FakeUserRepository(AbstractUserRepository):
         return self._users.get(email)
 
     async def get_by_id(self, user_id) -> User | None:
-        return next(
-            (user for user in self._users.values() if user.id == user_id), None
-        )
+        return next((user for user in self._users.values() if user.id == user_id), None)
 
     async def update(self, user: User) -> User:
         self._users[user.email] = user
@@ -59,22 +55,12 @@ class FakeSessionRepository(AbstractSessionRepository):
 
     async def get_by_refresh_token(self, refresh_token: str) -> Session | None:
         return next(
-            (
-                session
-                for session in self._sessions.values()
-                if session.refresh_token == refresh_token
-            ),
+            (session for session in self._sessions.values() if session.refresh_token == refresh_token),
             None,
         )
 
-    async def get_sessions_by_user_id(
-        self, user_id: str | UUID
-    ) -> list[Session]:
-        user_sessions = [
-            session
-            for session in self._sessions.values()
-            if session.user_id == user_id
-        ]
+    async def get_sessions_by_user_id(self, user_id: str | UUID) -> list[Session]:
+        user_sessions = [session for session in self._sessions.values() if session.user_id == user_id]
         return user_sessions
 
 
@@ -84,17 +70,13 @@ class FakeBlacklistRepository(AbstractBlacklistRepository):
 
     async def get_value(self, key: str) -> str | None:
         if (value := self._storage.get(key)) is not None:
-            if (
-                expire_at := value.get("expire_at")
-            ) and datetime.now() > expire_at:
+            if (expire_at := value.get("expire_at")) and datetime.now() > expire_at:
                 del self._storage[key]
                 return None
             return value["value"]
         return None
 
-    async def set_value(
-        self, key: str, value: str, exp: timedelta | None = None
-    ):
+    async def set_value(self, key: str, value: str, exp: timedelta | None = None):
         expires_at = datetime.now() + exp if exp else None
         self._storage[key] = {"value": value, "expire_at": expires_at}
 

@@ -43,17 +43,11 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
             # Добавляем разрешения к роли
             for permission in permissions:
                 await self._session.execute(
-                    insert(role_permissions_table).values(
-                        role_slug=role.slug, permission_slug=permission.slug
-                    )
+                    insert(role_permissions_table).values(role_slug=role.slug, permission_slug=permission.slug)
                 )
 
             await self._commit()
-            query = (
-                select(Role)
-                .options(selectinload(Role.permissions))
-                .filter(Role.slug == role.slug)
-            )
+            query = select(Role).options(selectinload(Role.permissions)).filter(Role.slug == role.slug)
             result = await self._session.execute(query)
             return result.scalar_one()
         except IntegrityError:
@@ -82,9 +76,7 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
         """Получает роль по slug"""
         query = (
             select(Role)
-            .options(
-                selectinload(Role.permissions)
-            )  # Загружаем `permissions` вместе с ролью
+            .options(selectinload(Role.permissions))  # Загружаем `permissions` вместе с ролью
             .filter(Role.slug == slug)
         )
         result: Result = await self._session.execute(query)
@@ -99,10 +91,7 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
     async def add_role_to_user(self, user_id: UUID, role_slug: str) -> bool:
 
         query_check = select(
-            exists().where(
-                (user_roles_table.c.role_slug == role_slug)
-                & (user_roles_table.c.user_id == user_id)
-            )
+            exists().where((user_roles_table.c.role_slug == role_slug) & (user_roles_table.c.user_id == user_id))
         )
 
         result = await self._session.execute(query_check)
@@ -111,9 +100,7 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
         if role_exists:
             return False
 
-        query = insert(user_roles_table).values(
-            role_slug=role_slug, user_id=user_id
-        )
+        query = insert(user_roles_table).values(role_slug=role_slug, user_id=user_id)
         await self._session.execute(query)
         await self._session.commit()
         return True
@@ -121,10 +108,7 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
     async def delete_role_to_user(self, user_id: UUID, role_slug: str) -> bool:
         """Удаляет роль у пользователя"""
         query_check = select(
-            exists().where(
-                (user_roles_table.c.role_slug == role_slug)
-                & (user_roles_table.c.user_id == user_id)
-            )
+            exists().where((user_roles_table.c.role_slug == role_slug) & (user_roles_table.c.user_id == user_id))
         )
 
         result = await self._session.execute(query_check)
@@ -133,8 +117,7 @@ class SQLAlchemyRoleRepository(AbstractRoleRepository):
         if not role_exists:
             return False
         query = delete(user_roles_table).where(
-            (user_roles_table.c.role_slug == role_slug)
-            & (user_roles_table.c.user_id == user_id)
+            (user_roles_table.c.role_slug == role_slug) & (user_roles_table.c.user_id == user_id)
         )
         await self._session.execute(query)
         await self._session.commit()

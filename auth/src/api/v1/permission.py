@@ -28,9 +28,7 @@ async def get_permission(
     return await permission_service.get(slug=slug)
 
 
-@perm_router.post(
-    "/", response_model=PermissionResponse, status_code=status.HTTP_201_CREATED
-)
+@perm_router.post("/", response_model=PermissionResponse, status_code=status.HTTP_201_CREATED)
 async def create_permission(
     data: PermissionCreate,
     permission_service: PermissionService = Depends(get_permission_service),

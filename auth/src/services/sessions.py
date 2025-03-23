@@ -20,9 +20,7 @@ class SessionService(AbstractSessionService):
         Инициализатор класса
         :param session_repository: Репозиторий для работы с объектами Session.
         """
-        self._session_repository: AbstractSessionRepository = (
-            session_repository
-        )
+        self._session_repository: AbstractSessionRepository = session_repository
 
     async def create_new_session(self, session: Session) -> Session:
         """
@@ -35,18 +33,14 @@ class SessionService(AbstractSessionService):
         new_session = await self._session_repository.create(session)
         return new_session
 
-    async def deactivate_current_session(
-        self, refresh_token: str
-    ) -> Session | None:
+    async def deactivate_current_session(self, refresh_token: str) -> Session | None:
         """
         Деактивирует текущую сессию пользователя.
         :param refresh_token: Refresh-токен пользователя
         :return: Обновлённая сессия (неактивная)
         :raises SessionHasExpired: Если сессия не найдена
         """
-        current_session = await self._session_repository.get_by_refresh_token(
-            refresh_token
-        )
+        current_session = await self._session_repository.get_by_refresh_token(refresh_token)
         if current_session is None:
             logger.error(
                 "Попытка деактивации несуществующей сессии (refresh_token=%s)",
@@ -54,32 +48,24 @@ class SessionService(AbstractSessionService):
             )
             raise SessionHasExpired
         current_session.is_active = False
-        updated_session = await self._session_repository.update(
-            current_session
-        )
+        updated_session = await self._session_repository.update(current_session)
         return updated_session
 
-    async def deactivate_all_without_current(
-        self, refresh_token: str
-    ) -> list[Session]:
+    async def deactivate_all_without_current(self, refresh_token: str) -> list[Session]:
         """
         Деактивирует все сессии пользователя, кроме текущей.
         :param refresh_token: Refresh-токен текущей сессии
         :return: Список деактивированных сессий
         :raises SessionHasExpired: Если сессия не найдена
         """
-        current_session = await self._session_repository.get_by_refresh_token(
-            refresh_token
-        )
+        current_session = await self._session_repository.get_by_refresh_token(refresh_token)
         if current_session is None:
             logger.warning(
                 "Попытка деактивации всех сессий без существующей текущей (refresh_token=%s)",
                 refresh_token,
             )
             raise SessionHasExpired
-        user_sessions = await self._session_repository.get_sessions_by_user_id(
-            current_session.user_id
-        )
+        user_sessions = await self._session_repository.get_sessions_by_user_id(current_session.user_id)
         deactivate_sessions = []
         for session in user_sessions:
             if session.id != current_session.id:
@@ -99,9 +85,7 @@ class SessionService(AbstractSessionService):
         :return: Обновлённая сессия
         :raises SessionHasExpired: Если сессия не активна или не найдена
         """
-        current_session = await self._session_repository.get_by_refresh_token(
-            old_refresh_token
-        )
+        current_session = await self._session_repository.get_by_refresh_token(old_refresh_token)
         if current_session is None:
             logger.error(
                 "Попытка обновления несуществующей сессии (refresh_token=%s)",
@@ -113,22 +97,16 @@ class SessionService(AbstractSessionService):
             raise SessionHasExpired
         current_session.refresh_token = new_refresh_token
         current_session.jti = new_jti
-        updated_session = await self._session_repository.update(
-            session=current_session
-        )
+        updated_session = await self._session_repository.update(session=current_session)
         return updated_session
 
-    async def get_current_user_sessions(
-        self, user_id: UUID | str
-    ) -> list[Session]:
+    async def get_current_user_sessions(self, user_id: UUID | str) -> list[Session]:
         """
         Получает все сессии пользователя по user_id
         :param user_id: ID пользователя
         :return: Список сессий пользователя
         """
-        sessions = await self._session_repository.get_sessions_by_user_id(
-            user_id=user_id
-        )
+        sessions = await self._session_repository.get_sessions_by_user_id(user_id=user_id)
         return sessions
 
     @staticmethod
@@ -151,9 +129,7 @@ class SessionService(AbstractSessionService):
 
 
 def get_session_service(
-    session_repository: AbstractSessionRepository = Depends(
-        get_session_repository
-    ),
+    session_repository: AbstractSessionRepository = Depends(get_session_repository),
 ) -> AbstractSessionService:
     """
     Фабричный метод для получения экземпляра SessionService.

@@ -26,9 +26,7 @@ class BlacklistService(AbstractBlacklistService):
         value = await self._repository.get_value(key=key)
         return value is not None
 
-    async def set_one_value(
-        self, key: str, value: str, exp: timedelta | None = None
-    ):
+    async def set_one_value(self, key: str, value: str, exp: timedelta | None = None):
         """
         Добавляет один ключ в черный список.
         :param key: Ключ (например, идентификатор токена).
@@ -36,13 +34,9 @@ class BlacklistService(AbstractBlacklistService):
         :param exp: Время жизни ключа (если не указано, ключ будет без срока действия).
         """
 
-        await self._repository.set_value(
-            key=str(key), value=str(value), exp=exp
-        )
+        await self._repository.set_value(key=str(key), value=str(value), exp=exp)
 
-    async def set_many_values(
-        self, values: dict[str, str], exp: timedelta | None = None
-    ):
+    async def set_many_values(self, values: dict[str, str], exp: timedelta | None = None):
         """
         Добавляет несколько значений в храниРепозиторий для управления данными слище.
         :param values: Словарь {ключ: значение}.
@@ -54,9 +48,7 @@ class BlacklistService(AbstractBlacklistService):
 
 
 def get_blacklist_service(
-    repository: AbstractBlacklistRepository = Depends(
-        get_blacklist_repository
-    ),
+    repository: AbstractBlacklistRepository = Depends(get_blacklist_repository),
 ) -> AbstractBlacklistService:
     """
     Фабричный метод для получения экземпляра BlackListService.

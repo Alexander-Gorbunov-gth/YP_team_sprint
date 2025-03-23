@@ -14,6 +14,5 @@ async def login_with_yandex(oauth_service: YandexOAuthDep):
 
 @oauth_router.get("/yandex/callback")
 async def auth_callback(oauth_service: YandexOAuthDep, code: str = Query(...)):
-    print(code)
     user_info = await oauth_service.get_user_info(code=code)
     return {"user_info": user_info}

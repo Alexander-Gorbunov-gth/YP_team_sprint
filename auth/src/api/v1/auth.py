@@ -29,14 +29,10 @@ auth_router = APIRouter()
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def register(
-    register_form: RegisterForm, auth_service: AuthDep
-) -> UserResponse:
+async def register(register_form: RegisterForm, auth_service: AuthDep) -> UserResponse:
     if register_form.password != register_form.confirm_password:
         raise PasswordsNotMatch
-    user = await auth_service.registration_new_user(
-        register_form.email, register_form.password
-    )
+    user = await auth_service.registration_new_user(register_form.email, register_form.password)
     return user
 
 
@@ -53,9 +49,7 @@ async def login(
     jwt_service: JWTDep,
     session_service: SessionDep,
 ) -> LoginResponse:
-    user = await auth_service.login_user(
-        email=login_form.email, password=login_form.password
-    )
+    user = await auth_service.login_user(email=login_form.email, password=login_form.password)
     access_token = jwt_service.generate_access_token(user)
     refresh_token = jwt_service.generate_refresh_token(user)
     session = SessionFactory.create(
@@ -67,9 +61,7 @@ async def login(
     )
     await session_service.create_new_session(session=session)
     set_refresh_token(response=response, refresh_token=refresh_token)
-    return LoginResponse(
-        access_token=access_token, refresh_token=refresh_token
-    )
+    return LoginResponse(access_token=access_token, refresh_token=refresh_token)
 
 
 @auth_router.post("/logout/", status_code=status.HTTP_204_NO_CONTENT)
@@ -78,9 +70,7 @@ async def logout(
     blacklist_service: BlacklistDep,
     refresh_token: str = Depends(get_refresh_token),
 ):
-    deactivate_session = await session_service.deactivate_current_session(
-        refresh_token
-    )
+    deactivate_session = await session_service.deactivate_current_session(refresh_token)
     await blacklist_service.set_one_value(
         deactivate_session.jti,
         deactivate_session.user_id,
@@ -89,9 +79,7 @@ async def logout(
     return
 
 
-@auth_router.post(
-    "/refresh/", response_model=LoginResponse, status_code=status.HTTP_200_OK
-)
+@auth_router.post("/refresh/", response_model=LoginResponse, status_code=status.HTTP_200_OK)
 async def refresh(
     response: Response,
     session_service: SessionDep,
@@ -102,13 +90,9 @@ async def refresh(
     new_refresh_token = jwt_service.generate_refresh_token(user=current_user)
     new_access_token = jwt_service.generate_access_token(user=current_user)
     new_jti = jwt_service.jti
-    _ = await session_service.update_session_refresh_token(
-        refresh_token, new_refresh_token, new_jti
-    )
+    _ = await session_service.update_session_refresh_token(refresh_token, new_refresh_token, new_jti)
     set_refresh_token(response=response, refresh_token=new_refresh_token)
-    return LoginResponse(
-        access_token=new_access_token, refresh_token=new_refresh_token
-    )
+    return LoginResponse(access_token=new_access_token, refresh_token=new_refresh_token)
 
 
 @auth_router.post("/logout-others/", status_code=status.HTTP_204_NO_CONTENT)
@@ -117,15 +101,9 @@ async def logout_others(
     black_list_service: BlacklistDep,
     current_refresh_token: str = Depends(get_refresh_token),
 ):
-    deactivate_sessions = await session_service.deactivate_all_without_current(
-        current_refresh_token
-    )
-    jti_tokens = {
-        session.jti: session.user_id for session in deactivate_sessions
-    }
-    await black_list_service.set_many_values(
-        jti_tokens, settings.service.access_token_expire
-    )
+    deactivate_sessions = await session_service.deactivate_all_without_current(current_refresh_token)
+    jti_tokens = {session.jti: session.user_id for session in deactivate_sessions}
+    await black_list_service.set_many_values(jti_tokens, settings.service.access_token_expire)
     return
 
 
@@ -141,9 +119,7 @@ async def django_login(
     auth_service: AuthDep,
     role_service: RoleServ,
 ) -> LoginResponse:
-    user = await auth_service.login_user(
-        email=login_form.email, password=login_form.password
-    )
+    user = await auth_service.login_user(email=login_form.email, password=login_form.password)
     roles = await role_service.get_user_roles(user.id)
     return DjangoLoginResponse(
         id=user.id,
