@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from httpx import AsyncClient
 from opentelemetry import trace
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from src.api.v1.auth import auth_router
+
 from src.api.v1 import v1_router
 from src.core import http_client
 from src.core.config import settings
@@ -36,7 +36,7 @@ async def lifespan(_: FastAPI):
 
     yield
 
-    await http_client.http_client.close()
+    await http_client.http_client.aclose()
     await redis.redis.close()
 
 

@@ -4,6 +4,7 @@ from fastapi import Depends
 from sqlalchemy import Result, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.db.postgres import get_session
 from src.domain.entities import User
 from src.domain.exceptions import UserIsExists

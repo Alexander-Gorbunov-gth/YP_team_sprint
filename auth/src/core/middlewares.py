@@ -4,9 +4,10 @@ from typing import Callable
 
 from fastapi import Request, status
 from fastapi.responses import ORJSONResponse
-from src.db.redis import get_redis
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
+
+from src.db.redis import get_redis
 
 logger = logging.getLogger(__name__)
 

@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from fastapi import Depends
 from redis.asyncio import Redis
+
 from src.db.redis import get_redis
 from src.domain.repositories import AbstractBlacklistRepository
 

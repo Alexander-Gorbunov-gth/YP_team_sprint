@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import jwt
+
 from src.core.config import settings
 from src.domain.entities import Token, User
 from src.domain.exceptions import SessionHasExpired

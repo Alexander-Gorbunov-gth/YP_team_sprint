@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status
+
 from src.api.v1.dependencies import (
     AuthDep,
     SessionDep,

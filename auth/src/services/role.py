@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import Depends
+
 from src.api.v1.schemas.roles import AddOrDeleteRoleToUser, RoleCreateOrUpdate
 from src.domain.entities import Role
 from src.domain.exceptions import RoleNotFound, UserNotFound

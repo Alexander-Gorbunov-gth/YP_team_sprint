@@ -7,6 +7,7 @@ from sqlalchemy.engine import Result
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
 from src.db.postgres import get_session
 from src.domain.entities import Permission, Role
 from src.domain.exceptions import RoleIsExists

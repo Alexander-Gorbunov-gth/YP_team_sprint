@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import Result, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.db.postgres import get_session
 from src.domain.entities import Session
 from src.domain.repositories import AbstractSessionRepository

@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends, Request, Response, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from src.core.config import settings
 from src.domain.entities import Token, User
 from src.domain.exceptions import (

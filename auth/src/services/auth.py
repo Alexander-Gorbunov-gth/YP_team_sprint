@@ -2,6 +2,7 @@ import logging
 
 from fastapi import Depends
 from passlib.context import CryptContext
+
 from src.domain.entities import User
 from src.domain.exceptions import WrongEmailOrPassword, WrongOldPassword
 from src.domain.repositories import AbstractUserRepository

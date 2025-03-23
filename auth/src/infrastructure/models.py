@@ -13,7 +13,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import registry, relationship
-from src.domain.entities import Permission, Role, Session, User
+
+from src.domain.entities import Permission, Role, Session, User, SocialAccount
 
 mapper_registry = registry()
 
@@ -97,6 +98,8 @@ user_roles_table = Table(
 
 
 mapper_registry.map_imperatively(Session, sessions_table)
+
+mapper_registry.map_imperatively(SocialAccount, social_account_table)
 
 mapper_registry.map_imperatively(
     User,

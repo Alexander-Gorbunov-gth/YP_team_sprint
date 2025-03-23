@@ -3,6 +3,7 @@ from pathlib import Path
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from src.core.logger import LOGGING
 
 logging.config.dictConfig(LOGGING)
@@ -48,7 +49,7 @@ class ServiceSettings(ModelConfig):
 class JaegerSettings(ModelConfig):
     host: str = Field(default="127.0.0.1", validation_alias="JAEGER_HOST")
     port: int = Field(default=6831, validation_alias="JAEGER_PORT")
-    enable_tracer: bool = Field(default=False, validate_default="ENABLE_TRACER")
+    enable_tracer: bool = Field(default=False, validation_alias="ENABLE_TRACER")
 
 
 class DBSettings(ModelConfig):

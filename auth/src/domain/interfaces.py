@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from uuid import UUID
 
-from src.domain.entities import Session, SocialAccount, Token, User
+from src.domain.entities import Session, Token, User
 
 
 class AbstractJWTService(ABC):

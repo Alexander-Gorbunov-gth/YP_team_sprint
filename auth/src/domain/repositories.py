@@ -120,7 +120,3 @@ class AbstractSocialAccountRepository(ABC):
     @abstractmethod
     async def save_social_account(self, social_account: SocialAccount) -> SocialAccount:
         raise NotImplementedError
-
-    @abstractmethod
-    async def get_social_account_by_client_id(self, client_id: str) -> SocialAccount | None:
-        raise NotImplementedError

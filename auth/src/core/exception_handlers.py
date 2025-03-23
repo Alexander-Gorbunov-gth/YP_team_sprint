@@ -3,6 +3,7 @@ from http import HTTPStatus
 from typing import Any, NoReturn
 
 from fastapi import HTTPException, Request, Response
+
 from src.domain.exceptions import (
     Forbidden,
     OAuthAccessTokenNotFound,

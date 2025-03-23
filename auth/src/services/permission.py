@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import Depends
+
 from src.api.v1.schemas.permissions import PermissionBase
 from src.domain.entities import Permission
 from src.domain.exceptions import PermissionNotFound

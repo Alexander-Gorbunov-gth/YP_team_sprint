@@ -6,7 +6,6 @@ from src.api.v1.oauth import oauth_router
 from src.api.v1.permission import perm_router
 from src.api.v1.roles import roles_router
 
-
 v1_router = APIRouter()
 
 v1_router.include_router(auth_router, prefix="/auth", tags=["auth"])

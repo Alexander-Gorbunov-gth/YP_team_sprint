@@ -1,9 +1,9 @@
 from uuid import uuid4
 
 import pytest
+
 from src.domain.entities import Session
 from src.services.sessions import SessionService
-
 from tests.unit.repositories import FakeSessionRepository
 
 

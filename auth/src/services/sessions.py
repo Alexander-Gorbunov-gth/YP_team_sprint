@@ -2,12 +2,13 @@ import logging
 from uuid import UUID
 
 from fastapi import Depends
+from user_agents import parse
+
 from src.domain.entities import Session
 from src.domain.exceptions import SessionHasExpired
 from src.domain.interfaces import AbstractSessionService
 from src.domain.repositories import AbstractSessionRepository
 from src.infrastructure.repositories.sessions import get_session_repository
-from user_agents import parse
 
 logger = logging.getLogger(__name__)
 

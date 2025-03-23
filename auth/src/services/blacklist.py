@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from fastapi import Depends
+
 from src.domain.interfaces import AbstractBlacklistService
 from src.domain.repositories import AbstractBlacklistRepository
 from src.infrastructure.repositories.blacklist import get_blacklist_repository

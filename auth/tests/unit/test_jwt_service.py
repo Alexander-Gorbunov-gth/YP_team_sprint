@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import jwt
 import pytest
+
 from src.domain.entities import User
 from src.services.jwt import JWTService
 
