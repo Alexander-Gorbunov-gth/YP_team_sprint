@@ -64,3 +64,11 @@ class Session(BaseEntity):
     device_type: str = "other"
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+@dataclass
+class SocialAccount(BaseEntity):
+    id: UUID | None
+    client_id: str
+    user_id: UUID | str
+    social_name: str
