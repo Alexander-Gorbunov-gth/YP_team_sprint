@@ -19,10 +19,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from src.api.v1.auth import auth_router
-from src.api.v1.me import me_router
-from src.api.v1.oauth import oauth_router
-from src.api.v1.permission import perm_router
-from src.api.v1.roles import roles_router
+from src.api.v1 import v1_router
 from src.core import http_client
 from src.core.config import settings
 from src.core.exception_handlers import exception_handlers
@@ -44,7 +41,7 @@ async def lifespan(_: FastAPI):
 
 
 def configure_tracer() -> None:
-    resource = Resource(attributes={SERVICE_NAME: 'auth-service'})
+    resource = Resource(attributes={SERVICE_NAME: "auth-service"})
     provider = TracerProvider(resource=resource)
     trace.set_tracer_provider(provider)
     trace.get_tracer_provider().add_span_processor(
@@ -81,11 +78,7 @@ app.add_middleware(
 FastAPIInstrumentor.instrument_app(app=app)
 
 
-app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
-app.include_router(me_router, prefix="/api/v1/me", tags=["me"])
-app.include_router(roles_router, prefix="/api/v1/roles", tags=["roles"])
-app.include_router(oauth_router, prefix="/api/v1/oauth", tags=["oauth"])
-app.include_router(perm_router, prefix="/api/v1/permissions", tags=["permissions"])
+app.include_router(v1_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     app()
