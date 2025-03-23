@@ -36,18 +36,12 @@ class ServiceSettings(ModelConfig):
     """
 
     base_dir: Path = Path(__file__).parent.parent.parent
-    project_name: str = Field(
-        default="auth service", validation_alias="PROJECT_NAME"
-    )
+    project_name: str = Field(default="auth service", validation_alias="PROJECT_NAME")
     secret_key: SecretStr = Field(..., validation_alias="SECRET_KEY")
     jwt_algorithm: str = Field(..., validation_alias="JWT_ALGORITHM")
     debug: bool = Field(default=False, validation_alias="DEBAG")
-    refresh_token_expire: int = Field(
-        default=60, validation_alias="REFRESH_TOKEN_EXPIRE"
-    )
-    access_token_expire: int = Field(
-        default=30, validation_alias="ACCESS_TOKEN_EXPIRE"
-    )
+    refresh_token_expire: int = Field(default=60, validation_alias="REFRESH_TOKEN_EXPIRE")
+    access_token_expire: int = Field(default=30, validation_alias="ACCESS_TOKEN_EXPIRE")
     rate_window: int = Field(60, validation_alias="RATE_WINDOW")
     rate_limit: int = Field(100, validation_alias="RATE_LIMIT")
 
@@ -55,6 +49,7 @@ class ServiceSettings(ModelConfig):
 class JaegerSettings(ModelConfig):
     host: str = Field(default="127.0.0.1", validation_alias="JAEGER_HOST")
     port: int = Field(default=6831, validation_alias="JAEGER_PORT")
+    enable_tracer: bool = Field(default=False, validate_default="ENABLE_TRACER")
 
 
 class DBSettings(ModelConfig):
