@@ -1,0 +1,5 @@
+clickhouse-connect==0.8.14
+vertica-python==1.4.0
+pydantic==2.9.2
+pydantic-settings==2.6.1
+pydantic_core==2.23.4
