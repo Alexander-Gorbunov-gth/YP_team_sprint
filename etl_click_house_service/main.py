@@ -1,19 +1,19 @@
 import clickhouse_connect
-from typing import Any, Generator, List, Tuple
-from pydantic import BaseModel
+from kafka import KafkaConsumer
 
+import json
+from logger import logger
+
+from settings import settings
 from src.queries import queries
-from src.schemas.base_user_event import BaseUserEvent, ClickPayload, VideoProgressPayload
-from logging import Logger
+from src.schemas.base_user_event import BaseUserEvent
+from src.helpers.backoff_func_wrapper import backoff
 
 
 class ClickHouse:
     def __init__(self):
         self.client = clickhouse_connect.get_client(
-            host='ofsok90ydh.germanywestcentral.azure.clickhouse.cloud',
-            user='default',
-            password='cjh72mrPIGd.f',
-            secure=True
+            **settings.clickhouse_settings.get_init_conf()
         )
 
     def create_tables(self):
@@ -21,13 +21,14 @@ class ClickHouse:
 
     def _get_table_columns(self, table: str) -> dict:
         result = self.client.query(
-            f"SELECT name, type FROM system.columns WHERE table = '{table}' AND database = 'default' ORDER BY position"
+            f"SELECT name, type FROM system.columns WHERE table = '{table}'"
+            +"AND database = 'default' ORDER BY position"
         )
         return {row[0]: row[1] for row in result.result_rows}
 
-    def load_data(self, table: str, data: List[BaseUserEvent]):
+    @backoff(0.1, 2, 10, logger)
+    def load_data(self, table: str, data: list[BaseUserEvent]):
         columns = self._get_table_columns(table)
-        print(columns)
         normal_data = []
 
         for event in data:
@@ -47,40 +48,35 @@ class ClickHouse:
                 row.append(res)
             normal_data.append(row)
 
-        print(normal_data)
         self.client.insert(table, normal_data, columns)
 
 
 class Kafka:
     def __init__(self):
-        ...
+        self.consumer = KafkaConsumer(
+            **settings.kafka_settings.get_init_conf()
+        )
+        self.consumer.subscribe([settings.kafka_settings.topic_name])
 
-    def extract_data(self):
-        ...
 
-
-if __name__ == '__main__':
-    import faker
-    fake = faker.Faker()
+if __name__ == "__main__":
     ch = ClickHouse()
+    kafka = Kafka()
     ch.create_tables()
 
-    event = BaseUserEvent(
-        user_id=fake.uuid4(),
-        ip_address=fake.ipv4(),
-        user_agent="asdasd/web",
-        event_type="click",
-        timestamp=fake.date_time(),
-        # payload=ClickPayload(
-        #     item_id="item_123",
-        #     item_type="button"
-        # )
-        payload=VideoProgressPayload(
-            video_id="item_123",
-            watched_seconds=123
-        )
-    )
-    ch.load_data(
-        "user_events",
-        [event]
-    )
+    batch_size = 10
+    batch = []
+
+    try:
+        for msg in kafka.consumer:
+            data = json.loads(json.loads(msg.value))
+            data = BaseUserEvent(**data)
+
+            batch.append(data)
+
+            if len(batch) >= batch_size:
+                ch.load_data("user_events", batch)
+                batch = []
+
+    finally:
+        ch.load_data("user_events", batch)
