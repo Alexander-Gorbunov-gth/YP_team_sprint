@@ -20,7 +20,7 @@ class KafkaSettings(BaseSettings):
 class ClickHouseSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="CH_")
     host: str = Field(..., alias="CLICKHOUSE_HOST")
-    port: str = Field(..., alias="CLICKHOUSE_PORT")
+    port: int = Field(..., alias="CLICKHOUSE_PORT")
     user: str = Field(..., alias="CLICKHOUSE_USER")
     password: str = Field(..., alias="CLICKHOUSE_PASSWORD")
     database: str = Field(..., alias="CLICKHOUSE_DATABASE")
@@ -32,6 +32,7 @@ class ClickHouseSettings(BaseSettings):
 
 class Settings(BaseSettings):
     debug: bool = Field(..., alias="DEBUG")
+    batch_size: int = Field(..., alias="BATCH_SIZE_KAFKA_CLICKHOUSE")
     kafka_settings: KafkaSettings = KafkaSettings()
     clickhouse_settings: ClickHouseSettings = ClickHouseSettings()
 

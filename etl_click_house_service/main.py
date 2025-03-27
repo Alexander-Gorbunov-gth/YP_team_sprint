@@ -21,8 +21,8 @@ class ClickHouse:
 
     def _get_table_columns(self, table: str) -> dict:
         result = self.client.query(
-            f"SELECT name, type FROM system.columns WHERE table = '{table}'"
-            +"AND database = 'default' ORDER BY position"
+            f"SELECT name, type FROM system.columns WHERE table = '{table}'"+
+            f"AND database = '{settings.clickhouse_settings.database}' ORDER BY position"
         )
         return {row[0]: row[1] for row in result.result_rows}
 
@@ -61,10 +61,8 @@ class Kafka:
 
 if __name__ == "__main__":
     ch = ClickHouse()
-    kafka = Kafka()
     ch.create_tables()
-
-    batch_size = 10
+    kafka = Kafka()
     batch = []
 
     try:
@@ -74,7 +72,7 @@ if __name__ == "__main__":
 
             batch.append(data)
 
-            if len(batch) >= batch_size:
+            if len(batch) >= settings.batch_size:
                 ch.load_data("user_events", batch)
                 batch = []
 
