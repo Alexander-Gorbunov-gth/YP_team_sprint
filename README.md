@@ -1,3 +1,16 @@
+Результаты на 500 запросов:
+Clickhouse:
+insert = 0.0035s
+select = 0.0038s
+update = 0.0085s
+delete = 0.0084s
+
+Vertica:
+insert = 0.0098s
+select = 0.0059s
+update = 0.0386s
+delete = 0.0175s
+
 Функциональные требования
 
 1. Выдача контента
