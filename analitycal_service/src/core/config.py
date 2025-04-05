@@ -24,7 +24,8 @@ class ServiceSettings(ModelConfig):
 
 
 class BrockerSettings(ModelConfig):
-    topic_name: str = Field(default="event_topic", validation_alias="TOPIC_NAME")
+    evenvt_topic_name: str = Field(default="event_topic", validation_alias="EVENT_TOPIC")
+    auth_topic_name: str = Field(default="auth_topic", validation_alias="AUTH_TOPUC")
     bootstrap_service: str = Field(..., validation_alias="KAFKA_BOOTSTRAP_SERVERS")
     kafka_username: str = Field(..., validation_alias="KAFKA_USERNAME")
     kafka_password: str = Field(..., validation_alias="KAFKA_PASSWORD")
