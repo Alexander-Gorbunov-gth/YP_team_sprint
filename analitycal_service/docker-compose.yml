@@ -69,11 +69,20 @@ services:
       - KAFKA_CLUSTERS_0_NAME=kraft 
     networks:
       - default
+  
+  redis:
+    image: redis:7.4.2-bookworm
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis-data:/data"
+
 
 volumes:
   kafka_0_data:
   kafka_1_data:
   kafka_2_data:
+  redis-data:
 
 networks:
   default:
