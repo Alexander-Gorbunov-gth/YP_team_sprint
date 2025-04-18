@@ -15,6 +15,7 @@ class KafkaSettings(BaseSettings):
             "sasl_mechanism": "PLAIN",
             "sasl_plain_username": self.kafka_username,
             "sasl_plain_password": self.kafka_password,
+            "enable_auto_commit": False,
         }
 
 class ClickHouseSettings(BaseSettings):
