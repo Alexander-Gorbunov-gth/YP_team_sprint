@@ -1,0 +1,16 @@
+services:
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: bench
+      POSTGRES_PASSWORD: psswd
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
