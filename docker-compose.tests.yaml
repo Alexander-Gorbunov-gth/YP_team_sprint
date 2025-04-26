@@ -1,16 +1,16 @@
 services:
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: nginx_movies
-    restart: always
-    volumes:
-      - static_volume:/code/static:ro
-    ports:
-      - "80:80"
-    depends_on:
-      - admin
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   container_name: nginx_movies
+  #   restart: always
+  #   volumes:
+  #     - static_volume:/code/static:ro
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - admin
 
   # admin:
   #   build:
