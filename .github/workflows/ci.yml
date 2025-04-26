@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10']
+        python-version: ['3.12']
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
@@ -43,7 +43,7 @@ jobs:
           
           docker --version
           docker compose version
-
+        
       - name: Start Docker services
         run: docker compose -f docker-compose.tests.yaml up -d
       - name: Wait for services
