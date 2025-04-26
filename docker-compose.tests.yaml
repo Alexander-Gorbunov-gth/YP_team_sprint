@@ -150,8 +150,6 @@ services:
       - ./tests:/code/tests
     env_file:
       - .env
-    networks:
-      - tests_network
 
 volumes:
   content_db:
