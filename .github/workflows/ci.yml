@@ -49,7 +49,7 @@ jobs:
       - name: Wait for services
         run: sleep 10
       - name: Run tests
-        run: pytest
+        run: docker compose -f docker-compose.tests.yaml run tests pytest
 
   notify:
     name: Notify Telegram
