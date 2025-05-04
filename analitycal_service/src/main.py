@@ -5,9 +5,10 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio.client import Redis
 
+from src.db import redis
 from src.api.v1.event import route
 from src.core.config import settings
-from src.infrastructure import producer, consumer, redis
+from src.infrastructure import consumer, producer
 from src.services.consumer_handlers import AuthConsumerHandler
 
 
@@ -23,12 +24,12 @@ async def lifespan(_: FastAPI):
         username=settings.brocker.kafka_username,
         password=settings.brocker.kafka_password,
         topics=settings.brocker.consumer_topics,
-        group_id=settings.brocker.consumer_group_id
+        group_id=settings.brocker.consumer_group_id,
     )
     consumer.consumer.register_handler(settings.brocker.auth_topic_name, AuthConsumerHandler().handle)
     await producer.producer.start()
     task = asyncio.create_task(consumer.consumer.start())
-    
+
     redis.redis = Redis.from_url(settings.redis.redis_url)
 
     yield
@@ -36,6 +37,8 @@ async def lifespan(_: FastAPI):
     await producer.producer.stop()
     await consumer.consumer.stop()
     task.cancel()
+
+    await redis.redis.close()
 
 
 app = FastAPI(

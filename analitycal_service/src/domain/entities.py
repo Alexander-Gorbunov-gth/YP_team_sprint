@@ -1,6 +1,6 @@
-from uuid import UUID
-from typing import Literal
 from datetime import datetime
+from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -37,14 +37,13 @@ class VideoProgressPayload(BaseModel):
 
 
 class ClientEvent(BaseModel):
-    user_id: UUID | str
+    user_id: UUID | str | None = Field(default=None)
     user_ip: str
     user_agent: str
     event_type: Literal[
         "click", "page_view", "quality_change", "video_finished", "search_filter_used", "video_progress"
     ]
     timestamp: datetime = Field(default_factory=datetime.now)
-    payload: dict[str, str]
     payload: (
         ClickPayload
         | PageViewPayload

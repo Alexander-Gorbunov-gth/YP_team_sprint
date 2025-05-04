@@ -1,9 +1,8 @@
-from typing import Any
 from abc import ABC, abstractmethod
+from typing import Any
 
 from fastapi import Depends
-
-from src.infrastructure.brocker import AbstractProducerBroker, get_broker
+from src.infrastructure.producer import AbstractProducerBroker, get_producer
 
 
 class AbstractEventPublisherService(ABC):
@@ -15,23 +14,18 @@ class AbstractEventPublisherService(ABC):
 
 
 class EventPublisherService(AbstractEventPublisherService):
-    def __init__(self, broker: AbstractProducerBroker) -> None:
-        self._broker = broker
+    def __init__(self, producer: AbstractProducerBroker) -> None:
+        self._producer = producer
 
     async def handle_event(self, topic: str, data: dict[str, Any], key: str | None = None) -> None:
-        if key is None:
-            await self._broker.send_message(topic=topic, value=data)
-        else:
-            await self._broker.send_message(topic=topic, value=data, key=key)
+        """Публикация события без ожидания подтверждения"""
+        await self._producer.send_message(topic=topic, value=data, key=key)
 
     async def handle_event_and_wait(self, topic: str, data: dict[str, Any], key: str | None = None) -> None:
-        """Публикация события с ожиданием подтверждения (например, ack от брокера)"""
-        if key is None:
-            await self._broker.send_message_and_wait(topic=topic, value=data)
-        else:
-            await self._broker.send_message_and_wait(topic=topic, value=data, key=key)
+        """Публикация события с ожиданием подтверждения"""
+        await self._producer.send_message_and_wait(topic=topic, value=data, key=key)
 
 
-def get_event_service(broker: AbstractEventPublisherService = Depends(get_broker)) -> AbstractEventPublisherService:
+def get_event_service(producer: AbstractProducerBroker = Depends(get_producer)) -> AbstractEventPublisherService:
     """Провайдер зависимости."""
-    return EventPublisherService(broker=broker)
+    return EventPublisherService(producer=producer)
