@@ -1,0 +1,16 @@
+services:  
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    ports:
+      - "8123:8123"
+    environment:
+      CLICKHOUSE_USER: bench
+      CLICKHOUSE_PASSWORD: psswd
+
+  vertica:
+    image: vertica/vertica-ce:24.1.0-0
+    ports:
+      - "5433:5433"
+    environment:
+      APP_DB_USER: bench
+      APP_DB_PASSWORD: psswd
