@@ -69,6 +69,8 @@ services:
       - KAFKA_CLUSTERS_0_NAME=kraft 
     networks:
       - default
+
+  
   
   redis:
     image: redis:7.4.2-bookworm
