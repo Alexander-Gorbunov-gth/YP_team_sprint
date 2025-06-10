@@ -5,8 +5,8 @@ from src.domain.base import TimestampMixin
 
 
 class Like(TimestampMixin):
-    movie_id: UUID = Field(..., description="ID фильма")
-    user_id: UUID = Field(..., description="ID пользователя")
+    movie_uid: UUID = Field(..., description="ID фильма")
+    user_uid: UUID = Field(..., description="ID пользователя")
 
     @classmethod
     def create(cls, movie_id: UUID, user_id: UUID) -> "Like":

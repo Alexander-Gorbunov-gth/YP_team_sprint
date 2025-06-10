@@ -5,8 +5,8 @@ from src.domain.base import TimestampMixin
 
 
 class Review(TimestampMixin):
-    movie_id: UUID = Field(..., description="ID фильма")
-    user_id: UUID = Field(..., description="ID пользователя")
+    movie_uid: UUID = Field(..., description="ID фильма")
+    user_uid: UUID = Field(..., description="ID пользователя")
     rating: int = Field(..., ge=1, le=10, description="Оценка фильма (1–10)")
     content: str = Field(..., description="Тело рецензии")
 
