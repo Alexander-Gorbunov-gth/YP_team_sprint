@@ -1,7 +1,5 @@
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-LOG_DEFAULT_HANDLERS = [
-    "console",
-]
+LOG_DEFAULT_HANDLERS = ["console", "all_logs", "file_warning"]
 
 # В логгере настраивается логгирование uvicorn-сервера.
 # Про логирование в Python можно прочитать в документации
@@ -28,6 +26,20 @@ LOGGING = {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+        },
+        "file_warning": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "logs/content_service/warnings.log",
+            "formatter": "verbose",
+        },
+        "all_logs": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "logs/content_service/all_logs.log",
+            "formatter": "verbose",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
         },
         "default": {
             "formatter": "default",

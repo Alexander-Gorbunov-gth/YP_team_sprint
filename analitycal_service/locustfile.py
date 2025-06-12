@@ -2,6 +2,7 @@ from locust import HttpUser, task, between
 import uuid
 import random
 
+
 class LoadTestUser(HttpUser):
     wait_time = between(1, 2)  # интервал между запросами
 
@@ -11,13 +12,8 @@ class LoadTestUser(HttpUser):
             "/api/v1/event/click/",
             json={
                 "token": str(uuid.uuid4()),  # имитация уникального токена
-                "payload": {
-                    "video_id": "test_id", 
-                    "watched_seconds": 10
-                    }
+                "payload": {"video_id": "test_id", "watched_seconds": 10},
             },
-            headers={
-                "User-Agent": "LocustLoadTest"
-            },
-            timeout=2
+            headers={"User-Agent": "LocustLoadTest"},
+            timeout=2,
         )

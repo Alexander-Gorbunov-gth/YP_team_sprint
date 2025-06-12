@@ -1,0 +1,69 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: https://grafana_host/loki/api/v1/push
+    basic_auth:
+      username: sysop
+      password: R%t6y7u8i9!@
+scrape_configs:
+  - job_name: content_service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: content_service
+          __path__: /var/log/content_service/*.log
+  - job_name: admin
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: admin
+          __path__: /var/log/admin/*.log
+  - job_name: fast_api_auth
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: fast_api_auth
+          __path__: /var/log/fast_api_auth/*.log
+  - job_name: fast_api_ugc
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: fast_api_ugc
+          __path__: /var/log/fast_api_ugc/*.log
+  - job_name: etl_service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: etl_service
+          __path__: /var/log/etl_service/*.log
+  - job_name: analitycal_service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: analitycal_service
+          __path__: /var/log/analitycal_service/*.log
+  - job_name: user_activity
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: user_activity
+          __path__: /var/log/user_activity/*.log
+  - job_name: auth
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: auth
+          __path__: /var/log/auth/*.log
