@@ -21,6 +21,7 @@ services:
     volumes:
       - ./movies_admin:/code
       - static_volume:/code/static
+      - logs:/app/logs
     env_file:
       - .env
     ports:
@@ -36,6 +37,8 @@ services:
     depends_on:
       - auth_postgres 
       - redis
+    volumes:
+      - logs:/app/logs
     ports:
       - 8001:8001
 
@@ -45,6 +48,8 @@ services:
       - .env
     depends_on:
       - redis
+    volumes:
+      - logs:/app/logs
     ports:
       - 8010:8010
 
@@ -56,6 +61,7 @@ services:
       - .auth.env
     ports:
       - 5432:5432
+    
 
   content_service:
     build: ./content_service
@@ -63,6 +69,8 @@ services:
       - .env
     ports:
       - 8005:8005
+    volumes:
+      - logs:/app/logs
     depends_on:
       - postgres
       - redis
@@ -99,6 +107,8 @@ services:
       dockerfile: etl_service/Dockerfile
     env_file:
       - ./.env
+    volumes:
+      - logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -135,11 +145,21 @@ services:
       - ./.env
     ports:
       - "8123:8123"
+    volumes:
+      - logs:/app/logs
     environment:
       CLICKHOUSE_USER: ${CH_USER}
       CLICKHOUSE_PASSWORD: ${CH_PASSWORD}
       CLICKHOUSE_DB: ${CH_DATABASE}
       CLICKHOUSE_SECURE: ${CH_USESSL}
+
+  promptail:
+    image:  grafana/promtail:3.0.0
+    volumes:
+      - logs:/var/log
+      - ./promptail-config.yaml:/etc/promptail/config.yaml
+    command: -config.file /etc/promptail/config.yaml
+    restart: always
 
   # kibana:
   #   image: kibana:8.15.3
@@ -159,3 +179,4 @@ volumes:
   static_volume:
   elasticsearch-data:
   pg_auth:
+  logs:

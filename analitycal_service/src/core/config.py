@@ -1,7 +1,13 @@
+import logging
 from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+from src.core.logger import LOGGING
+
+logging.config.dictConfig(LOGGING)
 
 
 class ModelConfig(BaseSettings):
@@ -19,16 +25,26 @@ class ModelConfig(BaseSettings):
 
 class ServiceSettings(ModelConfig):
     base_dir: Path = Path(__file__).parent.parent.parent
-    project_name: str = Field(default="Analytical service", validation_alias="PROJECT_NAME")
+    project_name: str = Field(
+        default="Analytical service", validation_alias="PROJECT_NAME"
+    )
     debug: bool = Field(default=True, validation_alias="DEBUG")
 
 
 class BrockerSettings(ModelConfig):
-    producer_topic_name: str = Field(default="event_topic", validation_alias="PRODUCER_TOPIC")
+    producer_topic_name: str = Field(
+        default="event_topic", validation_alias="PRODUCER_TOPIC"
+    )
 
-    auth_topic_name: str = Field(default="auth_topic", validation_alias="CONSUMER_TOPICS")
-    consumer_group_id: str = Field(default="analytic_services", validation_alias="CONSUMER_GROUP_ID")
-    auth_topic_key: str = Field(default="analytic_service", validation_alias="AUTH_TOPIC_KEY")
+    auth_topic_name: str = Field(
+        default="auth_topic", validation_alias="CONSUMER_TOPICS"
+    )
+    consumer_group_id: str = Field(
+        default="analytic_services", validation_alias="CONSUMER_GROUP_ID"
+    )
+    auth_topic_key: str = Field(
+        default="analytic_service", validation_alias="AUTH_TOPIC_KEY"
+    )
 
     bootstrap_service: str = Field(..., validation_alias="KAFKA_BOOTSTRAP_SERVERS")
     kafka_username: str = Field(..., validation_alias="KAFKA_USERNAME")
@@ -52,7 +68,9 @@ class RedisSettings(ModelConfig):
         if self.redis_username is not None:
             if self.redis_password is not None:
                 return f"redis://{self.redis_username}:{self.redis_password}@{self.redis_host}:{self.redis_port}"
-            raise ValueError("Если указан был пользователь для Redis нужно указать и пароль.")
+            raise ValueError(
+                "Если указан был пользователь для Redis нужно указать и пароль."
+            )
         return f"redis://{self.redis_host}:{self.redis_port}"
 
 

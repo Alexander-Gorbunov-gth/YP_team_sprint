@@ -1,0 +1,45 @@
+services:
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/loki.yaml
+    volumes:
+      - loki_config:/etc/loki
+      - loki_data:/loki
+      - ./loki.yaml:/etc/loki/loki.yaml
+    restart: always
+  grafana:
+    image: grafana/grafana:11.6.0-ubuntu
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_FEATURE_TOGGLES_ENABLE=accessControlOnCall lokiLogsDataplane
+      - GF_INSTALL_PLUGINS=https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - grafana_config:/etc/grafana
+      - grafana_logs:/var/log/grafana
+      - grafana_plugins:/var/lib/grafana/plugins
+volumes:
+  plantuml_data:
+    driver: local
+  grafana_data:
+    driver: local
+  grafana_config:
+    driver: local
+  grafana_logs:
+    driver: local
+  grafana_plugins:
+    driver: local
+  loki_config:
+    driver: local
+  loki_data:
+    driver: local

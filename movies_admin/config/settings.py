@@ -150,10 +150,10 @@ LOGGING = {
             "filename": "logs/warnings.log",
             "formatter": "verbose",
         },
-        "debug_file": {  # Новый обработчик для записи всех логов
+        "all_logs": {  # Новый обработчик для записи всех логов
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "logs/all_logs.log",  # Имя файла для записи всех логов
+            "filename": "logs/admin/all_logs.log",  # Имя файла для записи всех логов
             "formatter": "verbose",
             "maxBytes": 5 * 1024 * 1024,  # Максимальный размер файла (5 МБ)
             "backupCount": 5,  # Количество резервных файлов
@@ -165,12 +165,12 @@ LOGGING = {
         },
     },
     "loggers": {
-        "": {  # Корневой логгер
+        "": {
             "handlers": [
                 "console",
-                "debug_file",
-            ],  # Добавьте новый обработчик здесь
-            "level": "DEBUG",  # Установите уровень логирования
+                "all_logs",
+            ],
+            "level": "DEBUG",
             "propagate": True,
         },
     },

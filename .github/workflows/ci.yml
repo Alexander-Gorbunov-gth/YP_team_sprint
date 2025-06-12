@@ -1,0 +1,119 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install linters
+        run: pip install flake8 black isort
+
+      - name: Run flake8
+        run: flake8 .
+
+      - name: Run black check
+        run: black . --check --diff --line-length=120
+
+      - name: Run isort check
+        run: isort . --check --diff
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10']
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Docker and docker-compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Start Docker services
+        run: docker-compose -f docker-compose.tests.yaml up -d
+
+      - name: Wait for healthcheck
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:8000/healthcheck; then
+              echo "Service is up!"
+              break
+            fi
+            echo "Waiting for service..."
+            sleep 5
+          done
+
+      - name: Run tests
+        run: pytest --tb=short -p no:warnings
+
+      - name: Tear down Docker
+        if: always()
+        run: docker-compose -f docker-compose.tests.yaml down
+
+  notify:
+    name: Notify Telegram
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: always()
+    steps:
+      - name: Check workflow status
+        id: check-status
+        run: |
+          if [[ '${{ needs.lint.result }}' == 'success' && '${{ needs.test.result }}' == 'success' ]]; then
+            echo "status=✅ Success" >> $GITHUB_OUTPUT
+          else
+            echo "status=❌ Failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send notification
+        uses: appleboy/telegram-action@v0.0.3
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            🛠 CI Status: ${{ steps.check-status.outputs.status }}
+            🔍 Workflow: ${{ github.workflow }}
+            🔄 Event: ${{ github.event_name }}
+            📦 Repo: ${{ github.repository }}
+            🔗 https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
