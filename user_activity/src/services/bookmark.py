@@ -9,16 +9,16 @@ from src.infrastructure.repositories.bookmark import AbstractBookmarkRepository,
 
 class AbstractBookmarkService(ABC):
     @abstractmethod
-    async def create_bookmark(self, user_id: UUID, movie_id: UUID) -> Bookmark: ...
+    async def create_bookmark(self, user_uid: UUID, movie_uid: UUID) -> Bookmark: ...
 
     @abstractmethod
-    async def get_bookmark_by_id(self, bookmark_id: str, user_id: UUID) -> Bookmark: ...
+    async def get_bookmark_by_id(self, bookmark_id: str, user_uid: UUID) -> Bookmark: ...
 
     @abstractmethod
-    async def get_bookmarks_by_user_id(self, user_id: UUID) -> list[Bookmark]: ...
+    async def get_bookmarks_by_user_id(self, user_uid: UUID, limit: int = 10, offset: int = 0) -> list[Bookmark]: ...
 
     @abstractmethod
-    async def delete_bookmark(self, bookmark_id: str, user_id: UUID) -> Bookmark: ...
+    async def delete_bookmark(self, bookmark_id: str, user_uid: UUID) -> Bookmark: ...
 
 
 class BookmarkService(AbstractBookmarkService):
@@ -64,14 +64,16 @@ class BookmarkService(AbstractBookmarkService):
 
         return bookmark
 
-    async def get_bookmarks_by_user_id(self, user_uid: UUID) -> list[Bookmark]:
+    async def get_bookmarks_by_user_id(self, user_uid: UUID, limit: int = 10, offset: int = 0) -> list[Bookmark]:
         """
         Получает закладки по ID пользователя
         :param user_id: ID пользователя
+        :param limit: Количество закладок
+        :param offset: Сдвиг
         :return: Список закладок
         """
 
-        return await self._repository.get_by_user_id(user_uid)
+        return await self._repository.get_by_user_id(user_uid=user_uid, limit=limit, offset=offset)
 
     async def delete_bookmark(self, bookmark_id: str, user_uid: UUID) -> Bookmark:
         """
