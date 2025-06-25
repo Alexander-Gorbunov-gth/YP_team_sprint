@@ -1,24 +1,17 @@
 <mxfile host="65bd71144e">
     <diagram id="AZqJ_S_7tpPWxHdie49_" name="Страница — 1">
-        <mxGraphModel dx="1915" dy="725" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="2387" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="45" value="" style="edgeStyle=none;html=1;" parent="1" source="3" target="44" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="414" y="650"/>
-                        </Array>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="3" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;&lt;b&gt;RabbitMQ&lt;/b&gt;&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
-                    <mxGeometry x="226" y="530" width="376" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="16" value="" style="edgeStyle=none;html=1;" parent="1" source="6" target="3" edge="1">
+                <mxCell id="121" style="edgeStyle=none;html=1;" edge="1" parent="1" source="3" target="83">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
+                <mxCell id="3" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;&lt;b&gt;RabbitMQ&lt;/b&gt;&lt;/font&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="970" width="376" height="70" as="geometry"/>
+                </mxCell>
                 <mxCell id="6" value="Message" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=0;strokeColor=default;fontSize=16;" parent="1" vertex="1">
-                    <mxGeometry x="282" y="280" width="264" height="180" as="geometry"/>
+                    <mxGeometry x="282" y="280" width="264" height="210" as="geometry"/>
                 </mxCell>
                 <mxCell id="7" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;strokeColor=inherit;fontSize=16;" parent="6" vertex="1">
                     <mxGeometry y="30" width="264" height="30" as="geometry"/>
@@ -47,12 +40,12 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="32" value="" style="shape=waypoint;sketch=0;size=6;pointerEvents=1;points=[];fillColor=default;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;fontSize=16;rounded=1;startSize=30;fontStyle=0;" parent="10" vertex="1">
-                    <mxGeometry x="264" height="30" as="geometry">
+                    <mxGeometry x="264" width="NaN" height="30" as="geometry">
                         <mxRectangle width="NaN" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="34" value="" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;startSize=30;fontStyle=0;" parent="10" vertex="1">
-                    <mxGeometry height="30" as="geometry">
+                    <mxGeometry width="NaN" height="30" as="geometry">
                         <mxRectangle width="NaN" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
@@ -64,7 +57,7 @@
                         <mxRectangle width="58" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="15" value="send_to: list[UUID]" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="13" vertex="1">
+                <mxCell id="15" value="send_to: UUID" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="13" vertex="1">
                     <mxGeometry x="58" width="206" height="30" as="geometry">
                         <mxRectangle width="206" height="30" as="alternateBounds"/>
                     </mxGeometry>
@@ -104,11 +97,10 @@
                 <mxCell id="47" value="" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="83" target="46" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="84" value="" style="edgeStyle=none;html=1;" parent="1" source="94" target="83" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="44" value="&lt;div&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;Router (мироксервис который будет формировать отдельные сообщения с учетом таймзон)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="254.5" y="660" width="319" height="90" as="geometry"/>
+                <mxCell id="84" value="" style="edgeStyle=none;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;" parent="1" source="83" target="94" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="350" y="1140" as="sourcePoint"/>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="74" value="" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="46" target="63" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -119,10 +111,10 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="46" value="&lt;b&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;Notification&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;Template&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;Table&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="10" y="1187.5" width="120" height="67.5" as="geometry"/>
+                    <mxGeometry x="160" y="1320" width="120" height="67.5" as="geometry"/>
                 </mxCell>
                 <mxCell id="63" value="Notification template" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=0;strokeColor=default;fontSize=16;" parent="1" vertex="1">
-                    <mxGeometry x="-100" y="1290" width="340" height="120" as="geometry"/>
+                    <mxGeometry x="10" y="1560" width="340" height="120" as="geometry"/>
                 </mxCell>
                 <mxCell id="64" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;strokeColor=inherit;fontSize=16;" parent="63" vertex="1">
                     <mxGeometry y="30" width="340" height="30" as="geometry"/>
@@ -163,101 +155,44 @@
                         <mxRectangle width="264" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="83" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;Consumer&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;(мироксервис отправки сообщений)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="291" y="1190" width="246" height="65" as="geometry"/>
+                <mxCell id="83" value="&lt;font style=&quot;font-size: 19px; color: rgb(0, 0, 51);&quot;&gt;&lt;b&gt;Consumer&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;p style=&quot;margin: 0px; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-size-adjust: none; font-kerning: auto; font-optical-sizing: auto; font-feature-settings: normal; font-variation-settings: normal; font-variant-position: normal; font-variant-emoji: normal; font-stretch: normal; font-size: 13px; line-height: normal; font-family: &amp;quot;Helvetica Neue&amp;quot;; text-align: start;&quot; class=&quot;p1&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 51);&quot;&gt;- получает задание&lt;/font&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-size-adjust: none; font-kerning: auto; font-optical-sizing: auto; font-feature-settings: normal; font-variation-settings: normal; font-variant-position: normal; font-variant-emoji: normal; font-stretch: normal; font-size: 13px; line-height: normal; font-family: &amp;quot;Helvetica Neue&amp;quot;; text-align: start;&quot; class=&quot;p1&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 51);&quot;&gt;- берет шаблон&lt;/font&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-size-adjust: none; font-kerning: auto; font-optical-sizing: auto; font-feature-settings: normal; font-variation-settings: normal; font-variant-position: normal; font-variant-emoji: normal; font-stretch: normal; font-size: 13px; line-height: normal; font-family: &amp;quot;Helvetica Neue&amp;quot;; text-align: start;&quot; class=&quot;p1&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 51);&quot;&gt;- получает данные о клиенте (почта, часовой пояс, имя)&lt;/font&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-size-adjust: none; font-kerning: auto; font-optical-sizing: auto; font-feature-settings: normal; font-variation-settings: normal; font-variant-position: normal; font-variant-emoji: normal; font-stretch: normal; font-size: 13px; line-height: normal; font-family: &amp;quot;Helvetica Neue&amp;quot;; text-align: start;&quot; class=&quot;p1&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 51);&quot;&gt;- формирует текст&lt;/font&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-size-adjust: none; font-kerning: auto; font-optical-sizing: auto; font-feature-settings: normal; font-variation-settings: normal; font-variant-position: normal; font-variant-emoji: normal; font-stretch: normal; font-size: 13px; line-height: normal; font-family: &amp;quot;Helvetica Neue&amp;quot;; text-align: start;&quot; class=&quot;p1&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 51);&quot;&gt;- получает время когда надо отправить&lt;/font&gt;&lt;/p&gt;&lt;p style=&quot;margin: 0px; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-size-adjust: none; font-kerning: auto; font-optical-sizing: auto; font-feature-settings: normal; font-variation-settings: normal; font-variant-position: normal; font-variant-emoji: normal; font-stretch: normal; font-size: 13px; line-height: normal; font-family: &amp;quot;Helvetica Neue&amp;quot;; text-align: start;&quot; class=&quot;p1&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 51);&quot;&gt;- закидывает составленное сообщение в очереди на отпраку (на каждый канал своя очередь)&lt;/font&gt;&lt;/p&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="1130" width="246" height="210" as="geometry"/>
                 </mxCell>
-                <mxCell id="95" value="" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="44" target="98" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="414" y="750" as="sourcePoint"/>
-                        <mxPoint x="414" y="810" as="targetPoint"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="94" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;&lt;b&gt;RabbitMQ&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 22px;&quot;&gt;&lt;b&gt;+&amp;nbsp;&lt;/b&gt;&lt;/font&gt;&lt;a style=&quot;background: var(--control-transparent-bgColor-hover); font-weight: var(--base-text-weight-semibold); box-sizing: border-box; align-items: center; min-width: 3ch; line-height: var(--text-body-lineHeight-medium, 1.4285714286); border-radius: var(--borderRadius-medium); padding-inline: var(--base-size-6); padding-block: var(--base-size-4); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 14px; text-align: start; display: inline !important; text-decoration-line: none !important;&quot; class=&quot;AppHeader-context-item&quot; data-view-component=&quot;true&quot; id=&quot;contextregion-repositorycrumb-rabbitmq-delayed-message-exchange-link&quot; aria-current=&quot;page&quot; href=&quot;https://github.com/rabbitmq/rabbitmq-delayed-message-exchange&quot; data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;SiteHeaderComponent&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;context_region_crumb&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;rabbitmq-delayed-message-exchange&amp;quot;,&amp;quot;screen_size&amp;quot;:&amp;quot;full&amp;quot;}&quot; data-target=&quot;context-region-crumb.linkElement&quot;&gt;&lt;span style=&quot;box-sizing: border-box; display: inline !important; overflow: hidden; text-overflow: ellipsis; text-wrap-mode: nowrap;&quot; class=&quot;AppHeader-context-item-label&quot; data-target=&quot;context-region-crumb.labelElement&quot;&gt;rabbitmq-delayed-message-exchange&lt;/span&gt;&lt;/a&gt;&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
-                    <mxGeometry x="226" y="1050" width="376" height="70" as="geometry"/>
-                </mxCell>
-                <mxCell id="96" value="&lt;span style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;sended message&lt;/b&gt;&lt;/span&gt;&lt;div&gt;&lt;b&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;Table&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="-320" y="1187.5" width="120" height="67.5" as="geometry"/>
-                </mxCell>
-                <mxCell id="117" value="" style="edgeStyle=none;html=1;" parent="1" source="98" target="94" edge="1">
+                <mxCell id="123" style="edgeStyle=none;html=1;" edge="1" parent="1" source="94" target="122">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="98" value="Message" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=0;strokeColor=default;fontSize=16;" parent="1" vertex="1">
-                    <mxGeometry x="282" y="810" width="264" height="180" as="geometry"/>
+                <mxCell id="94" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;&lt;b&gt;RabbitMQ&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 22px;&quot;&gt;&lt;b&gt;+&amp;nbsp;&lt;/b&gt;&lt;/font&gt;&lt;a style=&quot;background: var(--control-transparent-bgColor-hover); font-weight: var(--base-text-weight-semibold); box-sizing: border-box; align-items: center; min-width: 3ch; line-height: var(--text-body-lineHeight-medium, 1.4285714286); border-radius: var(--borderRadius-medium); padding-inline: var(--base-size-6); padding-block: var(--base-size-4); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, &amp;quot;Noto Sans&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;; font-size: 14px; text-align: start; display: inline !important; text-decoration-line: none !important;&quot; class=&quot;AppHeader-context-item&quot; data-view-component=&quot;true&quot; id=&quot;contextregion-repositorycrumb-rabbitmq-delayed-message-exchange-link&quot; aria-current=&quot;page&quot; href=&quot;https://github.com/rabbitmq/rabbitmq-delayed-message-exchange&quot; data-analytics-event=&quot;{&amp;quot;category&amp;quot;:&amp;quot;SiteHeaderComponent&amp;quot;,&amp;quot;action&amp;quot;:&amp;quot;context_region_crumb&amp;quot;,&amp;quot;label&amp;quot;:&amp;quot;rabbitmq-delayed-message-exchange&amp;quot;,&amp;quot;screen_size&amp;quot;:&amp;quot;full&amp;quot;}&quot; data-target=&quot;context-region-crumb.linkElement&quot;&gt;&lt;span style=&quot;box-sizing: border-box; display: inline !important; overflow: hidden; text-overflow: ellipsis; text-wrap-mode: nowrap;&quot; class=&quot;AppHeader-context-item-label&quot; data-target=&quot;context-region-crumb.labelElement&quot;&gt;rabbitmq-delayed-message-exchange&lt;/span&gt;&lt;/a&gt;&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+                    <mxGeometry x="-50" y="890" width="376" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="99" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;strokeColor=inherit;fontSize=16;" parent="98" vertex="1">
-                    <mxGeometry y="30" width="264" height="30" as="geometry"/>
+                <mxCell id="96" value="&lt;span style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;sended message&lt;/b&gt;&lt;/span&gt;&lt;div&gt;&lt;b&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;Table&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-220" y="1330" width="120" height="67.5" as="geometry"/>
                 </mxCell>
-                <mxCell id="100" value="1" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;pointerEvents=1;strokeColor=inherit;fontSize=16;" parent="99" vertex="1">
-                    <mxGeometry width="58" height="30" as="geometry">
+                <mxCell id="117" value="" style="edgeStyle=none;html=1;" parent="1" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="420" y="480" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="118" value="админ&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;fontSize=16;startSize=30;fontStyle=0;" vertex="1" parent="1">
+                    <mxGeometry x="90" y="160" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="119" value="5" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;strokeColor=inherit;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="282" y="450" width="58" height="30" as="geometry">
                         <mxRectangle width="58" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="101" value="event_type: str" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="99" vertex="1">
-                    <mxGeometry x="58" width="206" height="30" as="geometry">
+                <mxCell id="120" value="channels: list[str]" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="450" width="206" height="30" as="geometry">
                         <mxRectangle width="206" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="102" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;strokeColor=inherit;fontSize=16;" parent="98" vertex="1">
-                    <mxGeometry y="60" width="264" height="30" as="geometry"/>
+                <mxCell id="125" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="122" target="124">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="103" value="2" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="102" vertex="1">
-                    <mxGeometry width="58" height="30" as="geometry">
-                        <mxRectangle width="58" height="30" as="alternateBounds"/>
-                    </mxGeometry>
+                <mxCell id="122" value="&lt;font style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;Consumer&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 19px;&quot;&gt;&lt;b&gt;(мироксервис отправки сообщений)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-477" y="1160" width="246" height="65" as="geometry"/>
                 </mxCell>
-                <mxCell id="104" value="params: dict[str, str]" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="102" vertex="1">
-                    <mxGeometry x="58" width="206" height="30" as="geometry">
-                        <mxRectangle width="206" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="105" value="" style="shape=waypoint;sketch=0;size=6;pointerEvents=1;points=[];fillColor=default;resizable=0;rotatable=0;perimeter=centerPerimeter;snapToPoint=1;fontSize=16;rounded=1;startSize=30;fontStyle=0;" parent="102" vertex="1">
-                    <mxGeometry x="264" width="NaN" height="30" as="geometry">
-                        <mxRectangle width="NaN" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="106" value="" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;startSize=30;fontStyle=0;" parent="102" vertex="1">
-                    <mxGeometry width="NaN" height="30" as="geometry">
-                        <mxRectangle width="NaN" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="107" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;strokeColor=inherit;fontSize=16;" parent="98" vertex="1">
-                    <mxGeometry y="90" width="264" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="108" value="3" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="107" vertex="1">
-                    <mxGeometry width="58" height="30" as="geometry">
-                        <mxRectangle width="58" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="109" value="send_to: UUID" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="107" vertex="1">
-                    <mxGeometry x="58" width="206" height="30" as="geometry">
-                        <mxRectangle width="206" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="110" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;strokeColor=inherit;fontSize=16;" parent="98" vertex="1">
-                    <mxGeometry y="120" width="264" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="111" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="110" vertex="1">
-                    <mxGeometry width="58" height="30" as="geometry">
-                        <mxRectangle width="58" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="112" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="110" vertex="1">
-                    <mxGeometry x="58" width="206" height="30" as="geometry">
-                        <mxRectangle width="206" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="113" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;strokeColor=inherit;fontSize=16;" parent="98" vertex="1">
-                    <mxGeometry y="150" width="264" height="30" as="geometry"/>
-                </mxCell>
-                <mxCell id="114" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="113" vertex="1">
-                    <mxGeometry width="58" height="30" as="geometry">
-                        <mxRectangle width="58" height="30" as="alternateBounds"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="115" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;strokeColor=inherit;fontSize=16;" parent="113" vertex="1">
-                    <mxGeometry x="58" width="206" height="30" as="geometry">
-                        <mxRectangle width="206" height="30" as="alternateBounds"/>
-                    </mxGeometry>
+                <mxCell id="124" value="Отправка в конкретный канал" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-740" y="1162.5" width="120" height="60" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
