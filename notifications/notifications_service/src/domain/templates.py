@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from src.domain.channels import ChannelTypes
 
+
 class Template(BaseModel):
     id: UUID
     channel: ChannelTypes

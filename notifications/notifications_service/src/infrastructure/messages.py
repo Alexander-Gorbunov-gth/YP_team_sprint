@@ -2,33 +2,31 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from src.domain.clients import Client
-from src.domain.tasks import TaskMessage
+from src.domain.tasks import IncomingTaskMessage
 from src.domain.templates import Template
+
 
 class AbstractMessageMaker(ABC):
 
-    def __init__(self, task_message: TaskMessage):
+    def __init__(self, task_message: IncomingTaskMessage):
         self.task_message = task_message
 
     @abstractmethod
-    async def create_send_task(self, message: str, send_to: str, delay: int) -> bool:
-        """Создает задачу на отправку сообщения.
+    async def compile(self) -> None:
+        """Компилирует класс"""
 
-        Args:
-            message (str): Сообщение, которое нужно отправить.
-            send_to (str): Адрес получателя, например email или номер телефона.
-            delay (int): Задержка отправки в миллисекундах.
+    @abstractmethod
+    async def send_task(self, message: str, send_to: str, delay: int) -> None:
+        """Создает задачу на отправку сообщения."""
 
-        Returns:
-            bool: True, если сообщение успешно отправлено, иначе False.
-        """
-        pass
-    
     @abstractmethod
     async def get_message_template(self, event_type: str, channel: str) -> Template:
-        pass
+        """Получает шаблон сообщения на основе типа события и канала."""
+
     @abstractmethod
-    async def get_message_body(self, template: Template, client_data: dict, params: dict) -> str:
+    async def get_message_body(
+        self, template: Template, client_data: dict, params: dict
+    ) -> str:
         """Получает тело сообщения на основе типа события и параметров.
 
         Returns:
@@ -36,16 +34,18 @@ class AbstractMessageMaker(ABC):
         """
         pass
 
-    async def get_message_subject(self, template: Template, client_data: dict, params: dict) -> str:
+    @abstractmethod
+    async def get_message_subject(
+        self, template: Template, client_data: dict, params: dict
+    ) -> str:
         """Получает тему сообщения на основе типа события и параметров.
 
         Returns:
             str: Тема сообщения.
         """
-        return f"Notification for {event_type}"
 
     @abstractmethod
-    async def get_delay(self, client_timezone: str, send_at: datetime) -> int:
+    async def get_delay(self, client_timezone: str) -> int:
         """Получает задержку отправки сообщения на основе часового пояса клиента и времени отправки.
 
         Args:
@@ -55,24 +55,11 @@ class AbstractMessageMaker(ABC):
         Returns:
             int: Задержка в милисекундах.
         """
-        pass
-
-    @abstractmethod
-    async def get_client_data(self, user_uuid: list[str]) -> list[dict]:
-        """Получает данные клиентов на основе их уникальных идентификаторов.
-
-        Args:
-            user_uuid (list[str]): Список уникальных идентификаторов клиентов.
-
-        Returns:
-            dict: Данные клиентов, например email и часовой пояс.
-        """
-        pass
-
 
     @abstractmethod
     async def run(self, clients_data: list[Client]) -> bool:
-        pass
+        """Запускает процесс создания и отправки сообщений для списка клиентов."""
+
 
 class AbstractSender(ABC):
 
@@ -82,4 +69,3 @@ class AbstractSender(ABC):
     ) -> bool:
         """Отправляет сообщение."""
         pass
-

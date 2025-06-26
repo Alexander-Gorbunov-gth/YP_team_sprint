@@ -2,12 +2,13 @@ import asyncio
 import json
 from aio_pika import connect_robust, IncomingMessage
 from logging import getLogger
+from httpx import AsyncClient
 
-from src.domain import clients
-from src.services import clients_data
 from src.infrastructure.messages import AbstractMessageMaker
 from src.core.config import settings
-from src.domain.tasks import TaskMessage  # Импортируем модель TaskMessage
+from src.domain.tasks import (
+    IncomingTaskMessage,
+)  # Импортируем модель IncomingTaskMessage
 from src.domain.channels import ChannelTypes
 from src.services.message_maker import get_message_maker
 from src.services.clients_data import get_clients_data_service
@@ -20,17 +21,23 @@ async def handle_message(message: IncomingMessage):
         try:
             data = json.loads(message.body.decode())
             logger.info(f"Получено сообщение: {data}")
-            task_message = TaskMessage(**data)
+            task_message = IncomingTaskMessage(**data)
 
             message_maker: AbstractMessageMaker = get_message_maker(task_message)
+            await message_maker.compile()
 
-            data_service = get_clients_data_service()
-            clients_data_generator = await data_service.get_clients_data([task_message.user_uuid], task_message.for_all_users)
-            if not clients_data_generator:
-                logger.warning(f"Не переданы данные о пользователе в сообщении {data}")
-                return
-            await for clients_data in clients_data_generator:
-                await message_maker.run(clients_data)
+            async with AsyncClient() as httpx_client:
+                data_service = get_clients_data_service(httpx_client)
+                clients_data_generator = data_service.get_clients_data(
+                    list(task_message.user_params.keys()), task_message.for_all_users
+                )
+                if not clients_data_generator:
+                    logger.warning(
+                        f"Не переданы данные о пользователе в сообщении {data}"
+                    )
+                    return
+                async for clients_data in clients_data_generator:
+                    await message_maker.run(clients_data)
         except Exception as e:
             logger.error(f"Ошибка обработки: {e}")
 

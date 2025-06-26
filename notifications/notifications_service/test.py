@@ -7,4 +7,4 @@ class ChannelTypes(str, Enum):
     PUSH = "push"
 
 
-ChannelLiteral = Literal[ChannelTypes.EMAIL, ChannelTypes.PUSH]
+print(list(ChannelTypes))
