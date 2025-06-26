@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
+from src.domain.tasks import TaskMessage
 
 class AbstractMessageMaker(ABC):
+
+    def __init__(self, task_message: TaskMessage):
+        self.task_message = task_message
 
     @abstractmethod
     async def create_send_task(self, message: str, send_to: str, delay: int) -> bool:
@@ -69,6 +73,9 @@ class AbstractMessageMaker(ABC):
         pass
 
 
+    @abstractmethod
+    async def run(self) -> bool:
+        pass
 class AbstractSender(ABC):
 
     @abstractmethod
@@ -77,3 +84,4 @@ class AbstractSender(ABC):
     ) -> bool:
         """Отправляет сообщение."""
         pass
+

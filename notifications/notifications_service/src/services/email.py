@@ -1,9 +1,13 @@
 from datetime import datetime
 
 from src.infrastructure.messages import AbstractSender, AbstractMessageMaker
-
+from src.domain.tasks import TaskMessage
 
 class EmailMessageMaker(AbstractMessageMaker):
+
+    def __init__(self, task_message: TaskMessage):
+        super().__init__(task_message)
+
     async def create_send_task(self, message: str, send_to: str, delay: int) -> bool:
         # Здесь должна быть логика отправки email
         print(f"Sending email to {send_to} with message: {message} after {delay} ms")
@@ -23,6 +27,11 @@ class EmailMessageMaker(AbstractMessageMaker):
     async def get_message_subject(self, event_type: str, params: dict) -> str:
         return f"Email subject for event {event_type} with params {params}"
 
+    async def run(self) -> bool:
+        pass
+
+
+
 
 class EmailSender(AbstractSender):
 
@@ -30,5 +39,5 @@ class EmailSender(AbstractSender):
         pass
 
 
-def get_email_message_maker() -> EmailMessageMaker:
-    return EmailMessageMaker()
+def get_email_message_maker(task_message: TaskMessage) -> EmailMessageMaker:
+    return EmailMessageMaker(task_message)

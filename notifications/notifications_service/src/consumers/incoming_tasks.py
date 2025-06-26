@@ -20,8 +20,8 @@ async def handle_message(message: IncomingMessage):
             for channel in task_message.channels:
                 if channel == ChannelTypes.EMAIL:
                     logger.info(f"Обработка email для: {task_message.user_uuid}")
-                    email_maker = get_email_message_maker()
-                    await email_maker.run(task_message)
+                    email_maker = get_email_message_maker(task_message)
+                    await email_maker.run()
                 elif channel == ChannelTypes.PUSH:
                     # Здесь должна быть логика обработки push-уведомлений
                     logger.info(f"Обработка push для: {task_message.user_uuid}")
