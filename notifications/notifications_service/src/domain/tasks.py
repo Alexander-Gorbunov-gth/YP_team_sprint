@@ -24,14 +24,14 @@ class TaskMessage(BaseModel):
         False,
         description="Флаг, указывающий, что событие для всех пользователей",
     )
-    user_uuid: UUID = Field(
-        ...,
-        description="Уникальный идентификатор клиентв",
-    )
-    params: Dict[str, str] | None = Field(
+    user_params: Dict[UUID, Dict[str, str]] | None = Field(
         None,
-        description="Параметры события, которые могут быть использованы в обработчике",
-        example={"key1": "value1", "key2": "value2"},
+        description="Данные клиентов для отправки",
+        example={"user_uuid": {"key1": "value1", "key2": "value2"}},
+    )
+    for_all_users: bool = Field(
+        False,
+        description="Флаг, указывающий, что событие для всех пользователей",
     )
     send_in_local_time: bool = Field(
         False,
