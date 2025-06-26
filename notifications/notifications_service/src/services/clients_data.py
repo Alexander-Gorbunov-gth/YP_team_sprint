@@ -1,7 +1,7 @@
 import logging
 from fastapi import Depends, HTTPException, status
 from pydantic import parse_obj_as
-from typing import List
+from typing import AsyncGenerator, Generator, List
 from circuitbreaker import CircuitBreakerError, circuit
 from httpx import AsyncClient, RequestError
 
@@ -43,8 +43,10 @@ class HttpxClientsDataService(AbstractDataClientsService):
             logger.exception(f"Неизвестная ошибка при получении данных пользователей: {e}")
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Сервис временно не доступен.")
     
-    async def get_clients_data(self, uuids: list[str] | None = None) -> list[Client]:
+    async def get_clients_data(self, uuids: list[str] | None = None, for_all_users: bool = False) -> AsyncGenerator[list[Client], None]:
         page_number = 0
+        if not for_all_users and not uuids:
+            return []
         while True:
             batch_clients_data = await self.fetch_clients_data(uuids, page_number)
             if not batch_clients_data:
@@ -54,3 +56,5 @@ class HttpxClientsDataService(AbstractDataClientsService):
 
     
 
+def get_clients_data_service() -> HttpxClientsDataService:
+    return HttpxClientsDataService()
