@@ -12,6 +12,3 @@ class Client(BaseModel):
     email: str
     active_channels: list[ChannelLiteral]
 
-
-class ClientsData(BaseModel):
-    data: list[Client]
