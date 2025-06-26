@@ -20,8 +20,9 @@ class ProjectSettings(ModelConfig):
     """
 
     title: str = Field("User activity service", validation_alias="PROJECT_TITLE")
-    decription: str = Field("", validation_alias="PROJECT_DESCRIPTION")
+    description: str = Field("", validation_alias="PROJECT_DESCRIPTION")
     debug: bool = Field(False, validation_alias="DEBUG")
+    use_mock_data: bool = Field(True, validation_alias="USE_MOCK_DATA")
 
 
 class AuthSettings(ModelConfig):
@@ -31,8 +32,10 @@ class AuthSettings(ModelConfig):
     auth_token: Токен для авторизации (по умолчанию None)
     """
 
-    service_url: str | None = Field(None, validation_alias="AUTH_SERVICE_URL")
-    token: str | None = Field(None, validation_alias="AUTH_TOKEN")
+    service_url: str | None = Field(
+        "http://auth_service:8001", validation_alias="AUTH_SERVICE_URL"
+    )
+    token: str | None = Field("some_token", validation_alias="AUTH_TOKEN")
 
 
 class RabbitSettings(ModelConfig):

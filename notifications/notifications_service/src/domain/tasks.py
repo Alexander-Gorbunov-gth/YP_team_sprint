@@ -8,9 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .channels import ChannelLiteral
 
 
-
-
-class TaskMessage(BaseModel):
+class IncomingTaskMessage(BaseModel):
 
     event_type: str = Field(
         ...,
@@ -29,10 +27,6 @@ class TaskMessage(BaseModel):
         description="Данные клиентов для отправки",
         example={"user_uuid": {"key1": "value1", "key2": "value2"}},
     )
-    for_all_users: bool = Field(
-        False,
-        description="Флаг, указывающий, что событие для всех пользователей",
-    )
     send_in_local_time: bool = Field(
         False,
         description="Флаг, указывающий, что время отправки события в локальном времени пользователя",
@@ -41,4 +35,25 @@ class TaskMessage(BaseModel):
         None,
         description="Время отправки события. Если None, то событие отправляется немедленно",
         example="2023-10-01T12:00:00Z",
+    )
+
+
+class MessageToSend(BaseModel):
+    """Сообщение для отправки"""
+
+    body: str = Field(
+        ...,
+        description="Тело сообщения, которое будет отправлено пользователю",
+    )
+    subject: str | None = Field(
+        None,
+        description="Тема сообщения, если применимо (например, для email)",
+    )
+    address: str = Field(
+        ...,
+        description="Адрес получателя, например email или номер телефона",
+    )
+    user_uuid: UUID = Field(
+        ...,
+        description="UUID пользователя, которому отправляется сообщение",
     )

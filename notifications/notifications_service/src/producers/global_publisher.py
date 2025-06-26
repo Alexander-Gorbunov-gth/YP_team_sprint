@@ -1,3 +1,4 @@
+from typing import Optional
 from src.producers.producer import RabbitMQPublisher
 
-publisher: RabbitMQPublisher | None = None
+publisher: Optional[RabbitMQPublisher] = None
