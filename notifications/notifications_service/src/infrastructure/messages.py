@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
+from src.domain.clients import Client
 from src.domain.tasks import TaskMessage
+from src.domain.templates import Template
 
 class AbstractMessageMaker(ABC):
 
@@ -21,26 +23,21 @@ class AbstractMessageMaker(ABC):
             bool: True, если сообщение успешно отправлено, иначе False.
         """
         pass
-
+    
     @abstractmethod
-    async def get_message_body(self, event_type: str, params: dict) -> str:
+    async def get_message_template(self, event_type: str, channel: str) -> Template:
+        pass
+    @abstractmethod
+    async def get_message_body(self, template: Template, client_data: dict, params: dict) -> str:
         """Получает тело сообщения на основе типа события и параметров.
-
-        Args:
-            event_type (str): Тип события, например 'send_notification'.
-            params (dict): Параметры события, которые могут быть использованы в обработчике.
 
         Returns:
             str: Тело сообщения.
         """
         pass
 
-    async def get_message_subject(self, event_type: str, params: dict) -> str:
+    async def get_message_subject(self, template: Template, client_data: dict, params: dict) -> str:
         """Получает тему сообщения на основе типа события и параметров.
-
-        Args:
-            event_type (str): Тип события, например 'send_notification'.
-            params (dict): Параметры события, которые могут быть использованы в обработчике.
 
         Returns:
             str: Тема сообщения.
@@ -74,8 +71,9 @@ class AbstractMessageMaker(ABC):
 
 
     @abstractmethod
-    async def run(self) -> bool:
+    async def run(self, clients_data: list[Client]) -> bool:
         pass
+
 class AbstractSender(ABC):
 
     @abstractmethod
