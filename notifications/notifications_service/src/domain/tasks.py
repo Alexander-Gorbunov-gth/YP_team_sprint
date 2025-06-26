@@ -5,9 +5,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .channels import ChannelTypes
+from .channels import ChannelLiteral
 
-ChannelLiteral = Literal[ChannelTypes.EMAIL, ChannelTypes.PUSH]
+
 
 
 class TaskMessage(BaseModel):

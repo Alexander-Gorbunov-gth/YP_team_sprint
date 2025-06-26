@@ -5,3 +5,5 @@ class ChannelTypes:
     EMAIL = "email"
     PUSH = "push"
     ALL: tuple[str, ...] = (EMAIL, PUSH)
+
+ChannelLiteral = Literal[ChannelTypes.EMAIL, ChannelTypes.PUSH]
