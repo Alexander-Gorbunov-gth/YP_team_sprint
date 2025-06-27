@@ -1,0 +1,54 @@
+services:
+  url_shortener_service:
+    build: .
+    container_name: url_shortener_service
+    env_file:
+      - ./.env
+    ports:
+      - "8000:8000"
+    networks:
+      - main_network
+    entrypoint: ["/app/entrypoint.sh"]
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  scheduler:
+    build:
+      context: .
+    command: taskiq scheduler src.tasks.worker:scheduler
+    environment:
+      - PYTHONPATH=/src
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+    command: taskiq worker src.tasks.worker:broker
+    environment:
+      - PYTHONPATH=/src
+    depends_on:
+      - redis
+
+  postgres:
+    image: postgres:15
+    container_name: postgres_movies
+    restart: always
+    volumes:
+      - content_db:/var/lib/postgresql/data/
+      - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - ./.env
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 3
