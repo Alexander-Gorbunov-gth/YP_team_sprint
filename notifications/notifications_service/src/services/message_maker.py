@@ -3,8 +3,8 @@ import uuid
 import pytz
 import logging
 
-from src.infrastructure.messages import AbstractSender, AbstractMessageMaker
-from src.domain.tasks import IncomingTaskMessage, MessageToSend
+from src.infrastructure.messages import AbstractMessageMaker
+from src.domain.tasks import IncomingTaskMessage
 from src.domain.clients import Client
 from src.domain.templates import Template
 from src.producers import global_publisher
@@ -112,11 +112,6 @@ class MessageMaker(AbstractMessageMaker):
                 delay = await self.get_delay(data.timezone)
                 await self.send_task(channel, data, body, subject, delay)
 
-
-class EmailSender(AbstractSender):
-
-    async def send(self, message: str, send_to: str, subject: str) -> bool:
-        pass
 
 
 def get_message_maker(task_message: IncomingTaskMessage) -> AbstractMessageMaker:

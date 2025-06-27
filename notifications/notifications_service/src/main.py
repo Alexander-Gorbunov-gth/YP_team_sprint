@@ -4,8 +4,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
+from notifications.notifications_service.src.services import email
 from src.core.config import settings
 from src.consumers.incoming_tasks import start_incomming_task_consumer
+from src.consumers.email_worker import start_email_consumer
+from src.consumers.push_worker import start_push_consumer
 from src.producers.producer import RabbitMQPublisher
 from src.infrastructure.connections import http
 
@@ -19,11 +22,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     await rabbitmq_publisher.connect()
     global_publisher.publisher = rabbitmq_publisher
     incoming_tasks_connection = await start_incomming_task_consumer()
-
+    email_connect = await start_email_consumer()
+    push_connect = await start_push_consumer()
+    
     try:
         yield
     finally:
         await incoming_tasks_connection.close()
+        await email_connect.close()
+        await push_connect.close()
         await rabbitmq_publisher.close()
 
 
