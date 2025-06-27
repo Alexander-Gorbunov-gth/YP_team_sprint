@@ -26,7 +26,10 @@ class HttpxClientsDataService(AbstractDataClientsService):
     async def fetch_clients_data(
         self, uuids: list[UUID] | None = None, page_number: int | None = None
     ) -> list[Client]:
-        """Получает список данных польщователей пачками по страницам page_number"""
+        """
+        Получает список данных польщователей пачками по страницам page_number
+        Если uuids не переданы, то будут получены данные всех пользователей
+        """
         if settings.proect.use_mock_data:
             # 👉 вернем тестовые данные
             if page_number == 0:
@@ -96,5 +99,5 @@ class HttpxClientsDataService(AbstractDataClientsService):
             page_number += 1
 
 
-def get_clients_data_service(httpx_client) -> HttpxClientsDataService:
+def get_clients_data_service(httpx_client) -> AbstractDataClientsService:
     return HttpxClientsDataService(httpx_client)

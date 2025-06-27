@@ -54,6 +54,12 @@ class RabbitSettings(ModelConfig):
     router_queue_title: str = Field(
         "router_queue", validation_alias="RABBIT_ROUTER_QUEUE_TITLE"
     )
+    email_queue_title: str = Field(
+        "email_queue", validation_alias="RABBIT_EMAIL_QUEUE_TITLE"
+    )
+    push_queue_title: str = Field(
+        "push_queue", validation_alias="RABBIT_PUSH_QUEUE_TITLE"
+    )
 
     @property
     def rabbit_url(self) -> str:

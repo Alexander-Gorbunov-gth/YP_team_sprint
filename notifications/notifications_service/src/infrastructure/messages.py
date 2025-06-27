@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from src.domain.clients import Client
-from src.domain.tasks import IncomingTaskMessage
+from src.domain.tasks import IncomingTaskMessage, MessageToSend
 from src.domain.templates import Template
 
 
@@ -63,9 +63,10 @@ class AbstractMessageMaker(ABC):
 
 class AbstractSender(ABC):
 
+    def __init__(self, message: MessageToSend):
+        self.message = message
+
     @abstractmethod
-    async def send(
-        self, message: str, send_to: str, subject: str | None = None
-    ) -> bool:
+    async def send(self) -> bool:
         """Отправляет сообщение."""
         pass
