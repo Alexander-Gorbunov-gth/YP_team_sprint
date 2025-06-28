@@ -12,6 +12,7 @@ from src.domain.tasks import (
 from src.domain.channels import ChannelTypes
 from src.services.message_maker import get_message_maker
 from src.services.email import get_email_sender
+from src.infrastructure.repositories.messages_status import get_short_url_repository
 
 logger = getLogger(__name__)
 
@@ -24,6 +25,12 @@ async def handle_message(message: IncomingMessage):
             message = MessageToSend(**data)
             sender = get_email_sender(message)
             await sender.send()
+            await get_short_url_repository().create(
+                body=message.body,
+                sent_to=message.user_uuid,
+                sent_address=message.address,
+                subject=message.subject
+            )
 
         except Exception as e:
             logger.error(f"Ошибка обработки отправки Email: {e}")

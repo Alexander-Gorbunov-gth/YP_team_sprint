@@ -69,10 +69,48 @@ class RabbitSettings(ModelConfig):
         return f"amqp://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/"
 
 
+class DBSettings(ModelConfig):
+    """
+    Настройки базы данных.
+
+    Attributes:
+        db_type (str): Тип базы данных (по умолчанию 'postgres').
+        db_name (str): Название базы данных (по умолчанию 'notifications_db').
+        db_user (str): Имя пользователя базы данных (по умолчанию 'auth_user').
+        db_password (SecretStr): Пароль пользователя базы данных (читается из переменной `DB_PASSWORD`).
+        db_host (str): Хост базы данных (по умолчанию '127.0.0.1').
+        db_port (int): Порт базы данных (по умолчанию 5432).
+        db_echo (bool): Флаг включения SQL логов (по умолчанию True).
+    """
+
+    db_type: str = Field(default="postgres", validation_alias="DB_TYPE")
+    db_name: str = Field(default="notifications_db", validation_alias="POSTGRES_DB")
+    db_user: str = Field(default="auth_user", validation_alias="POSTGRES_USER")
+    db_password: SecretStr = Field(..., validation_alias="POSTGRES_PASSWORD")
+    db_host: str = Field(default="127.0.0.1", validation_alias="SQL_HOST")
+    db_port: int = Field(default=5432, validation_alias="SQL_PORT")
+    db_echo: bool = Field(default=True, validation_alias="DB_ECHO")
+
+    @property
+    def db_url(self) -> str:
+        """
+        Генерирует URL для подключения к базе данных.
+
+        Returns:
+            str: URL для подключения.
+        """
+        return (
+            f"{self.db_type}://{self.db_user}:"
+            f"{self.db_password.get_secret_value()}@{self.db_host}:{self.db_port}/"
+            f"{self.db_name}"
+        )
+
+
 class Settings(BaseSettings):
     proect: ProjectSettings = ProjectSettings()
     auth: AuthSettings = AuthSettings()
     rabbit: RabbitSettings = RabbitSettings()
+    db: DBSettings = DBSettings()
 
 
 settings = Settings()
