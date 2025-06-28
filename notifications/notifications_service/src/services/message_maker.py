@@ -113,6 +113,5 @@ class MessageMaker(AbstractMessageMaker):
                 await self.send_task(channel, data, body, subject, delay)
 
 
-
 def get_message_maker(task_message: IncomingTaskMessage) -> AbstractMessageMaker:
     return MessageMaker(task_message)
