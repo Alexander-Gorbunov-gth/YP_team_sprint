@@ -1,7 +1,6 @@
 import logging
 
 from pydantic import ValidationError
-
 from src.interfaces.handler import AbstractHandler, ConsumeMessage
 
 logger = logging.getLogger(__name__)
