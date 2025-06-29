@@ -23,10 +23,7 @@ async def handle_message(message: IncomingMessage):
             sender = get_email_sender(message)
             await sender.send()
             await get_short_url_repository().create(
-                body=message.body,
-                sent_to=message.user_uuid,
-                sent_address=message.address,
-                subject=message.subject
+                body=message.body, sent_to=message.user_uuid, sent_address=message.address, subject=message.subject
             )
 
         except Exception as e:
