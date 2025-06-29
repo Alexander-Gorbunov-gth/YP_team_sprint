@@ -1,0 +1,39 @@
+services:
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  notification_db:
+    image: postgres:17.4-bookworm
+    container_name: notification_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - notification_pgdata:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.dev
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+    networks:
+      - notification_network
+
+volumes:
+  rabbitmq_data:
+  notification_pgdata:
+
+networks:
+  notification_network:
+    driver: bridge
