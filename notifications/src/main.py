@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from src.api.router import router as api_router
 from src.consumers.email_worker import start_email_consumer
 from src.consumers.incoming_tasks import start_incomming_task_consumer
 from src.consumers.push_worker import start_push_consumer
@@ -10,12 +11,11 @@ from src.core.config import settings
 from src.infrastructure.container import AppContainer
 from src.producers import global_publisher
 from src.producers.producer import RabbitMQPublisher
-from src.services import email
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
-    await AppContainer.startup()
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    await AppContainer.startup(app=app)
 
     rabbitmq_publisher = RabbitMQPublisher(settings.rabbit.connection_url)
     await rabbitmq_publisher.connect()
@@ -43,7 +43,7 @@ def create_app() -> FastAPI:
         openapi_url="/api/openapi.json",
         response_class=ORJSONResponse,
     )
-    # app.include_router(api_router)
+    app.include_router(api_router)
     return app
 
 

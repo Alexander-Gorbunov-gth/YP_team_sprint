@@ -2,7 +2,11 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from fastapi import FastAPI
+from sqladmin import Admin
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from src.admin.auth import AdminAuth
+from src.admin.config import add_views
 from src.core.config import settings
 from src.infrastructure.connections.db import AsyncDatabase
 from src.infrastructure.connections.http import HttpClient
@@ -17,9 +21,10 @@ class AppContainer(AbstractContainer):
     _db_session_factory: async_sessionmaker | None = None
     _http_client: AsyncDatabase | None = None
     _db_client: AsyncDatabase | None = None
+    _admin: Admin | None = None
 
     @classmethod
-    async def startup(self) -> None:
+    async def startup(self, app: FastAPI) -> None:
         """Запускает контейнер."""
 
         self._producer = RabbitMQProducer(settings.rabbit.connection_url, settings.rabbit.exchange_name)
@@ -30,6 +35,14 @@ class AppContainer(AbstractContainer):
 
         self._db_client = AsyncDatabase(settings.db.connection_url)
         self._db_session_factory = await self._db_client.connect()
+
+        self._admin = Admin(
+            app=app,
+            engine=self._db_client._engine,
+            session_maker=self._db_session_factory,
+            authentication_backend=AdminAuth(secret_key=settings.admin.secret_key),
+        )
+        await add_views(admin=self._admin)
 
     @classmethod
     async def shutdown(self) -> None:
