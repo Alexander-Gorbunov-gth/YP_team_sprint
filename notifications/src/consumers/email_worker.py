@@ -4,8 +4,8 @@ from logging import getLogger
 from aio_pika import IncomingMessage, connect_robust
 from src.core.config import settings
 from src.domain.tasks import MessageToSend
-from src.services.email import get_email_sender
 from src.infrastructure.repositories.messages_status import get_short_url_repository
+from src.services.email import get_email_sender
 
 logger = getLogger(__name__)
 
@@ -19,10 +19,7 @@ async def handle_message(message: IncomingMessage):
             sender = get_email_sender(message)
             await sender.send()
             await get_short_url_repository().create(
-                body=message.body,
-                sent_to=message.user_uuid,
-                sent_address=message.address,
-                subject=message.subject
+                body=message.body, sent_to=message.user_uuid, sent_address=message.address, subject=message.subject
             )
 
         except Exception as e:
