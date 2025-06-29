@@ -125,12 +125,25 @@ class AdminSettings(ModelConfig):
     secret_key: str = Field("secret_key", validation_alias="ADMIN_SECRET_KEY")
 
 
+
+class EmailSettings(ModelConfig):
+    """
+    Настройки для сервиса email
+    """
+
+    from_address: str  = Field("test@mail.ru", validation_alias="EMAIL_FROM_ADDRESS")
+    smtp_host: str = Field("smtp.mail.ru", validation_alias="EMAIL_SMTP_HOST")
+    smtp_port: int = Field(587, validation_alias="EMAIL_SMTP_PORT")
+    smtp_user: str = Field("test@mail.ru", validation_alias="EMAIL_SMTP_USER")
+    smtp_password: str = Field("password", validation_alias="EMAIL_SMTP_PASSWORD")
+   
 class Settings(BaseSettings):
     proect: ProjectSettings = ProjectSettings()
     auth: AuthSettings = AuthSettings()
     rabbit: RabbitSettings = RabbitSettings()
     db: DatabaseSettings = DatabaseSettings()
     admin: AdminSettings = AdminSettings()
+    email: EmailSettings = EmailSettings()
 
 
 settings = Settings()
