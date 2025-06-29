@@ -1,20 +1,15 @@
 from abc import ABC, abstractmethod
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
-from src.domain.status import MessageStatus, MessageModel
+from src.domain.status import MessageModel, MessageStatus
 
 
 class AbstractMessagesStatusRepository(ABC):
 
     @abstractmethod
     async def create(
-        self,
-        body: str,
-        sent_to: UUID,
-        sent_address: str,
-        status: MessageStatus,
-        subject: str
+        self, body: str, sent_to: UUID, sent_address: str, status: MessageStatus, subject: str
     ) -> MessageModel:
         raise NotImplementedError
 

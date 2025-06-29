@@ -1,15 +1,13 @@
-
 import logging
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy import Result, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.db.postgres import get_session
 from src.domain.repositories import AbstractMessagesStatusRepository
-from src.domain.status import MessageStatus, MessageModel
+from src.domain.status import MessageModel, MessageStatus
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +29,7 @@ class SQLAlchemyMessagesStatusRepository(AbstractMessagesStatusRepository):
             "sent_to": sent_to,
             "sent_address": sent_address,
             "status": status,
-            "subject": subject
+            "subject": subject,
         }
         query = insert(MessageModel).values(insert_data).returning(MessageModel)
         result: Result = await self._session.execute(query)
@@ -39,19 +37,11 @@ class SQLAlchemyMessagesStatusRepository(AbstractMessagesStatusRepository):
         return result.scalar_one()
 
     async def update_status(self, id: UUID, status: MessageStatus) -> None:
-        await self._session.execute(
-            update(MessageModel)
-            .filter_by(id=id)
-            .values(status=status)
-        )
+        await self._session.execute(update(MessageModel).filter_by(id=id).values(status=status))
         await self._commit()
 
     async def update_send_at(self, id: UUID, send_at: datetime) -> None:
-        await self._session.execute(
-            update(MessageModel)
-            .filter_by(id=id)
-            .values(send_at=send_at)
-        )
+        await self._session.execute(update(MessageModel).filter_by(id=id).values(send_at=send_at))
         await self._commit()
 
     async def _commit(self) -> None:

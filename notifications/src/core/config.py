@@ -105,6 +105,25 @@ class DatabaseSettings(ModelConfig):
         """
         return f"postgresql+asyncpg://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/{self.database}"
 
+    @property
+    def alembic_url(self) -> str:
+        """Собирает URL для Alembic"""
+        return f"postgresql+psycopg2://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/{self.database}"
+
+
+class AdminSettings(ModelConfig):
+    """
+    Настройки для админ панели
+    email: Email админ панели (по умолчанию admin@admin.com)
+    password: Пароль админ панели (по умолчанию admin)
+    token: Токен админ панели (по умолчанию admin)
+    """
+
+    email: str = Field("admin@admin.com", validation_alias="ADMIN_EMAIL")
+    password: str = Field("admin", validation_alias="ADMIN_PASSWORD")
+    token: str = Field("admin", validation_alias="ADMIN_TOKEN")
+    secret_key: str = Field("secret_key", validation_alias="ADMIN_SECRET_KEY")
+
 
 
 class EmailSettings(ModelConfig):
@@ -123,6 +142,7 @@ class Settings(BaseSettings):
     auth: AuthSettings = AuthSettings()
     rabbit: RabbitSettings = RabbitSettings()
     db: DatabaseSettings = DatabaseSettings()
+    admin: AdminSettings = AdminSettings()
     email: EmailSettings = EmailSettings()
 
 
