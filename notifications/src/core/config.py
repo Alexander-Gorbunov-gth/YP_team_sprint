@@ -19,7 +19,7 @@ logging.config.dictConfig(get_logger_settings(LOGS_DIR))
 class ModelConfig(BaseSettings):
     env_file_name: ClassVar[str] = os.getenv("ENVIRONMENT", "dev")
     model_config = SettingsConfigDict(
-        env_file=(".env.dev") if env_file_name != "prod" else (".env, ../.env"),
+        env_file=(".env") if env_file_name != "prod" else (".env, ../.env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -46,7 +46,9 @@ class AuthSettings(ModelConfig):
     auth_token: Токен для авторизации (по умолчанию None)
     """
 
-    service_url: str | None = Field("http://auth_service:8001", validation_alias="AUTH_SERVICE_URL")
+    service_url: str | None = Field(
+        "http://auth_service:8001", validation_alias="AUTH_SERVICE_URL"
+    )
     token: str | None = Field("some_token", validation_alias="AUTH_TOKEN")
 
 
@@ -68,9 +70,18 @@ class RabbitSettings(ModelConfig):
     user: str = Field("user", validation_alias="RABBITMQ_DEFAULT_USER")
     password: SecretStr = Field("password", validation_alias="RABBITMQ_DEFAULT_PASS")
     exchange_name: str = Field("notifications", validation_alias="RABBIT_EXCHANGE_NAME")
-    router_queue_title: str = Field("router_queue", validation_alias="RABBIT_ROUTER_QUEUE_TITLE")
-    email_queue_title: str = Field("email_queue", validation_alias="RABBIT_EMAIL_QUEUE_TITLE")
-    push_queue_title: str = Field("push_queue", validation_alias="RABBIT_PUSH_QUEUE_TITLE")
+    max_retry_count: int = Field(
+        3, validation_alias="RABBIT_MAX_RETRY_COUNT", ge=0, le=10
+    )
+    router_queue_title: str = Field(
+        "router_queue", validation_alias="RABBIT_ROUTER_QUEUE_TITLE"
+    )
+    email_queue_title: str = Field(
+        "email_queue", validation_alias="RABBIT_EMAIL_QUEUE_TITLE"
+    )
+    push_queue_title: str = Field(
+        "push_queue", validation_alias="RABBIT_PUSH_QUEUE_TITLE"
+    )
 
     @property
     def connection_url(self) -> str:
@@ -125,18 +136,18 @@ class AdminSettings(ModelConfig):
     secret_key: str = Field("secret_key", validation_alias="ADMIN_SECRET_KEY")
 
 
-
 class EmailSettings(ModelConfig):
     """
     Настройки для сервиса email
     """
 
-    from_address: str  = Field("test@mail.ru", validation_alias="EMAIL_FROM_ADDRESS")
+    from_address: str = Field("test@mail.ru", validation_alias="EMAIL_FROM_ADDRESS")
     smtp_host: str = Field("smtp.mail.ru", validation_alias="EMAIL_SMTP_HOST")
     smtp_port: int = Field(587, validation_alias="EMAIL_SMTP_PORT")
     smtp_user: str = Field("test@mail.ru", validation_alias="EMAIL_SMTP_USER")
     smtp_password: str = Field("password", validation_alias="EMAIL_SMTP_PASSWORD")
-   
+
+
 class Settings(BaseSettings):
     proect: ProjectSettings = ProjectSettings()
     auth: AuthSettings = AuthSettings()
