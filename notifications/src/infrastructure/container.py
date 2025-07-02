@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class AppContainer(AbstractContainer):
     _producer: RabbitMQProducer | None = None
     _db_session_factory: async_sessionmaker | None = None
-    _http_client: AsyncDatabase | None = None
+    _http_client: HttpClient | None = None
     _db_client: AsyncDatabase | None = None
     _admin: Admin | None = None
     _incoming_consumer: IncomingTaskConsumer | None = None
@@ -106,7 +106,6 @@ class AppContainer(AbstractContainer):
         return self._producer
 
     @classmethod
-    @asynccontextmanager
     async def get_db_session(self) -> AsyncGenerator[AsyncSession, None]:
         if self._db_session_factory is None:
             raise RuntimeError("Фабрика сессий не была запущена...")

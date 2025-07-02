@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from domain.templates import Template
 from jinja2 import Environment
 from jinja2 import Template as JinjaTemplate
 from jinja2 import TemplateSyntaxError, meta
+from src.domain.templates import Template
 from src.infrastructure.models import TemplateModel
 from src.services.interfaces.repositories.template import AbstractTemplateRepository
 from src.services.interfaces.services.template import AbstractTemplateService
@@ -19,6 +19,7 @@ class TemplateService(AbstractTemplateService):
             id=template.id,
             event_type=template.name,
             subject=template.subject,
+            channel=template.channel,
             body=template.template,
         )
 
@@ -48,16 +49,14 @@ class TemplateService(AbstractTemplateService):
         :return: строка с предварительным просмотром шаблона
         """
 
-        template = self._get_template_model(await self.get_template(template_id=template_id))
+        template = await self.get_template(template_id=template_id)
         env = Environment()
-        template = JinjaTemplate(template.body)
         parsed_template = env.parse(template.body)
         variables = meta.find_undeclared_variables(parsed_template)
-        context = {}
-        for variable in variables:
-            context[variable] = variable
+        context = {variable: variable for variable in variables}
+        jinja_template = JinjaTemplate(template.body)
         try:
-            html_template = template.render(**context)
+            html_template = jinja_template.render(**context)
         except Exception as e:
             raise TemplateSyntaxError(f"Ошибка при предварительном просмотре шаблона: {e}")
         return html_template
