@@ -1,12 +1,12 @@
 import json
 from logging import getLogger
 
-from aio_pika import IncomingMessage, connect_robust, Message, DeliveryMode
+from aio_pika import DeliveryMode, IncomingMessage, Message, connect_robust
 from src.core.config import settings
+from src.domain.status import MessageStatus
 from src.domain.tasks import MessageToSend
 from src.infrastructure.repositories.messages_status import get_short_url_repository
 from src.services.email import get_email_sender
-from src.domain.status import MessageStatus
 
 logger = getLogger(__name__)
 
@@ -18,9 +18,7 @@ async def email_handle_message(message: IncomingMessage):
         x_death_count = 0
         if headers.get("x-death"):
             x_death_count = headers["x-death"][0].get("count", 0)
-            logger.info(
-                f"Сообщение Email с адресом {data.get('address')} было отложено {x_death_count} раз"
-            )
+            logger.info(f"Сообщение Email с адресом {data.get('address')} было отложено {x_death_count} раз")
 
         logger.info(f"Получено сообщение Email: {data}")
         message_model = MessageToSend(**data)

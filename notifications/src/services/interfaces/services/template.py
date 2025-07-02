@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from domain.templates import Template
+from src.domain.templates import Template
 
 
 class AbstractTemplateService(ABC):
     @abstractmethod
-    async def get_template(self, template_id: UUID) ->  Template: ...
+    async def get_template(self, template_id: UUID) -> Template: ...
 
     @abstractmethod
     async def get_template_by_name(self, name: str) -> Template: ...

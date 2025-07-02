@@ -1,8 +1,8 @@
 import logging
 
+from aio_pika import DeliveryMode, IncomingMessage, Message, connect_robust
 from pydantic import ValidationError
 from src.interfaces.handler import AbstractHandler, ConsumeMessage
-from aio_pika import IncomingMessage, connect_robust, Message, DeliveryMode
 
 logger = logging.getLogger(__name__)
 

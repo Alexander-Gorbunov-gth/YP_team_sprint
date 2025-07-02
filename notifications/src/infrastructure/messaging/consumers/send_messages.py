@@ -1,6 +1,6 @@
+import importlib
 import logging
 from typing import Callable
-import importlib
 
 from aio_pika import (
     ExchangeType,
@@ -10,8 +10,8 @@ from aio_pika import (
     RobustQueue,
     connect_robust,
 )
-from src.interfaces.connection import AbstractConnection
 from src.core.config import settings
+from src.interfaces.connection import AbstractConnection
 
 logger = logging.getLogger(__name__)
 
@@ -78,9 +78,7 @@ class SendMessageConsumer(AbstractConnection):
 
     async def consume(self) -> None:
         await self._queue.consume(self.handler)
-        logger.info(
-            f"⏳ {self._title} запущен и слушает очередь {self.main_queue_name}"
-        )
+        logger.info(f"⏳ {self._title} запущен и слушает очередь {self.main_queue_name}")
 
     async def close(self) -> None:
         if self._connection is not None:
@@ -92,9 +90,7 @@ async def start_email_consumer():
     connection = await connect_robust(settings.rabbit.connection_url)
     channel = await connection.channel()
 
-    main_exchange = await channel.declare_exchange(
-        "email_exchange", durable=True, type="direct"
-    )
+    main_exchange = await channel.declare_exchange("email_exchange", durable=True, type="direct")
     dlq_queue_name = "email_dlq"
     dlq_queue = await channel.declare_queue(
         dlq_queue_name,
@@ -115,9 +111,7 @@ async def start_email_consumer():
             "x-dead-letter-routing-key": dlq_queue_name,
         },
     )
-    await main_queue.bind(
-        exchange=main_exchange, routing_key=settings.rabbit.email_queue_title
-    )
+    await main_queue.bind(exchange=main_exchange, routing_key=settings.rabbit.email_queue_title)
     await main_queue.consume(handle_message, no_ack=False)
     logger.info("⏳ Консьюмер отправки Email запущен и слушает очередь")
     return connection

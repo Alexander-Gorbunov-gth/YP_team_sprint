@@ -12,7 +12,6 @@ from src.domain.tasks import (  # Импортируем модель IncomingTa
 from src.infrastructure.messages import AbstractMessageMaker
 from src.services.clients_data import get_clients_data_service
 
-
 logger = getLogger(__name__)
 
 
@@ -34,9 +33,7 @@ async def incoming_handle_message(message: IncomingMessage):
                     list(task_message.user_params.keys()), task_message.for_all_users
                 )
                 if not clients_data_generator:
-                    logger.warning(
-                        f"Не переданы данные о пользователе в сообщении {data}"
-                    )
+                    logger.warning(f"Не переданы данные о пользователе в сообщении {data}")
                     return
                 async for clients_data in clients_data_generator:
                     await message_maker.run(clients_data)

@@ -38,15 +38,11 @@ class SQLAlchemyMessagesStatusRepository(AbstractMessagesStatusRepository):
         return result.scalar_one()
 
     async def update_status(self, id: UUID, status: MessageStatus) -> None:
-        await self._session.execute(
-            update(MessageModel).filter_by(id=id).values(status=status)
-        )
+        await self._session.execute(update(MessageModel).filter_by(id=id).values(status=status))
         await self._commit()
 
     async def update_send_at(self, id: UUID, send_at: datetime) -> None:
-        await self._session.execute(
-            update(MessageModel).filter_by(id=id).values(send_at=send_at)
-        )
+        await self._session.execute(update(MessageModel).filter_by(id=id).values(send_at=send_at))
         await self._commit()
 
     async def _commit(self) -> None:
