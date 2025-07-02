@@ -1,6 +1,6 @@
 .PHONY: run_docker
 run_docker:
-	@docker compose -f docker-compose.gorbunov.yml build && docker compose -f docker-compose.gorbunov.yml up
+	@docker compose -f docker-compose.dev.yml build && docker compose -f docker-compose.dev.yml up
 
 .PHONY: auth
 auth:
@@ -18,3 +18,7 @@ format:
 
 check:
 	flake8 --max-line-length 120 src/
+
+.PHONY: down
+down:
+	@docker compose -f docker-compose.dev.yml down -v

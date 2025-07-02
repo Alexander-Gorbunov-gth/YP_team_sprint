@@ -7,4 +7,7 @@ class ChannelTypes(str, Enum):
     PUSH = "push"
 
 
-print(list(ChannelTypes))
+print(ChannelTypes)
+
+for channel in ChannelTypes:
+    print(channel.value)

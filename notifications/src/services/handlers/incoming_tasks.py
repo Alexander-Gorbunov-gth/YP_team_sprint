@@ -11,12 +11,14 @@ from src.domain.tasks import (  # Импортируем модель IncomingTa
 )
 from src.infrastructure.messages import AbstractMessageMaker
 from src.services.clients_data import get_clients_data_service
-from src.services.message_maker import get_message_maker
+
 
 logger = getLogger(__name__)
 
 
-async def handle_message(message: IncomingMessage):
+async def incoming_handle_message(message: IncomingMessage):
+    from src.services.message_maker import get_message_maker
+
     async with message.process():
         try:
             data = json.loads(message.body.decode())
@@ -32,18 +34,11 @@ async def handle_message(message: IncomingMessage):
                     list(task_message.user_params.keys()), task_message.for_all_users
                 )
                 if not clients_data_generator:
-                    logger.warning(f"Не переданы данные о пользователе в сообщении {data}")
+                    logger.warning(
+                        f"Не переданы данные о пользователе в сообщении {data}"
+                    )
                     return
                 async for clients_data in clients_data_generator:
                     await message_maker.run(clients_data)
         except Exception as e:
             logger.error(f"Ошибка обработки: {e}")
-
-
-async def start_incomming_task_consumer():
-    connection = await connect_robust(settings.rabbit.connection_url)
-    channel = await connection.channel()
-    queue = await channel.declare_queue(settings.rabbit.router_queue_title, durable=True)
-    await queue.consume(handle_message)
-    logger.info("⏳ Консьюмер запущен и слушает очередь")
-    return connection

@@ -7,8 +7,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    env_file:
-      - .env
+    env_file: .env
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
@@ -19,8 +18,7 @@ services:
       - "5432:5432"
     volumes:
       - notification_pgdata:/var/lib/postgresql/data/
-    env_file:
-      - ./.env.dev
+    env_file: .env
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
       interval: 30s

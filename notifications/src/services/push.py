@@ -8,5 +8,5 @@ class PushSender(AbstractSender):
         pass
 
 
-def get_email_sender(message: MessageToSend) -> AbstractSender:
+def get_push_sender(message: MessageToSend) -> AbstractSender:
     return PushSender(message)
