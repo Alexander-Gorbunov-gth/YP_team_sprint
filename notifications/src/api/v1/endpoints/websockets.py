@@ -1,12 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from src.api.v1.depends import Current_User_Dep
+from src.services.handlers.push import active_connections
 
 router = APIRouter(prefix="/ws", tags=["Websockets"])
-
-
-active_connections: dict[UUID, WebSocket] = {}
 
 
 @router.websocket("/")
