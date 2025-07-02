@@ -40,7 +40,10 @@ class RabbitMQProducer(AbstractProducer, AbstractConnection):
         self._connection = await connect_robust(self.connection_url)
         self._channel = await self._connection.channel(publisher_confirms=True)
         self._exchange = await self._channel.declare_exchange(
-            self.exchange_name, ExchangeType.X_DELAYED_MESSAGE, durable=True, arguments={"x-delayed-type": "direct"}
+            self.exchange_name,
+            ExchangeType.X_DELAYED_MESSAGE,
+            durable=True,
+            arguments={"x-delayed-type": "direct"},
         )
         logger.info("✅ Соединение с продюсером RabbitMQ успешно установлено")
 
@@ -51,7 +54,9 @@ class RabbitMQProducer(AbstractProducer, AbstractConnection):
             await self._connection.close()
             logger.info(f"✅ Соединение с продюсером RabbitMQ закрыто")
 
-    async def send(self, message: dict[str, Any], routing_key: str, delay_ms: int | None = None) -> None:
+    async def send(
+        self, message: dict[str, Any], routing_key: str, delay_ms: int | None = None
+    ) -> None:
         """
         Отправляет сообщение в RabbitMQ.
         :param message: Сообщение для отправки
@@ -59,8 +64,11 @@ class RabbitMQProducer(AbstractProducer, AbstractConnection):
         :param delay_ms: Задержка в миллисекундах
         """
 
-        message = Message(body=json.dumps(message).encode(), headers={"x-delay": delay_ms} if delay_ms else None)
-        await self._exchange.publish(message, routing_key=routing_key, delivery_mode=DeliveryMode.PERSISTENT)
+        message = Message(
+            body=json.dumps(message).encode(),
+            headers={"x-delay": delay_ms} if delay_ms else None,
+        )
+        await self._exchange.publish(message, routing_key=routing_key)
         logger.info(
             "➡ Сообщение опубликовано в exchange '%s' → '%s' с задержкой %s мс.",
             self.exchange_name,

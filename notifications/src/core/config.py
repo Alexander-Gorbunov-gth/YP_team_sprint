@@ -82,6 +82,7 @@ class RabbitSettings(ModelConfig):
     push_queue_title: str = Field(
         "push_queue", validation_alias="RABBIT_PUSH_QUEUE_TITLE"
     )
+    dlq_ttl: int = Field(60000, validation_alias="RABBIT_DLQ_TTL", ge=0, le=3600000)
 
     @property
     def connection_url(self) -> str:

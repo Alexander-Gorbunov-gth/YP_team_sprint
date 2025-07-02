@@ -15,7 +15,7 @@ async def get_session() -> AsyncSession:  # type: ignore
         yield session
 
 
-async def create_database() -> None:
+async def create_database(engine) -> None:
     async with engine.begin() as conn:
         await conn.run_sync(mapper_registry.metadata.create_all)
 

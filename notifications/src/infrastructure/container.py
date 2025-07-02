@@ -12,6 +12,11 @@ from src.infrastructure.connections.db import AsyncDatabase
 from src.infrastructure.connections.http import HttpClient
 from src.infrastructure.messaging.producer import RabbitMQProducer
 from src.interfaces.container import AbstractContainer
+from src.infrastructure.messaging.consumers.incoming_tasks import IncomingTaskConsumer
+from src.services.handlers.incoming_tasks import incoming_handle_message
+from src.infrastructure.messaging.consumers.send_messages import SendMessageConsumer
+from src.domain.channels import ChannelTypes
+from src.db.postgres import create_database
 
 logger = logging.getLogger(__name__)
 
@@ -22,19 +27,51 @@ class AppContainer(AbstractContainer):
     _http_client: AsyncDatabase | None = None
     _db_client: AsyncDatabase | None = None
     _admin: Admin | None = None
+    _incoming_consumer: IncomingTaskConsumer | None = None
+
+    async def _init_rabbit(self) -> None:
+        """Инициализирует соединения с RabbitMQ."""
+
+        self._producer = RabbitMQProducer(
+            settings.rabbit.connection_url, settings.rabbit.exchange_name
+        )
+        await self._producer.connect()
+
+        self._incoming_consumer = IncomingTaskConsumer(
+            connection_url=settings.rabbit.connection_url,
+            queue_name=settings.rabbit.router_queue_title,
+            handler=incoming_handle_message,
+        )
+
+        await self._incoming_consumer.connect()
+        await self._incoming_consumer.consume()
+
+        for channel in ChannelTypes:
+            setattr(
+                self,
+                f"_{channel.value}_consumer",
+                SendMessageConsumer(
+                    connection_url=settings.rabbit.connection_url,
+                    channel_name=channel.value,
+                ),
+            )
+            consumer = getattr(self, f"_{channel.value}_consumer")
+            if consumer:
+                await consumer.connect()
+                await consumer.consume()
 
     @classmethod
     async def startup(self, app: FastAPI) -> None:
         """Запускает контейнер."""
 
-        self._producer = RabbitMQProducer(settings.rabbit.connection_url, settings.rabbit.exchange_name)
-        await self._producer.connect()
+        logger.info("Инициализация контейнера приложения...")
 
         self._http_client = HttpClient()
         await self._http_client.connect()
 
         self._db_client = AsyncDatabase(settings.db.connection_url)
         self._db_session_factory = await self._db_client.connect()
+        await create_database(self._db_client._engine)
 
         self._admin = Admin(
             app=app,
@@ -43,6 +80,8 @@ class AppContainer(AbstractContainer):
             authentication_backend=AdminAuth(secret_key=settings.admin.secret_key),
         )
         await add_views(admin=self._admin)
+
+        await self._init_rabbit(self)
 
     @classmethod
     async def shutdown(self) -> None:
@@ -56,6 +95,11 @@ class AppContainer(AbstractContainer):
 
         if self._db_client is not None:
             await self._db_client.close()
+
+        for channel in ChannelTypes:
+            consumer = getattr(self, f"_{channel.value}_consumer")
+            if consumer is not None:
+                await consumer.close()
 
     @classmethod
     async def get_producer(self) -> RabbitMQProducer:

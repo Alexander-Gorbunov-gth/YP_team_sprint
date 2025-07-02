@@ -1,14 +1,60 @@
 import asyncio
 import json
+from datetime import datetime
+from typing import Dict, Literal
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+# from src.domain.tasks import (  # Импортируем модель IncomingTaskMessage
+#     IncomingTaskMessage,
+# )
 
 from aio_pika import DeliveryMode, Message, connect_robust
 
-RABBITMQ_URL = "amqp://user:password@localhost:5672/"
+RABBITMQ_URL = "amqp://u:p@localhost:5672/"
 QUEUE_NAME = "router_queue"
 
-from src.domain.tasks import (  # Импортируем модель IncomingTaskMessage
-    IncomingTaskMessage,
-)
+from enum import Enum
+from typing import Literal
+
+
+class ChannelTypes(str, Enum):
+    EMAIL = "email"
+    PUSH = "push"
+
+
+ChannelLiteral = Literal[ChannelTypes.EMAIL, ChannelTypes.PUSH]
+
+
+class IncomingTaskMessage(BaseModel):
+
+    event_type: str = Field(
+        ...,
+        description="Тип события, например 'send_notification'",
+    )
+    channels: list[ChannelLiteral] = Field(
+        ...,
+        description="Список каналов, допустимые значения: 'email', 'push'",
+    )
+    for_all_users: bool = Field(
+        False,
+        description="Флаг, указывающий, что событие для всех пользователей",
+    )
+    user_params: Dict[UUID, Dict[str, str]] | None = Field(
+        None,
+        description="Данные клиентов для отправки",
+        example={"user_uuid": {"key1": "value1", "key2": "value2"}},
+    )
+    send_in_local_time: bool = Field(
+        False,
+        description="Флаг, указывающий, что время отправки события в локальном времени пользователя",
+    )
+    send_at: datetime | None = Field(
+        None,
+        description="Время отправки события. Если None, то событие отправляется немедленно",
+        example="2023-10-01T12:00:00Z",
+    )
 
 
 async def send_message(payload: dict):

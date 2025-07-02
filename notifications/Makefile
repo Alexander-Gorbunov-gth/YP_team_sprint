@@ -18,3 +18,7 @@ format:
 
 check:
 	flake8 --max-line-length 120 src/
+
+.PHONY: down
+down:
+	@docker compose -f docker-compose.dev.yml down -v
