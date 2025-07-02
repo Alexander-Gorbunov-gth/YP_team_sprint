@@ -54,9 +54,7 @@ class RabbitMQProducer(AbstractProducer, AbstractConnection):
             await self._connection.close()
             logger.info(f"✅ Соединение с продюсером RabbitMQ закрыто")
 
-    async def send(
-        self, message: dict[str, Any], routing_key: str, delay_ms: int | None = None
-    ) -> None:
+    async def send(self, message: dict[str, Any], routing_key: str, delay_ms: int | None = None) -> None:
         """
         Отправляет сообщение в RabbitMQ.
         :param message: Сообщение для отправки

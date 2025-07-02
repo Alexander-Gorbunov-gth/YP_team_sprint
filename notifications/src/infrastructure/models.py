@@ -63,6 +63,7 @@ class TemplateModel(Base):
     template = Column(Text, nullable=False)
     name = Column(String(255), nullable=False, unique=True)
     channel = Column(String(255), nullable=False)
+    subject = Column(String(255), nullable=True)
     *timestamp_columns(),
 
     def __repr__(self) -> str:

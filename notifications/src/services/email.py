@@ -1,12 +1,11 @@
 import logging
-import aiosmtplib
-import backoff
 from email.message import EmailMessage
 
+import aiosmtplib
+import backoff
+from src.core.config import settings
 from src.domain.tasks import MessageToSend
 from src.infrastructure.messages import AbstractSender
-
-from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +18,7 @@ class EmailSender(AbstractSender):
         max_tries=2,
         jitter=None,
         on_backoff=lambda details: logger.warning(
-            f"🔁 Повторная попытка отправки Email ({details['tries']}): "
-            f"{details.get('exception')}"
+            f"🔁 Повторная попытка отправки Email ({details['tries']}): " f"{details.get('exception')}"
         ),
     )
     async def send(self) -> bool:

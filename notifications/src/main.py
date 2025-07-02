@@ -2,6 +2,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 from src.api.router import router as api_router
 from src.core.config import settings
@@ -33,6 +34,14 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Или список допустимых адресов
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 if __name__ == "__main__":

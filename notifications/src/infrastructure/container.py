@@ -8,15 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from src.admin.auth import AdminAuth
 from src.admin.config import add_views
 from src.core.config import settings
+from src.db.postgres import create_database
+from src.domain.channels import ChannelTypes
 from src.infrastructure.connections.db import AsyncDatabase
 from src.infrastructure.connections.http import HttpClient
+from src.infrastructure.messaging.consumers.incoming_tasks import IncomingTaskConsumer
+from src.infrastructure.messaging.consumers.send_messages import SendMessageConsumer
 from src.infrastructure.messaging.producer import RabbitMQProducer
 from src.interfaces.container import AbstractContainer
-from src.infrastructure.messaging.consumers.incoming_tasks import IncomingTaskConsumer
 from src.services.handlers.incoming_tasks import incoming_handle_message
-from src.infrastructure.messaging.consumers.send_messages import SendMessageConsumer
-from src.domain.channels import ChannelTypes
-from src.db.postgres import create_database
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class AppContainer(AbstractContainer):
     _producer: RabbitMQProducer | None = None
     _db_session_factory: async_sessionmaker | None = None
-    _http_client: AsyncDatabase | None = None
+    _http_client: HttpClient | None = None
     _db_client: AsyncDatabase | None = None
     _admin: Admin | None = None
     _incoming_consumer: IncomingTaskConsumer | None = None
@@ -32,9 +32,7 @@ class AppContainer(AbstractContainer):
     async def _init_rabbit(self) -> None:
         """Инициализирует соединения с RabbitMQ."""
 
-        self._producer = RabbitMQProducer(
-            settings.rabbit.connection_url, settings.rabbit.exchange_name
-        )
+        self._producer = RabbitMQProducer(settings.rabbit.connection_url, settings.rabbit.exchange_name)
         await self._producer.connect()
 
         self._incoming_consumer = IncomingTaskConsumer(
@@ -108,7 +106,6 @@ class AppContainer(AbstractContainer):
         return self._producer
 
     @classmethod
-    @asynccontextmanager
     async def get_db_session(self) -> AsyncGenerator[AsyncSession, None]:
         if self._db_session_factory is None:
             raise RuntimeError("Фабрика сессий не была запущена...")

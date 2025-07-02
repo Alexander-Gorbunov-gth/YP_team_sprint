@@ -8,11 +8,12 @@ class TemplateAdmin(ModelView, model=TemplateModel):
     name_plural = "Шаблоны"
     icon = "fa-solid fa-file-pen"
 
-    column_list = [TemplateModel.name, TemplateModel.channel, "preview_link"]
+    column_list = [TemplateModel.name, TemplateModel.channel, TemplateModel.subject, "preview_link"]
     column_labels = {
         TemplateModel.name: "Название",
         TemplateModel.channel: "Канал",
         TemplateModel.template: "Шаблон",
+        TemplateModel.subject: "Тема",
         "preview_link": "Предпросмотр",
     }
     column_searchable_list = [TemplateModel.name]
