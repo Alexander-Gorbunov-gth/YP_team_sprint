@@ -1,5 +1,6 @@
+.PHONY: run
 run:
-	python3 -m src.main
+	@uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
 typecheck:
 	mypy src/ --explicit-package-bases
