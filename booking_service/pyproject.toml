@@ -17,6 +17,7 @@ psycopg2-binary = "^2.9.10"
 sqlalchemy = "^2.0.41"
 faststream = "^0.5.47"
 dishka = "^1.6.0"
+httpx = "^0.28.1"
 
 
 [tool.poetry.group.dev.dependencies]
