@@ -1,14 +1,13 @@
 run:
-	uvicorn src.main:app
+	python3 -m src.main
 
-reload:
-	uvicorn src.main:app --reload
-
-sort:
-	isort --line-length 120 .
+typecheck:
+	mypy src/ --explicit-package-bases
 
 format:
-	black --line-length 120 .
+	ruff check src/ --fix
+	ruff check src/ --select I --fix
 
-check:
-	flake8 .
+lint:
+	ruff check src/
+	ruff check src/ --select I
