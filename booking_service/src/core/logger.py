@@ -30,13 +30,13 @@ LOGGING = {
         "file_warning": {
             "level": "WARNING",
             "class": "logging.FileHandler",
-            "filename": "logs/user_activity/warnings.log",
+            "filename": "logs/warnings.log",
             "formatter": "verbose",
         },
         "all_logs": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": "logs/user_activity/all_logs.log",
+            "filename": "logs/all_logs.log",
             "formatter": "verbose",
             "maxBytes": 5 * 1024 * 1024,
             "backupCount": 5,
