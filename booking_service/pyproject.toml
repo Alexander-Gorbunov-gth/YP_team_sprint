@@ -17,12 +17,14 @@ psycopg2-binary = "^2.9.10"
 sqlalchemy = "^2.0.41"
 faststream = "^0.5.47"
 dishka = "^1.6.0"
+polyfactory = "2.22.1"
 httpx = "^0.28.1"
 
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.17.0"
 ruff = "^0.12.3"
+pytest = "^8.4.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -37,4 +39,7 @@ select = ["E", "F", "W", "I", "ERA"]
 
 [tool.mypy]
 plugins = ['pydantic.mypy']
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src"]
 
