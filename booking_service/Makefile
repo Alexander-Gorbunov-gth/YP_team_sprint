@@ -2,10 +2,11 @@ run:
 	python3 -m src.main
 
 typecheck:
-	mypy src/ --explicit-package-bases
+	mypy src/ tests/ --explicit-package-bases
 
 format:
-	ruff check src/ --fix
+	ruff format src/ tests/
+	ruff check src/ tests/ --fix
 
 lint:
 	ruff check src/
