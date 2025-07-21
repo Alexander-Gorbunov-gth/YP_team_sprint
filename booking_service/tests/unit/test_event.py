@@ -9,7 +9,7 @@ from tests.unit.factories import AddressFactory, EventFacroty, UserFactory
 
 
 @pytest.fixture
-def addres():
+def address():
     return AddressFactory.build()
 
 
@@ -24,12 +24,12 @@ def host_user():
 
 
 @pytest.fixture
-def event(addres, host_user):
+def event(address, host_user):
     return EventFacroty.build(
         capacity=4,
         start_datetime=datetime.now() + timedelta(hours=1),
-        addres=addres,
-        address_id=addres.id,
+        addres=address,
+        address_id=address.id,
         owner_id=host_user.id,
         reservations=[],
         UPDATE_LOCK_TIMEDELTA=timedelta(hours=2),
