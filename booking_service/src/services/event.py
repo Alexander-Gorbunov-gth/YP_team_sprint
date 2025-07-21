@@ -5,7 +5,7 @@ from uuid import UUID
 from src.domain.entities.event import Event
 from src.domain.schemas.event import EventCreateSchema, EventUpdateSchema
 from src.services.exceptions import EventNotFoundError, EventTimeConflictError
-from src.services.interfaces.producer import IProducer
+from src.services.interfaces.producer import IProducer, PublishMessage
 from src.services.interfaces.repositories.event import IEventRepository
 
 
@@ -81,5 +81,6 @@ class EventService(IEventService):
         if current_event is None:
             raise EventNotFoundError("Event not found")
         for reservation in current_event.reservations:
-            await self._producer.publish(message=f"Event {event_id} deleted", user_id=reservation.user_id)
+            message = PublishMessage(user_id=reservation.user_id)
+            await self._producer.publish(message=message)
         return await self._event_repository.delete(event_id)
