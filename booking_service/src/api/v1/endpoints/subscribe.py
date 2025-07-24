@@ -2,28 +2,29 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query, status
-# from src.api.v1.schemas.events import
+
+from src.domain.schemas import subscription as schema
+from tests.unit.routers_fixture import sub_data
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/subscribe", tags=["Subscribe"])
 
 
-@router.get("/my/{uuid}", summary="Получить мои подписки")
+@router.get("/my/", summary="Получить мои подписки", response_model=list[schema.SubscriptionRepresentSchema])
 async def get_events():
-    return
+    return [sub_data, sub_data, sub_data]
 
 
-@router.get("/{uuid}", summary="Получить данные о подписке на автора")
-async def get_subscribe():
-    return
-
-@router.post("/{uuid}", summary="Подписаться на автора")
-async def subscribe():
-    return
-
-@router.delete("/{uuid}", summary="Отписаться от автора")
-async def unsubscribe():
-    return
+@router.post("/", summary="Подписаться на автора", response_model=schema.SubscriptionRepresentSchema)
+async def subscribe(
+    data: schema.SubscriptionCreateSchema
+):
+    return sub_data
 
 
+@router.delete("/", summary="Отписаться от автора")
+async def unsubscribe(
+    data: schema.SubscriptionDeleteSchema
+) -> bool:
+    return True

@@ -2,35 +2,40 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query, status
-# from src.api.v1.schemas.events import
+
+from src.domain.schemas import event as schema
+from tests.unit.routers_fixture import event_data
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
 
-@router.post("/", summary="Создать мероприятие")
-async def create_event():
-    return
+@router.post("/", summary="Создать мероприятие", response_model=schema.EventResponseSchema)
+async def create_event(
+    data: schema.EventCreateSchema,
+):
+    return event_data
 
 
-@router.get("/", summary="Получить список мероприятий")
+@router.get("/", summary="Получить список мероприятий", response_model=list[schema.EventResponseSchema])
 async def get_events():
-    return
+    return [event_data, event_data, event_data]
 
 
-@router.get("/{uuid}", summary="Получить данные о мероприятии")
+@router.get("/{id}", summary="Получить данные о мероприятии", response_model=schema.EventResponseSchema)
 async def get_event():
-    # здесь же будут приходит и данные о бронях и их статусах
-    return
+    return event_data
 
 
-@router.delete("/{uuid}", summary="Удалить мероприятие")
-async def delete_event():
-    return
+@router.delete("/{id}", summary="Удалить мероприятие")
+async def delete_event() -> bool:
+    return True
 
 
-@router.patch("/{uuid}", summary="Обновить мероприятие")
-async def update_event():
-    return
+@router.patch("/{id}", summary="Обновить мероприятие",  response_model=schema.EventResponseSchema)
+async def update_event(
+    data: schema.EventUpdateSchema
+):
+    return event_data
 
