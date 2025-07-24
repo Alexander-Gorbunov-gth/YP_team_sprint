@@ -14,3 +14,7 @@ class SubscriptionCreateSchema(BaseSubscriptionSchema):
 
 class SubscriptionDeleteSchema(BaseSubscriptionSchema):
     pass
+
+
+class SubscriptionRepresentSchema(BaseSubscriptionSchema):
+    pass

@@ -1,19 +1,22 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from .address import AdressRepresentSchema
 
 
-class EventCreateSchema(BaseModel):
+class EventBaseSchema(BaseModel):
     movie_id: UUID
     address_id: UUID
     owner_id: UUID
     capacity: int
     start_datetime: datetime
 
+class EventCreateSchema(EventBaseSchema):
+    pass
+
 
 class EventUpdateSchema(BaseModel):
-    id: UUID
     movie_id: UUID | None
     address_id: UUID | None
     owner_id: UUID | None
@@ -21,5 +24,6 @@ class EventUpdateSchema(BaseModel):
     start_datetime: datetime | None
 
 
-class EventReadSchema(BaseModel):
-    pass
+class EventResponseSchema(EventBaseSchema):
+    id: UUID
+    address: AdressRepresentSchema
