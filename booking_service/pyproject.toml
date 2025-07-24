@@ -4,6 +4,9 @@ version = "0.1.0"
 description = ""
 authors = ["Pavel Glavan <pglavan1998@mail.ru>"]
 readme = "README.md"
+packages = [
+    { include = "src", from = "." }
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -16,6 +19,7 @@ asyncpg = "^0.30.0"
 psycopg2-binary = "^2.9.10"
 sqlalchemy = "^2.0.41"
 faststream = "^0.5.47"
+faststream[rabbit] = "^0.5.48"
 dishka = "^1.6.0"
 polyfactory = "2.22.1"
 httpx = "^0.28.1"
