@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p /app/logs/auth
+
 echo "Ожидание PostgreSQL..."
 echo данные - $SQL_HOST $SQL_PORT
 while ! nc -z $SQL_HOST $SQL_PORT; do

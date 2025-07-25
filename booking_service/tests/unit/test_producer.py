@@ -24,7 +24,10 @@ print(f"close is abstract: {inspect.isabstract(RabbitMQProducer.close)}")
 
 # Пытаемся создать экземпляр
 try:
-    producer = RabbitMQProducer("amqp://localhost", "test")
+    producer = RabbitMQProducer(
+        "amqp://rabbitmq_user:rabbitmq_password@127.0.0.1:5672/",
+        "test"
+    )
     print("✅ Instance created successfully!")
 except Exception as e:
     print(f"❌ Error creating instance: {e}")
