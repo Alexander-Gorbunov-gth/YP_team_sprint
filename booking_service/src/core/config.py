@@ -1,5 +1,22 @@
+import logging
+import logging.config
+import os
+from pathlib import Path
+
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from src.core.logger import get_logger_settings
+
+
+def init_logger():
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    LOGS_DIR = BASE_DIR / "logs"
+
+    if not os.path.exists(LOGS_DIR):
+        os.mkdir(LOGS_DIR)
+
+    logging.config.dictConfig(get_logger_settings(LOGS_DIR))
 
 
 class ModelConfig(BaseSettings):
@@ -11,8 +28,8 @@ class PostgresSettings(ModelConfig):
 
     host: str = Field(default="127.0.0.1", validation_alias="POSTGRES_HOST")
     port: int = Field(default=5432, validation_alias="POSTGRES_PORT")
-    db_name: str = Field(default="postgres", validation_alias="POSTGRES_DB")
-    user: str = Field(default="postgres", validation_alias="POSTGRES_USER")
+    db_name: str = Field(default="booking_db", validation_alias="POSTGRES_DB")
+    user: str = Field(default="booking_user", validation_alias="POSTGRES_USER")
     password: SecretStr = Field(..., validation_alias="POSTGRES_PASSWORD")
     echo: bool = Field(default=False, validation_alias="POSTGRES_ECHO")
 
@@ -34,5 +51,7 @@ class PostgresSettings(ModelConfig):
 class Settings(BaseSettings):
     postgres: PostgresSettings = PostgresSettings()
 
+
+init_logger()
 
 settings = Settings()
