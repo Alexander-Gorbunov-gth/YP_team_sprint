@@ -24,5 +24,5 @@ class ReservationRepresentSchema(ReservationBaseSchema):
 
 
 class ReservationUpdateSchema(BaseModel):
-    seats: int | None
-    status: ReservationStatus | None
+    seats: int | None = None
+    status: ReservationStatus | None = None

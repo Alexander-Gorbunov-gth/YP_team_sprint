@@ -9,16 +9,14 @@ export default function SubscriptionsPage() {
   useEffect(() => {
     getMySubscriptions()
       .then((data) => {
-        setSubscriptions(data.subscriptions || data);
+        setSubscriptions(data || []);
       })
       .finally(() => setLoading(false));
   }, []);
 
   const handleUnsubscribe = async (host_id) => {
     try {
-      await deleteSubscription({
-        host_id
-      });
+      await deleteSubscription(host_id);
       setSubscriptions((prev) => prev.filter((s) => s.host_id !== host_id));
     } catch (error) {
       alert("Не удалось отменить подписку");

@@ -10,10 +10,13 @@ from src.domain.schemas.subscription import (
     SubscriptionRepresentSchema,
 )
 from src.services.subscription import ISubscriptionService
+from src.domain.schemas import subscription as schema
+from tests.unit.routers_fixture import sub_data1, sub_data2
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/subscribe", tags=["Subscribe"], route_class=DishkaRoute)
+
 
 
 @router.get("/my/", summary="Получить мои подписки", response_model=list[SubscriptionRepresentSchema])
@@ -34,7 +37,24 @@ async def subscribe(
     subscription = await subscription_service.create_subscription(
         SubscriptionCreateSchema(user_id=user_id, host_id=host_id)
     )
-    return SubscriptionRepresentSchema.model_validate(subscription)
+
+@router.get(
+    "/my/",
+    summary="Получить мои подписки",
+    response_model=list[schema.SubscriptionRepresentSchema],
+)
+async def get_events():
+    return [sub_data1, sub_data2]
+
+
+@router.post(
+    "/",
+    summary="Подписаться на автора",
+    response_model=schema.SubscriptionRepresentSchema,
+)
+async def subscribe(data: schema.SubscriptionCreateSchema):
+    return sub_data1
+
 
 
 @router.delete("/", summary="Отписаться от автора")

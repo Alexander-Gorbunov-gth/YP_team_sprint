@@ -13,7 +13,7 @@ export default function EventsPage() {
   useEffect(() => {
     Promise.all([getEvents(), getMySubscriptions()])
       .then(([eventData, subscriptionsData]) => {
-        setEvents(eventData.events);
+        setEvents(eventData);
         setMySubscriptions(subscriptionsData || []);
       })
       .finally(() => setLoading(false));

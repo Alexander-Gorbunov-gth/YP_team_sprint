@@ -15,14 +15,22 @@ async def create_address(data: schema.AdressCreateSchema):
     return address_data
 
 
-@router.get("/{id}", summary="Получить данные об адресе", response_model=schema.AdressRepresentSchema)
+@router.get(
+    "/{id}",
+    summary="Получить данные об адресе",
+    response_model=schema.AdressRepresentSchema,
+)
 async def get_address():
     return address_data
 
 
-@router.get("/", summary="Получить список моих адресов", response_model=list[schema.AdressRepresentSchema | None])
+@router.get(
+    "/my/",
+    summary="Получить список моих адресов",
+    response_model=list[schema.AdressRepresentSchema | None],
+)
 async def get_my_address():
-    return [address_data, address_data, address_data]
+    return [address_data]
 
 
 @router.delete("/{id}", summary="Удалить адрес")
@@ -30,6 +38,8 @@ async def delete_address() -> bool:
     return True
 
 
-@router.patch("/{id}", summary="Изменить адрес", response_model=schema.AdressRepresentSchema)
+@router.patch(
+    "/{id}", summary="Изменить адрес", response_model=schema.AdressRepresentSchema
+)
 async def update_address(data: schema.UpdateAddressSchema):
     return address_data

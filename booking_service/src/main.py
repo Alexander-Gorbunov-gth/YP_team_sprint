@@ -4,6 +4,7 @@ import uvicorn
 from dishka import make_async_container
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.v1.router import router
 from src.infrastructure.container import Container
@@ -20,7 +21,6 @@ async def lifespan(app: FastAPI):
         await app_lifetime.shutdown()
         await app.state.dishka_container.close()
 
-
 def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
     app.include_router(router, prefix="/api")
@@ -31,5 +31,13 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # или ["*"] для всех
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 if __name__ == "__main__":
     uvicorn.run(app=app, host="0.0.0.0", port=8000, reload=True)

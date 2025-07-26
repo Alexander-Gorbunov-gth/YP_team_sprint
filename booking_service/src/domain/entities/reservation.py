@@ -8,7 +8,7 @@ from src.domain.entities.mixins import DateTimeMixin
 
 class ReservationStatus(Enum):
     PENDING = "pending"
-    CANCELED = "canseled"
+    CANCELED = "canceled"
     SUCCESS = "success"
 
 
@@ -21,7 +21,12 @@ class Reservation(DateTimeMixin, BaseModel):
 
     @classmethod
     def create(cls, user_id: UUID, event_id: UUID, seats: int) -> "Reservation":
-        return cls(user_id=user_id, event_id=event_id, seats=seats, status=ReservationStatus.PENDING)
+        return cls(
+            user_id=user_id,
+            event_id=event_id,
+            seats=seats,
+            status=ReservationStatus.PENDING,
+        )
 
     def approve_reservation(self) -> None:
         self.status = ReservationStatus.SUCCESS
