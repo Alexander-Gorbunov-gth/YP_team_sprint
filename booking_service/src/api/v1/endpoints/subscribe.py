@@ -1,7 +1,6 @@
 import logging
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter
 
 from src.domain.schemas import subscription as schema
 from tests.unit.routers_fixture import sub_data
@@ -17,14 +16,10 @@ async def get_events():
 
 
 @router.post("/", summary="Подписаться на автора", response_model=schema.SubscriptionRepresentSchema)
-async def subscribe(
-    data: schema.SubscriptionCreateSchema
-):
+async def subscribe(data: schema.SubscriptionCreateSchema):
     return sub_data
 
 
 @router.delete("/", summary="Отписаться от автора")
-async def unsubscribe(
-    data: schema.SubscriptionDeleteSchema
-) -> bool:
+async def unsubscribe(data: schema.SubscriptionDeleteSchema) -> bool:
     return True
