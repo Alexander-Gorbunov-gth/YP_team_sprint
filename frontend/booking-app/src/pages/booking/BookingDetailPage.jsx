@@ -21,11 +21,11 @@ export default function BookingDetailPage() {
 
   function renderStatus(status) {
     switch (status) {
-      case "PENDING":
+      case "pending":
         return "Ожидается";
-      case "SUCCESS":
+      case "success":
         return "Подтверждено";
-      case "CANCELED":
+      case "canceled":
         return "Отменено";
       default:
         return status;
@@ -50,18 +50,18 @@ export default function BookingDetailPage() {
       <p><strong>Актёры:</strong> {movie.actors_names?.join(", ") || "–"}</p>
       <p><strong>Количество мест:</strong> {booking.seats}</p>
       <p><strong>Статус:</strong> {renderStatus(booking.status)}</p>
-      {booking.status === "PENDING" && (
+      {booking.status === "pending" && (
         <button
           className={styles.button}
-          onClick={() => handleUpdateStatus("SUCCESS")}
+          onClick={() => handleUpdateStatus("success")}
         >
           Подтвердить бронирование
         </button>
       )}
-      {booking.status === "SUCCESS" && (
+      {booking.status === "success" && (
         <button
           className={styles.buttonCancel}
-          onClick={() => handleUpdateStatus("CANCELED")}
+          onClick={() => handleUpdateStatus("canceled")}
         >
           Отменить бронирование
         </button>

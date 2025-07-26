@@ -2,11 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-
-class Author(BaseModel):
-    id: UUID
-    name: str
-    username: str
+from src.domain.schemas.to_represent import Author
 
 
 class BaseSubscriptionSchema(BaseModel):
@@ -25,4 +21,3 @@ class SubscriptionDeleteSchema(BaseSubscriptionSchema):
 class SubscriptionRepresentSchema(BaseSubscriptionSchema):
     pass
     author: Author
-

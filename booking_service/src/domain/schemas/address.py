@@ -20,8 +20,8 @@ class AdressRepresentSchema(AddressBaseSchema):
 
 
 class UpdateAddressSchema(BaseModel):
-    country: str | None
-    city: str | None
-    street: str | None
-    house: str | None
-    flat: str | None
+    country: str | None = None
+    city: str | None = None
+    street: str | None = None
+    house: str | None = None
+    flat: str | None = None

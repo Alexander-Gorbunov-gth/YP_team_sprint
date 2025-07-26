@@ -6,11 +6,11 @@ import styles from "./BookingsPage.module.css";
 export default function BookingsPage() {
   function getStatusLabel(status) {
     switch (status) {
-      case "PENDING":
+      case "pending":
         return "Забронировано";
-      case "CANCELED":
+      case "canceled":
         return "Отменено";
-      case "SUCCESS":
+      case "success":
         return "Подтверждено";
       default:
         return status;

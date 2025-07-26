@@ -29,7 +29,7 @@ export default function NewBookingPage() {
       const newReservation = await createReservation({
         event_id: event.id,
         seats: Number(seats),
-        status: "PENDING",
+        status: "pending",
       });
       navigate(`/bookings/${newReservation.id}`);
     } catch {
