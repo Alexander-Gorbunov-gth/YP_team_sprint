@@ -42,7 +42,7 @@ class Event(DateTimeMixin, BaseModel):
     def has_reservation_for(self, user_id: UUID) -> bool:
         return any(r.user_id == user_id for r in self.reservations)
 
-    def can_reserve(self, seats_requested: int) -> bool:
+    def can_reserve_seats(self, seats_requested: int) -> bool:
         return seats_requested <= self.available_seats()
 
     def add_reservasion(self, reservation: Reservation) -> None:
@@ -54,7 +54,7 @@ class Event(DateTimeMixin, BaseModel):
         self.touch()
 
     def reserve(self, user_id: UUID, seats_requested: int) -> Reservation:
-        if not self.can_reserve(seats_requested=seats_requested):
+        if not self.can_reserve_seats(seats_requested=seats_requested):
             raise NotEnoughSeatsError
 
         if self.has_reservation_for(user_id=user_id):
