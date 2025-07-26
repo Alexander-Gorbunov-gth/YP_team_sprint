@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Author(BaseModel):
@@ -10,8 +10,10 @@ class Author(BaseModel):
 
 
 class BaseSubscriptionSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     host_id: UUID
-    # user_id: UUID - забрать из токена
+    user_id: UUID
 
 
 class SubscriptionCreateSchema(BaseSubscriptionSchema):
