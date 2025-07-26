@@ -48,8 +48,16 @@ class PostgresSettings(ModelConfig):
         return f"postgresql+psycopg2://{self.user}:{pwd}@{self.host}:{self.port}/{self.db_name}"
 
 
+class AuthSettings(ModelConfig):
+    """Настройки авторизации"""
+
+    secret_key: SecretStr = Field(..., validation_alias="AUTH_SECRET_KEY")
+    algorithm: str = Field(default="HS256", validation_alias="AUTH_ALGORITHM")
+
+
 class Settings(BaseSettings):
     postgres: PostgresSettings = PostgresSettings()
+    auth: AuthSettings = AuthSettings()
 
 
 init_logger()

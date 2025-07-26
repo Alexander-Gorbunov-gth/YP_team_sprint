@@ -4,3 +4,7 @@ class EventTimeConflictError(Exception):
 
 class EventNotFoundError(Exception):
     pass
+
+
+class SessionHasExpired(Exception):
+    """Исключение, которое выбрасывается, если сессия истекла."""
