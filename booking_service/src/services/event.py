@@ -81,6 +81,10 @@ class EventService(IEventService):
         if current_event is None:
             raise EventNotFoundError("Event not found")
         for reservation in current_event.reservations:
-            message = PublishMessage(user_id=reservation.user_id)
+            message = PublishMessage(
+                event_type="example",  # TODO: example Чтобы mypy не жаловался. Нужно заменить на реальный тип события
+                channels=["email", "push"],  # TODO: email, push Чтобы mypy не жаловался. Нужно заменить на реальные.
+                user_id=reservation.user_id,
+            )
             await self._producer.publish(message=message)
         return await self._event_repository.delete(event_id)

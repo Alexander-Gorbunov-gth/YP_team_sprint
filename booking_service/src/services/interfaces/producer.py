@@ -22,18 +22,22 @@ class PublishMessage(BaseModel):
         description="Флаг, указывающий, что событие для всех пользователей",
     )
     user_params: Dict[UUID, Dict[str, str]] | None = Field(
-        None,
+        default=None,
         description="Данные клиентов для отправки",
-        example={"user_uuid": {"key1": "value1", "key2": "value2"}},
+        json_schema_extra={
+            "example": {"123e4567-e89b-12d3-a456-426614174000": {"key1": "value1", "key2": "value2"}}
+        },
     )
     send_in_local_time: bool = Field(
         False,
         description="Флаг, указывающий, что время отправки события в локальном времени пользователя",
     )
     send_at: datetime | None = Field(
-        None,
+        default=None,
         description="Время отправки события. Если None, то событие отправляется немедленно",
-        example="2023-10-01T12:00:00Z",
+        json_schema_extra={
+            "example": "2023-10-01T12:00:00Z"
+        },
     )
 
 

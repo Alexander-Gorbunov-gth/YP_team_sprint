@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 
 from src.infrastructure.messaging.producer import RabbitMQProducer
 from src.interfaces.connection import AbstractConnection
@@ -16,7 +17,6 @@ print(f"Has connect method: {hasattr(RabbitMQProducer, 'connect')}")
 print(f"Has close method: {hasattr(RabbitMQProducer, 'close')}")
 
 # Проверяем, что методы не абстрактные
-import inspect
 
 print(f"publish is abstract: {inspect.isabstract(RabbitMQProducer.publish)}")
 print(f"connect is abstract: {inspect.isabstract(RabbitMQProducer.connect)}")

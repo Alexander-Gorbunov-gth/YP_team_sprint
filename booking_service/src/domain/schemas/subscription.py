@@ -25,3 +25,4 @@ class SubscriptionDeleteSchema(BaseSubscriptionSchema):
 class SubscriptionRepresentSchema(BaseSubscriptionSchema):
     pass
     author: Author
+

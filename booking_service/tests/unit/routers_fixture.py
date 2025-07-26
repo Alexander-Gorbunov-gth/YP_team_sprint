@@ -38,6 +38,7 @@ event_data = Event(
 
 
 sub_data = Subscription(
+    id="2a736ae7-7c0f-429a-ba4b-f334e32d05aa",
     host_id="2a736ae7-7c0f-429a-ba4b-f334e32d0aaa",
     user_id="2a736ae7-7c0f-429a-ba4b-f334e32d05ab",
 )
