@@ -60,7 +60,12 @@ export default function MyEventsPage() {
       </div>
       <div className={styles.grid}>
         {events.map((event) => (
-          <div key={event.id} className={styles.card}>
+          <div
+            key={event.id}
+            className={styles.card}
+            onClick={() => navigate(`/events/${event.id}`)}
+            style={{ cursor: "pointer" }}
+          >
             <h3>{event.movie?.title || "Название неизвестно"}</h3>
             <p>
               <strong>Адрес:</strong> {event.address?.city}, {event.address?.street} {event.address?.house}

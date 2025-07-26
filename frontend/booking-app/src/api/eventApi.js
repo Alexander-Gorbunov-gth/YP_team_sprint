@@ -10,7 +10,7 @@ export async function getEvents() {
             id: 1,
             movie_id: "uuid-1",
             address_id: "uuid-a1",
-            owner_id: "uuid-o1",
+            owner_id: "uuid-o112",
             capacity: 100,
             start_datetime: "2023-10-01T18:00:00Z",
             address: {
@@ -27,6 +27,11 @@ export async function getEvents() {
                 description: "Экранизация великого романа.",
                 directors_names: ["Сергей Бондарчук"],
                 actors_names: ["Людмила Савельева", "Вячеслав Тихонов"]
+            },
+            author: {
+                id: "uuid-o112",
+                name: "Иван Иванов",
+                username: "ivanov"
             }
             },
             {
@@ -50,6 +55,11 @@ export async function getEvents() {
                 description: "Легендарная советская комедия.",
                 directors_names: ["Леонид Гайдай"],
                 actors_names: ["Юрий Никулин", "Андрей Миронов"]
+            },
+            author: {
+                id: "uuid-o1",
+                name: "Иван Иванов",
+                username: "ivanov"
             }
             }
         ]
@@ -81,7 +91,12 @@ export async function getEventById(id) {
         description: "Экранизация великого романа.",
         directors_names: ["Сергей Бондарчук"],
         actors_names: ["Людмила Савельева", "Вячеслав Тихонов"]
-        }
+        },
+        author: {
+                id: "uuid-o1",
+                name: "Иван Иванов",
+                username: "ivanov"
+            }
     };
 }
 
@@ -150,4 +165,9 @@ export async function createEvent(eventData) {
     console.error("Ошибка при создании события:", error);
     throw error;
   }
+}
+
+export async function updateEvent(id, data) {
+  const res = await axios.patch(`${API_BASE}/events/${id}`, data);
+  return res.data;
 }

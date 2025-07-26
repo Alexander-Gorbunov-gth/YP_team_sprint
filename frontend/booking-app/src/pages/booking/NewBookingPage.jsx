@@ -26,12 +26,12 @@ export default function NewBookingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createReservation({
+      const newReservation = await createReservation({
         event_id: event.id,
         seats: Number(seats),
         status: "PENDING",
       });
-      navigate(`/bookings?event_id=${event.id}`);
+      navigate(`/bookings/${newReservation.id}`);
     } catch {
       alert("Ошибка при бронировании");
     }

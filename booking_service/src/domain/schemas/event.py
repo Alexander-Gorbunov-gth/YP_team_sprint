@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from .address import AdressRepresentSchema
+from .subscription import Author
 
 
 class MovieSchema(BaseModel):
@@ -27,10 +28,9 @@ class EventCreateSchema(EventBaseSchema):
 
 
 class EventUpdateSchema(BaseModel):
-    movie_id: UUID | None
-
+    # movie_id: UUID | None - сам фильм запретим менять
     address_id: UUID | None
-    owner_id: UUID | None
+    # owner_id: UUID | None - # сам автор запретим менять
     capacity: int | None
     start_datetime: datetime | None
 
@@ -39,3 +39,4 @@ class EventResponseSchema(EventBaseSchema):
     id: UUID
     address: AdressRepresentSchema
     movie: MovieSchema
+    author: Author

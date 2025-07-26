@@ -129,13 +129,13 @@ export default function CreateEventPage({ movies = [] }) {
         <button type="submit" className={styles.button}>
           Создать
         </button>
-        <button
+        {/* <button
           type="button"
           className={styles.secondaryButton}
           onClick={() => navigate("/addresses/new")}
         >
           ➕ Добавить адрес
-        </button>
+        </button> */}
       </form>
     </div>
   );
