@@ -38,7 +38,5 @@ class PublishMessage(BaseModel):
 
 
 class IProducer(abc.ABC):
-
     @abc.abstractmethod
-    async def publish(self, message: PublishMessage) -> None:
-        ...
+    async def publish(self, message: PublishMessage) -> None: ...

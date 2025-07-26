@@ -1,9 +1,10 @@
-from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
 
 from src.domain.entities.reservation import ReservationStatus
+
+from .event import MovieSchema
 
 
 class ReservationBaseSchema(BaseModel):
@@ -19,6 +20,7 @@ class ReservationCreateSchema(ReservationBaseSchema):
 
 class ReservationRepresentSchema(ReservationBaseSchema):
     id: UUID
+    movie: MovieSchema
 
 
 class ReservationUpdateSchema(BaseModel):

@@ -9,7 +9,7 @@ export default function Sidebar() {
       <Link className={styles.link} to="/my-events">Мои события</Link>
       <Link className={styles.link} to="/bookings">Бронирования</Link>
       <Link className={styles.link} to="/subscriptions">Подписки</Link>
-      <Link className={styles.link} to="/notifications">Уведомления</Link>
+      {/* <Link className={styles.link} to="/notifications">Уведомления</Link> */}
     </aside>
   );
 }

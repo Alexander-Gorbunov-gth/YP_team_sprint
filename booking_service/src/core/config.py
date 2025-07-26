@@ -35,5 +35,4 @@ class Settings(BaseSettings):
     postgres: PostgresSettings = PostgresSettings()
 
 
-
 settings = Settings()
