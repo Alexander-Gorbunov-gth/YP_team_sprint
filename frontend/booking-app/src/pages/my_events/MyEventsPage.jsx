@@ -10,7 +10,7 @@ export default function MyEventsPage() {
 
   useEffect(() => {
     getMyEvents()
-      .then((data) => setEvents(data.events))
+      .then((data) => setEvents(data))
       .finally(() => setLoading(false));
   }, []);
 

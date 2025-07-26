@@ -18,7 +18,7 @@ export default function EditEventPage() {
         setEvent(eventData);
         setAddresses(addressData);
         setForm({
-          movie_id: eventData.movie_id,
+        //   movie_id: eventData.movie_id,
           address_id: eventData.address_id,
           capacity: eventData.capacity,
           start_datetime: eventData.start_datetime,
