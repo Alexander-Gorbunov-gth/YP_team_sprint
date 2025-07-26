@@ -5,6 +5,14 @@ from pydantic import BaseModel, Field
 from .address import AdressRepresentSchema
 
 
+class MovieSchema(BaseModel):
+    genres: list[str]
+    title: str
+    description: str | None = None
+    directors_names: list[str]
+    actors_names: list[str]
+
+
 class EventBaseSchema(BaseModel):
     movie_id: UUID
     address_id: UUID
@@ -12,12 +20,14 @@ class EventBaseSchema(BaseModel):
     capacity: int
     start_datetime: datetime
 
+
 class EventCreateSchema(EventBaseSchema):
     pass
 
 
 class EventUpdateSchema(BaseModel):
     movie_id: UUID | None
+
     address_id: UUID | None
     owner_id: UUID | None
     capacity: int | None
@@ -27,3 +37,4 @@ class EventUpdateSchema(BaseModel):
 class EventResponseSchema(EventBaseSchema):
     id: UUID
     address: AdressRepresentSchema
+    movie: MovieSchema

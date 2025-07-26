@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getEvents } from "../api/eventApi";
+import { getEvents } from "../../api/eventApi";
 import dayjs from "dayjs";
 import styles from "./EventsPage.module.css";
 
@@ -27,11 +27,15 @@ export default function EventsPage() {
 }
 
 function EventCard({ event }) {
+  const address = event.address
+    ? `${event.address.city}, ${event.address.street} ${event.address.house}`
+    : "Адрес не указан";
+
   return (
     <div className={styles.card}>
       <h3>Событие #{event.id}</h3>
       <p><strong>Фильм:</strong> {event.movie_id}</p>
-      <p><strong>Адрес:</strong> {event.address_id}</p>
+      <p><strong>Адрес:</strong> {address}</p>
       <p><strong>Вместимость:</strong> {event.capacity}</p>
       <p><strong>Начало:</strong> {dayjs(event.start_datetime).format("DD.MM.YYYY HH:mm")}</p>
     </div>
