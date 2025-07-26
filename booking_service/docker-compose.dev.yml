@@ -1,14 +1,14 @@
 services:
-  # booking_service:
-  #   build: .
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "8050:8050"
-  #   volumes:
-  #     - logs:/app/logs
-  #   depends_on:
-  #     - booking_db
+  booking_service:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8050:8050"
+    volumes:
+      - logs:/app/logs
+    depends_on:
+      - booking_db
       # - rabbitmq
 
   auth_service:

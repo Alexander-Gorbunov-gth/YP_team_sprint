@@ -8,8 +8,9 @@ from src.domain.schemas.to_represent import Author, MovieSchema
 from src.domain.schemas.event import EventResponseSchema
 from src.domain.schemas.reservation import ReservationRepresentSchema
 from src.domain.schemas.subscription import SubscriptionRepresentSchema
+from src.domain.schemas.address import AdressRepresentSchema
 
-address_data = Address(
+address_data = AdressRepresentSchema(
     id="2a736ae7-7c0f-429a-ba4b-f334e32d05bb",
     country="Россия",
     city="Москва",
