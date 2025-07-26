@@ -14,7 +14,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
   align-items: center; /* changed from stretch to center */
   text-align: center;
@@ -29,7 +29,7 @@
 }
 
 .input {
-  width: 100%;
+  width: 90%;
   padding: 0.75rem 1rem;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
