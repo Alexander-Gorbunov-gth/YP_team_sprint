@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import Header from "./components/Header/Header";
 
 import EventsPage from './pages/events/EventsPage'; // <-- импорт OK
+import NewBookingPage from "./pages/booking/NewBookingPage";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
               <Route path="/events" element={<EventsPage />} />
               <Route path="/my-events" element={<EventsPage />} />
               <Route path="/bookings" element={<h1>Бронирования</h1>} />
+              <Route path="/bookings/new" element={<NewBookingPage />} />
               <Route path="/subscriptions" element={<h1>Подписки</h1>} />
               <Route path="/notifications" element={<h1>Уведомления</h1>} />
             </Routes>
