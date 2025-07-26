@@ -1,13 +1,12 @@
 import logging
+from collections.abc import Iterable
 from uuid import UUID
 
-from fastapi import Depends
 from sqlalchemy import Result, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.postgres import get_session
 from src.domain.entities.subscription import Subscription
-from src.domain.schemas.subscription import CreateSubscriptionSchema, DeleteSubscriptionSchema
+from src.domain.schemas.subscription import SubscriptionCreateSchema, SubscriptionDeleteSchema
 from src.infrastructure.repositories.exceptions import SubscriptionAlreadyExistsError, SubscriptionNotFoundError
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 
@@ -18,7 +17,7 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create(self, subscription: CreateSubscriptionSchema) -> Subscription:
+    async def create(self, subscription: SubscriptionCreateSchema) -> Subscription:
         """
         Создает подписку в базе данных.
         :param subscription: Схема подписки для создания.
@@ -27,15 +26,18 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
         """
 
         check_query = select(Subscription).filter_by(host_id=subscription.host_id, user_id=subscription.user_id)
-        existing: Result = await self._session.execute(check_query).scalar_one_or_none()
-        if existing is not None:
-            raise SubscriptionAlreadyExistsError(f"Подписка {subscription.host_id=} {subscription.user_id=} уже существует")
+        result: Result = await self._session.execute(check_query)
+        existing = result.scalar_one_or_none()
+        if existing:
+            raise SubscriptionAlreadyExistsError(
+                f"Подписка {subscription.host_id=} {subscription.user_id=} уже существует"
+            )
 
         query = insert(Subscription).values(subscription.model_dump()).returning(Subscription)
-        result: Result = await self._session.execute(query)
-        return result.scalar_one()
+        created_subscription: Result = await self._session.execute(query)
+        return created_subscription.scalar_one()
 
-    async def delete(self, subscription: DeleteSubscriptionSchema) -> None:
+    async def delete(self, subscription: SubscriptionDeleteSchema) -> None:
         """
         Удаляет подписку из базы данных.
         :param subscription: Схема подписки для удаления.
@@ -43,12 +45,15 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
         """
 
         check_query = select(Subscription).filter_by(host_id=subscription.host_id, user_id=subscription.user_id)
-        existing: Result = await self._session.execute(check_query).scalar_one_or_none()
+        result: Result = await self._session.execute(check_query)
+        existing = result.scalar_one_or_none()
         if existing is None:
             raise SubscriptionNotFoundError(f"Подписка с {subscription.host_id=} и {subscription.user_id=} не найдена.")
         await self._session.delete(subscription)
 
-    async def get_subscriptions_by_user_id(self, user_id: UUID | str, limit: int, offset: int) -> list[Subscription]:
+    async def get_subscriptions_by_user_id(
+        self, user_id: UUID | str, limit: int, offset: int
+    ) -> Iterable[Subscription]:
         """
         Получает все подписки для пользователя.
         :param user_id: ID пользователя.
@@ -60,11 +65,7 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
             .filter_by(user_id=user_id)
             .limit(limit)
             .offset(offset)
-            .order_by(Subscription.created_at.desc())
+            .order_by(Subscription.created_at.desc())  # type: ignore
         )
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()
-
-
-async def get_subscription_repository(session: AsyncSession = Depends(get_session)) -> SQLAlchemySubscriptionRepository:
-    return SQLAlchemySubscriptionRepository(session=session)
