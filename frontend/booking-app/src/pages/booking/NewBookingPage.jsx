@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { getEventById } from "../../api/eventApi";
 import { createReservation } from "../../api/bookingApi";
 import dayjs from "dayjs";
@@ -8,6 +8,7 @@ import styles from "./NewBookingPage.module.css";
 export default function NewBookingPage() {
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get("event_id");
+  const navigate = useNavigate();
 
   const [event, setEvent] = useState(null);
   const [seats, setSeats] = useState(1);
@@ -30,7 +31,7 @@ export default function NewBookingPage() {
         seats: Number(seats),
         status: "PENDING",
       });
-      setSuccess(true);
+      navigate(`/bookings?event_id=${event.id}`);
     } catch {
       alert("Ошибка при бронировании");
     }
@@ -61,29 +62,25 @@ export default function NewBookingPage() {
 
       <hr style={{ margin: "20px 0" }} />
 
-      {success ? (
-        <p style={{ color: "green" }}>Бронирование успешно!</p>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <label>
-            Количество мест:
-            <input
-              type="number"
-              min="1"
-              max={event.capacity}
-              value={seats}
-              onChange={(e) => setSeats(e.target.value)}
-              required
-              className={styles.input}
-            />
-          </label>
-          <div style={{ marginTop: "16px" }}>
-            <button type="submit" className={styles.button}>
-              Забронировать
-            </button>
-          </div>
-        </form>
-      )}
+      <form onSubmit={handleSubmit}>
+        <label>
+          Количество мест:
+          <input
+            type="number"
+            min="1"
+            max={event.capacity}
+            value={seats}
+            onChange={(e) => setSeats(e.target.value)}
+            required
+            className={styles.input}
+          />
+        </label>
+        <div style={{ marginTop: "16px" }}>
+          <button type="submit" className={styles.button}>
+            Забронировать
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

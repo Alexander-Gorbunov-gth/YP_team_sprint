@@ -1,6 +1,6 @@
 import logging
 
-from faststream.rabbit import RabbitBroker, RabbitExchange, ExchangeType
+from faststream.rabbit import ExchangeType, RabbitBroker, RabbitExchange
 
 from src.interfaces.connection import AbstractConnection
 from src.services.interfaces.producer import IProducer, PublishMessage
@@ -47,12 +47,7 @@ class RabbitMQProducer(IProducer, AbstractConnection):
             await self._broker.stop()
             logger.info("✅ Соединение с продюсером RabbitMQ закрыто")
 
-    async def publish(
-        self,
-        message: PublishMessage,
-        routing_key: str,
-        delay_ms: int | None = None
-    ) -> None:
+    async def publish(self, message: PublishMessage, routing_key: str, delay_ms: int | None = None) -> None:
         """
         Отправляет сообщение в RabbitMQ.
         :param message: Сообщение для отправки

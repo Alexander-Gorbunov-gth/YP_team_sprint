@@ -1,7 +1,6 @@
 import logging
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter
 
 from src.domain.schemas import address as schema
 from tests.unit.routers_fixture import address_data
@@ -12,9 +11,7 @@ router = APIRouter(prefix="/address", tags=["Address"])
 
 
 @router.post("/", summary="Создать адрес", response_model=schema.AdressRepresentSchema)
-async def create_address(
-    data: schema.AdressCreateSchema
-):
+async def create_address(data: schema.AdressCreateSchema):
     return address_data
 
 
@@ -27,13 +24,12 @@ async def get_address():
 async def get_my_address():
     return [address_data, address_data, address_data]
 
+
 @router.delete("/{id}", summary="Удалить адрес")
 async def delete_address() -> bool:
     return True
 
 
 @router.patch("/{id}", summary="Изменить адрес", response_model=schema.AdressRepresentSchema)
-async def update_address(
-    data: schema.UpdateAddressSchema
-):
+async def update_address(data: schema.UpdateAddressSchema):
     return address_data

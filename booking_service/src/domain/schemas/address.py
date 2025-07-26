@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -26,4 +25,3 @@ class UpdateAddressSchema(BaseModel):
     street: str | None
     house: str | None
     flat: str | None
-

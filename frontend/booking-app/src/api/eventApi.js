@@ -84,3 +84,70 @@ export async function getEventById(id) {
         }
     };
 }
+
+
+
+export async function getMyEvents() {
+  return {
+    events: [
+      {
+        id: 1,
+        movie_id: "uuid-1",
+        address_id: "uuid-a1",
+        owner_id: "00000000-0000-0000-0000-000000000001",
+        capacity: 100,
+        start_datetime: "2023-10-01T18:00:00Z",
+        address: {
+          id: "uuid-a1",
+          country: "Россия",
+          city: "Москва",
+          street: "Тверская",
+          house: "10",
+          flat: null
+        },
+        movie: {
+          genres: ["драма", "история"],
+          title: "Война и мир",
+          description: "Экранизация великого романа.",
+          directors_names: ["Сергей Бондарчук"],
+          actors_names: ["Людмила Савельева", "Вячеслав Тихонов"]
+        },
+        status: "active"
+      },
+      {
+        id: 2,
+        movie_id: "uuid-2",
+        address_id: "uuid-a2",
+        owner_id: "00000000-0000-0000-0000-000000000001",
+        capacity: 80,
+        start_datetime: "2023-11-10T16:00:00Z",
+        address: {
+          id: "uuid-a2",
+          country: "Россия",
+          city: "Казань",
+          street: "Баумана",
+          house: "12",
+          flat: null
+        },
+        movie: {
+          genres: ["триллер"],
+          title: "Тайна на Волге",
+          description: "Захватывающий детектив.",
+          directors_names: ["Иван Иванов"],
+          actors_names: ["Анна Смирнова", "Дмитрий Петров"]
+        },
+        status: "finished"
+      }
+    ]
+  };
+}
+
+export async function createEvent(eventData) {
+  try {
+    const res = await axios.post(`${API_BASE}/events`, eventData);
+    return res.data;
+  } catch (error) {
+    console.error("Ошибка при создании события:", error);
+    throw error;
+  }
+}
