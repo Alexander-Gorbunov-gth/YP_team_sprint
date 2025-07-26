@@ -1,11 +1,16 @@
 import { suggestAddress } from "../../api/dadataApi";
+import { createAddress } from "../../api/addressApi";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import styles from "./AddAddressPage.module.css";
+import { parseDadataAddress } from "../../services/dadataParser";
+
 
 export default function AddAddressPage() {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [selected, setSelected] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -20,9 +25,22 @@ export default function AddAddressPage() {
 
   const handleSelect = (sugg) => {
     setSelected(sugg);
-    console.log("Выбранный адрес:", sugg);
     setQuery(sugg.value);
     setSuggestions([]);
+  };
+
+  const handleSave = () => {
+    if (!selected) return;
+    const addressData = parseDadataAddress(selected.data);
+    console.log("Данные для POST:", addressData);
+    createAddress(addressData)
+      .then(() => {
+        navigate("/my-events");
+      })
+      .catch((err) => {
+        console.error("Ошибка при создании адреса", err);
+        alert("Не удалось сохранить адрес");
+      });
   };
 
   return (
@@ -55,7 +73,7 @@ export default function AddAddressPage() {
           <p><strong>Дом:</strong> {selected.data.house}</p>
         </div>
       )}
-      <button className={styles.saveButton}>
+      <button className={styles.saveButton} onClick={handleSave}>
         Сохранить адрес
       </button>
     </div>

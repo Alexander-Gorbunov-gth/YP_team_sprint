@@ -30,3 +30,13 @@ export async function getMyAddresses() {
     throw error;
   }
 }
+export async function createAddress(addressData) {
+  return {}
+  try {
+    const response = await axios.post(`${API_BASE}/addresses/`, addressData);
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при создании адреса:', error);
+    throw error;
+  }
+}

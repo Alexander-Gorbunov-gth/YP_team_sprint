@@ -6,17 +6,17 @@ import axios from "axios";
 export async function getMySubscriptions(userId) {
     return [
   {
-    host_id: "00000000-0000-0000-0000-000000000001",
+    host_id: "uuid-o1",
     author: {
-      id: "00000000-0000-0000-0000-000000000001",
+      id: "uuid-o1",
       name: "Иван Иванов",
       username: "ivan123"
     }
   },
   {
-    host_id: "00000000-0000-0000-0000-000000000002",
+    host_id: "uuid-o2",
     author: {
-      id: "00000000-0000-0000-0000-000000000002",
+      id: "uuid-o2",
       name: "Мария Смирнова",
       username: "masha_s"
     }
@@ -36,3 +36,8 @@ export async function deleteSubscription(hostId) {
   });
   return response.data;
 }   
+
+export async function createSubscription(subscriptionData) {
+  const response = await axios.post(`${API_BASE}/subscriptions`, subscriptionData);
+  return response.data;
+}

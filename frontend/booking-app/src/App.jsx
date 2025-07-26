@@ -8,8 +8,9 @@ import NewBookingPage from "./pages/booking/NewBookingPage";
 import BookingsPage from "./pages/booking/BookingsPage";
 import BookingDetailPage from "./pages/booking/BookingDetailPage";
 import MyEventsPage from "./pages/my_events/MyEventsPage";
-import CreateEventPage from "./pages/events/CreateEventPage";
+import CreateEventPage from "./pages/my_events/CreateEventPage";
 import AddAddressPage from "./pages/address/AddAddressPage";
+import EditEventPage from "./pages/my_events/EditEventPage";
 
 export default function App() {
   return (
@@ -31,7 +32,7 @@ export default function App() {
               <Route path="/bookings/:id" element={<BookingDetailPage />} />
               <Route path="/bookings/new" element={<NewBookingPage />} />
               <Route path="/subscriptions" element={<SubscriptionsPage />} />
-              {/* <Route path="/notifications" element={<h1>Уведомления</h1>} /> */}
+              <Route path="/events/:id" element={<EditEventPage />} />
             </Routes>
           </main>
         </div>
