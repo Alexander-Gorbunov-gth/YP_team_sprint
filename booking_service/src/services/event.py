@@ -5,8 +5,8 @@ from uuid import UUID
 from src.domain.entities.event import Event
 from src.domain.schemas.event import EventCreateSchema, EventUpdateSchema
 from src.services.exceptions import EventNotFoundError, EventTimeConflictError
-from src.services.interfaces.producer import IProducer, PublishMessage
-from src.services.interfaces.repositories.event import IEventRepository
+from src.services.interfaces.producer import PublishMessage
+from src.services.interfaces.uow import IUnitOfWork
 
 
 class IEventService(abc.ABC):
@@ -19,13 +19,18 @@ class IEventService(abc.ABC):
     @abc.abstractmethod
     async def delete(self, event_id: UUID | str) -> None: ...
 
+    @abc.abstractmethod
+    async def get_by_id(self, event_id: UUID | str) -> Event: ...
+
+    @abc.abstractmethod
+    async def get_event_list(self, offset: int, limit: int) -> list[Event]: ...
+
 
 class EventService(IEventService):
     EVENT_DURATION_HOURS = 3
 
-    def __init__(self, event_repository: IEventRepository, producer: IProducer):
-        self._event_repository = event_repository
-        self._producer = producer
+    def __init__(self, uow: IUnitOfWork):
+        self._uow = uow
 
     def _check_event_time_conflict(
         self, event: EventCreateSchema | EventUpdateSchema, user_events: list[Event]
@@ -50,10 +55,10 @@ class EventService(IEventService):
         Проверяется, что событие не пересекается с другими событиями пользователя.
         param: event: EventCreateSchema - событие для создания
         """
-
-        user_events: list[Event] = await self._event_repository.get_events_by_user_id(event.owner_id)
-        self._check_event_time_conflict(event, user_events)
-        return await self._event_repository.create(event)
+        async with self._uow as uow:
+            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(event.owner_id)
+            self._check_event_time_conflict(event, user_events)
+            return await uow.event_repository.create(event)
 
     async def update(self, event: EventUpdateSchema) -> Event | None:
         """
@@ -62,14 +67,16 @@ class EventService(IEventService):
         param: event: EventUpdateSchema - событие для обновления
         """
 
-        current_event: Event | None = await self._event_repository.get_by_id(event.id)
-        if current_event is None:
-            raise EventNotFoundError("Event not found")
-        current_event.can_be_updated()
-        if event.start_datetime is not None:
-            user_events: list[Event] = await self._event_repository.get_events_by_user_id(current_event.owner_id)
+        async with self._uow as uow:
+            current_event: Event | None = await uow.event_repository.get_by_id(event.id)
+            if current_event is None:
+                raise EventNotFoundError("Event not found")
+            current_event.can_be_updated()
+            if event.start_datetime is not None:
+                user_events: list[Event] = await uow.event_repository.get_events_by_user_id(current_event.owner_id)
             self._check_event_time_conflict(event, user_events)
-        return await self._event_repository.update(event)
+            await uow.producer.publish(message=PublishMessage(user_id=current_event.owner_id))
+            return await uow.event_repository.update(event)
 
     async def delete(self, event_id: UUID | str) -> None:
         """
