@@ -35,6 +35,19 @@ services:
     ports:
       - "8060:8060"
 
+  content_service:
+    build: ../content_service
+    env_file:
+      - .env
+    ports:
+      - 8005:8005
+    volumes:
+      - logs:/app/logs/content_service
+    depends_on:
+      - content_postgres
+      - redis
+      - elasticsearch
+
   notification_db:
     image: postgres:17.4-bookworm
     container_name: notification_db
@@ -66,6 +79,25 @@ services:
     ports:
       - "5435:5432"
 
+  content_postgres:
+    image: postgres:15
+    container_name: postgres_movies
+    restart: always
+    volumes:
+      - content_db:/var/lib/postgresql/data/
+      - ../database_dump.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - ../.env
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 3
+
   rabbitmq:
     build:
       context: ../notifications/rabbitmq
@@ -89,9 +121,33 @@ services:
     ports:
       - 6379:6379
 
+  elasticsearch:
+    image: elasticsearch:8.15.3
+    container_name: elasticsearch_movies
+    logging:
+      driver: none
+    ports:
+      - "9200:9200"
+    expose:
+      - "9200"
+    healthcheck:
+      test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 50
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - logger.level=WARN
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - cluster.routing.allocation.disk.watermark.low=95%
+      - cluster.routing.allocation.disk.watermark.high=97%
+      - cluster.routing.allocation.disk.watermark.flood_stage=98%
+
 volumes:
   pg_auth:
   logs:
   notification_pgdata:
   rabbitmq_data:
   pg_booking:
+  content_db:
