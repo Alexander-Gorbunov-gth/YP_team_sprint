@@ -11,4 +11,15 @@ format:
 
 lint:
 	ruff check src/
+
+format-path:
+	ruff format $(PATH)
+	ruff check $(PATH) --fix
+
+lint-path:
+	ruff check $(PATH)
+
+typecheck-path:
+	mypy $(PATH) --explicit-package-bases
+
 	
