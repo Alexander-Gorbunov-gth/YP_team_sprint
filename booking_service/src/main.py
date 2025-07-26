@@ -10,8 +10,7 @@ from src.api.v1.router import router
 async def lifespan(_: FastAPI):
     yield
 
-
-app = FastAPI(lifespan=lifespan, root_path="/proxy/8000/")
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(router, prefix="/api")
 
