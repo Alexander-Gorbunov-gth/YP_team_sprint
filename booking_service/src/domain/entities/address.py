@@ -7,6 +7,9 @@ from src.domain.entities.mixins import DateTimeMixin
 
 class Address(DateTimeMixin, BaseModel):
     id: UUID = Field(default_factory=uuid4)
+    user_id: UUID
+    latitude: float
+    longitude: float
     country: str
     city: str
     street: str
@@ -14,8 +17,27 @@ class Address(DateTimeMixin, BaseModel):
     flat: str | None = Field(default=None)
 
     @classmethod
-    def create(cls, country: str, city: str, street: str, house: str, flat: str | None = None) -> "Address":
-        return cls(country=country, city=city, street=street, house=house, flat=flat)
+    def create(
+        cls,
+        user_id: UUID,
+        latitude: float,
+        longitude: float,
+        country: str,
+        city: str,
+        street: str,
+        house: str,
+        flat: str | None = None,
+    ) -> "Address":
+        return cls(
+            user_id=user_id,
+            latitude=latitude,
+            longitude=longitude,
+            country=country,
+            city=city,
+            street=street,
+            house=house,
+            flat=flat,
+        )
 
     @property
     def full_address(self) -> str:

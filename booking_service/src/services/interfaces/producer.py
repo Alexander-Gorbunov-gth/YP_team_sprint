@@ -24,9 +24,7 @@ class PublishMessage(BaseModel):
     user_params: Dict[UUID, Dict[str, str]] | None = Field(
         default=None,
         description="Данные клиентов для отправки",
-        json_schema_extra={
-            "example": {"123e4567-e89b-12d3-a456-426614174000": {"key1": "value1", "key2": "value2"}}
-        },
+        json_schema_extra={"example": {"123e4567-e89b-12d3-a456-426614174000": {"key1": "value1", "key2": "value2"}}},
     )
     send_in_local_time: bool = Field(
         False,
@@ -35,9 +33,7 @@ class PublishMessage(BaseModel):
     send_at: datetime | None = Field(
         default=None,
         description="Время отправки события. Если None, то событие отправляется немедленно",
-        json_schema_extra={
-            "example": "2023-10-01T12:00:00Z"
-        },
+        json_schema_extra={"example": "2023-10-01T12:00:00Z"},
     )
 
 
