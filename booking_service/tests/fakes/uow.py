@@ -1,11 +1,21 @@
 from src.services.interfaces.producer import IProducer
+from src.services.interfaces.repositories.address import IAddressRepository
 from src.services.interfaces.repositories.event import IEventRepository
+from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 from src.services.interfaces.uow import IUnitOfWork
 from tests.fakes.producer import FakeProducer
+from tests.fakes.repositories.address import FakeAddressRepository
 from tests.fakes.repositories.event import FakeEventRepository
+from tests.fakes.repositories.subscription import FakeSubscriptionRepository
 
 
 class FakeUnitOfWork(IUnitOfWork):
+    def __init__(self) -> None:
+        self._subscription_repository = FakeSubscriptionRepository()
+        self._event_repository = FakeEventRepository()
+        self._producer = FakeProducer()
+        self._address_repository = FakeAddressRepository()
+
     async def __aenter__(self) -> "FakeUnitOfWork":
         return self
 
@@ -19,9 +29,17 @@ class FakeUnitOfWork(IUnitOfWork):
         pass
 
     @property
+    def subscription_repository(self) -> ISubscriptionRepository:
+        return self._subscription_repository
+
+    @property
     def event_repository(self) -> IEventRepository:
-        return FakeEventRepository()
+        return self._event_repository
+
+    @property
+    def address_repository(self) -> IAddressRepository:
+        return self._address_repository
 
     @property
     def producer(self) -> IProducer:
-        return FakeProducer()
+        return self._producer
