@@ -1,27 +1,23 @@
 import abc
+from collections.abc import Iterable
 from uuid import UUID
 
+from src.domain.dtos.address import AddressUpdateDTO, AdressCreateDTO
 from src.domain.entities.address import Address
-from src.domain.schemas.address import AdressCreateSchema, UpdateAddressSchema
 
 
 class IAddressRepository(abc.ABC):
     @abc.abstractmethod
-    async def create(self, address: AdressCreateSchema) -> Address:
-        pass
+    async def create(self, address: AdressCreateDTO) -> Address: ...
 
     @abc.abstractmethod
-    async def get_address(self, address_id: UUID) -> Address:
-        pass
+    async def get_address(self, address_id: UUID) -> Address: ...
 
     @abc.abstractmethod
-    async def get_my_address(self, user_id: UUID) -> list[Address]:
-        pass
+    async def get_my_addresses(self, user_id: UUID) -> Iterable[Address]: ...
 
     @abc.abstractmethod
-    async def delete(self, address_id: UUID) -> bool:
-        pass
+    async def delete(self, address_id: UUID) -> None: ...
 
     @abc.abstractmethod
-    async def update(self, address_id: UUID, address: UpdateAddressSchema) -> Address:
-        pass
+    async def update(self, address: AddressUpdateDTO) -> Address: ...
