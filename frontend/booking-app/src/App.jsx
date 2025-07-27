@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import Header from "./components/Header/Header";
 
 import EventsPage from './pages/events/EventsPage'; // <-- импорт OK
+import HomePage from "./pages/main/HomePage";
 import SubscriptionsPage from "./pages/subscriptions/SubscriptionsPage";
 import NewBookingPage from "./pages/booking/NewBookingPage";
 import BookingsPage from "./pages/booking/BookingsPage";
@@ -47,7 +48,7 @@ function AppLayout() {
             <Route path="/register" element={<RegisterPage />} />
 
             <Route element={<PrivateRoute />}>
-              <Route path="/" element={<h1>Добро пожаловать 👋</h1>} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/new" element={<CreateEventPage />} />
               <Route path="/addresses/new" element={<AddAddressPage />} />
