@@ -22,6 +22,8 @@ export default function EventsPage() {
   if (loading) return <p>Загрузка событий...</p>;
   if (!events.length) return <p>Нет доступных событий.</p>;
 
+
+
   return (
     <div className={styles.container}>
       {/* <h2 className={styles.title}>Доступные события</h2> */}
