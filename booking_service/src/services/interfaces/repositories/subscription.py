@@ -3,7 +3,10 @@ from collections.abc import Iterable
 from uuid import UUID
 
 from src.domain.entities.subscription import Subscription
-from src.domain.schemas.subscription import SubscriptionCreateSchema, SubscriptionDeleteSchema
+from src.api.v1.schemas.subscription import (
+    SubscriptionCreateSchema,
+    SubscriptionDeleteSchema,
+)
 
 
 class ISubscriptionRepository(abc.ABC):

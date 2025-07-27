@@ -6,8 +6,14 @@ from sqlalchemy import Result, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.entities.subscription import Subscription
-from src.domain.schemas.subscription import SubscriptionCreateSchema, SubscriptionDeleteSchema
-from src.infrastructure.repositories.exceptions import SubscriptionAlreadyExistsError, SubscriptionNotFoundError
+from src.api.v1.schemas.subscription import (
+    SubscriptionCreateSchema,
+    SubscriptionDeleteSchema,
+)
+from src.infrastructure.repositories.exceptions import (
+    SubscriptionAlreadyExistsError,
+    SubscriptionNotFoundError,
+)
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 
 logger = logging.getLogger(__name__)
@@ -25,7 +31,9 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
         :return: Созданная подписка.
         """
 
-        check_query = select(Subscription).filter_by(host_id=subscription.host_id, user_id=subscription.user_id)
+        check_query = select(Subscription).filter_by(
+            host_id=subscription.host_id, user_id=subscription.user_id
+        )
         result: Result = await self._session.execute(check_query)
         existing = result.scalar_one_or_none()
         if existing:
@@ -33,7 +41,11 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
                 f"Подписка {subscription.host_id=} {subscription.user_id=} уже существует"
             )
 
-        query = insert(Subscription).values(subscription.model_dump()).returning(Subscription)
+        query = (
+            insert(Subscription)
+            .values(subscription.model_dump())
+            .returning(Subscription)
+        )
         created_subscription: Result = await self._session.execute(query)
         return created_subscription.scalar_one()
 
@@ -44,11 +56,15 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
         :raises SubscriptionNotFoundError: Если подписка не найдена.
         """
 
-        check_query = select(Subscription).filter_by(host_id=subscription.host_id, user_id=subscription.user_id)
+        check_query = select(Subscription).filter_by(
+            host_id=subscription.host_id, user_id=subscription.user_id
+        )
         result: Result = await self._session.execute(check_query)
         existing = result.scalar_one_or_none()
         if existing is None:
-            raise SubscriptionNotFoundError(f"Подписка с {subscription.host_id=} и {subscription.user_id=} не найдена.")
+            raise SubscriptionNotFoundError(
+                f"Подписка с {subscription.host_id=} и {subscription.user_id=} не найдена."
+            )
         await self._session.delete(subscription)
 
     async def get_subscriptions_by_user_id(

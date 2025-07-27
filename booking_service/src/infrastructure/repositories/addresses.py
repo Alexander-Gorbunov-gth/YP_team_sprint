@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.postgres import get_session
 from src.domain.entities.address import Address
-from src.domain.schemas.address import UpdateAddressSchema
+from src.api.v1.schemas.address import UpdateAddressSchema
 from src.services.interfaces.repositories.address import IAddressRepository
 
 logger = logging.getLogger(__name__)
@@ -74,7 +74,12 @@ class SQLAlchemyAddressRepository(IAddressRepository):
         if not update_data:
             return None
 
-        stmt = update(Address).where(Address.id == address_id).values(**update_data).returning(Address)
+        stmt = (
+            update(Address)
+            .where(Address.id == address_id)
+            .values(**update_data)
+            .returning(Address)
+        )
         result: Result = await self._session.execute(stmt)
         updated_address = result.scalar_one_or_none()
 
@@ -89,5 +94,7 @@ class SQLAlchemyAddressRepository(IAddressRepository):
         await self._session.commit()
 
 
-async def get_address_repository(session: AsyncSession = Depends(get_session)) -> SQLAlchemyAddressRepository:
+async def get_address_repository(
+    session: AsyncSession = Depends(get_session),
+) -> SQLAlchemyAddressRepository:
     return SQLAlchemyAddressRepository(session=session)

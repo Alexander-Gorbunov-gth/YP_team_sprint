@@ -5,14 +5,16 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.core.config import settings
 from src.db import postgres
-from src.domain.schemas.address import UpdateAddressSchema
+from src.api.v1.schemas.address import UpdateAddressSchema
 from src.infrastructure.repositories.addresses import SQLAlchemyAddressRepository
 
 
 async def test_repository():
     # === 1. Инициализируем engine и сессию ===
     postgres.engine = create_async_engine(settings.postgres.connection_url)
-    postgres.async_session_maker = async_sessionmaker(bind=postgres.engine, expire_on_commit=False)
+    postgres.async_session_maker = async_sessionmaker(
+        bind=postgres.engine, expire_on_commit=False
+    )
 
     # === 2. Получаем сессию через async генератор get_session ===
     session_gen = postgres.get_session()

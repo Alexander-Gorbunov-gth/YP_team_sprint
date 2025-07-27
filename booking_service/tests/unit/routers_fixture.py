@@ -4,13 +4,13 @@ from src.domain.entities.address import Address
 from src.domain.entities.event import Event
 from src.domain.entities.reservation import Reservation, ReservationStatus
 from src.domain.entities.subscription import Subscription
-from src.domain.schemas.to_represent import Author, MovieSchema
-from src.domain.schemas.event import EventResponseSchema
-from src.domain.schemas.reservation import ReservationRepresentSchema
-from src.domain.schemas.subscription import SubscriptionRepresentSchema
-from src.domain.schemas.address import AdressRepresentSchema
+from src.api.v1.schemas.utils import Author, MovieSchema
+from src.api.v1.schemas.event import EventResponseSchema
+from src.api.v1.schemas.reservation import ReservationResponseSchema
+from src.api.v1.schemas.subscription import SubscriptionResponseSchema
+from src.api.v1.schemas.address import AddressResponseSchema
 
-address_data = AdressRepresentSchema(
+address_data = AddressResponseSchema(
     id="2a736ae7-7c0f-429a-ba4b-f334e32d05bb",
     country="Россия",
     city="Москва",
@@ -34,7 +34,7 @@ movie_data = MovieSchema(
     actors_names=["John Doe", "Jane Doe"],
 )
 
-reservation_data = ReservationRepresentSchema(
+reservation_data = ReservationResponseSchema(
     id="2a736ae7-7c0f-429a-ba4b-f334e32d05aa",
     user_id="2a736ae7-7c0f-429a-ba4b-f334e32d05ab",
     event_id="2a736ae7-7c0f-429a-ba4b-f334e32d05cc",
@@ -83,13 +83,13 @@ event_my_data = EventResponseSchema(
 )
 
 
-sub_data1 = SubscriptionRepresentSchema(
+sub_data1 = SubscriptionResponseSchema(
     id="2a736ae7-7c0f-429a-ba4b-f334e32d05aa",
     host_id="2a736ae7-7c0f-429a-ba4b-f334e32d0aaa",
     user_id="2a736ae7-7c0f-429a-ba4b-f334e32d05ab",
     author=author_data,
 )
-sub_data2 = SubscriptionRepresentSchema(
+sub_data2 = SubscriptionResponseSchema(
     id="2a736ae7-7c0f-429a-ba4b-f334e32d05ab",
     host_id="2a736ae7-7c0f-429a-ba4b-f334e32d0bbb",
     user_id="2a736ae7-7c0f-429a-ba4b-f334e32d0bbb",

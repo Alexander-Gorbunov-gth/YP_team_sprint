@@ -1,0 +1,201 @@
+services:
+  booking_service:
+    build: ./booking_service
+    env_file:
+      - .booking_service.env
+    ports:
+      - "8050:8050"
+    volumes:
+      - logs:/app/logs
+    depends_on:
+      - booking_db
+      # - rabbitmq
+
+  auth_service:
+    build: ./auth
+    env_file:
+      - .auth.env
+    depends_on:
+      - auth_postgres
+      - redis
+    volumes:
+      - logs:/app/logs
+    ports:
+      - "8001:8001"
+
+  notifications_service:
+    build: ./notifications
+    env_file:
+      - .notifications.env
+    depends_on:
+      - notification_db
+      - rabbitmq
+    volumes:
+      - logs:/app/logs
+    ports:
+      - "8060:8060"
+
+  content_service:
+    build: ./content_service
+    env_file:
+      - .env
+    ports:
+      - 8005:8005
+    volumes:
+      - logs:/app/logs/content_service
+    depends_on:
+      - content_postgres
+      - redis
+      - elasticsearch
+
+  notification_db:
+    image: postgres:17.4-bookworm
+    container_name: notification_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - notification_pgdata:/var/lib/postgresql/data/
+    env_file:
+      - .notifications.env
+
+  auth_postgres:
+    image: postgres:15
+    container_name: auth_postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_auth:/var/lib/postgresql/data/
+    env_file:
+      - .auth.env
+
+  booking_db:
+    image: postgres:15
+    container_name: booking_db
+    restart: always
+    volumes:
+      - pg_booking:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=booking_db
+    env_file:
+      - .env
+    ports:
+      - "5435:5432"
+
+  content_postgres:
+    image: postgres:15
+    container_name: postgres_movies
+    restart: always
+    volumes:
+      - content_db:/var/lib/postgresql/data/
+      - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 3
+
+  rabbitmq:
+    build:
+      context: ./notifications/rabbitmq
+      dockerfile: Dockerfile
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .notifications.env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+
+  elasticsearch:
+    image: elasticsearch:8.15.3
+    container_name: elasticsearch_movies
+    logging:
+      driver: none
+    ports:
+      - "9200:9200"
+    expose:
+      - "9200"
+    healthcheck:
+      test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 50
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - logger.level=WARN
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - cluster.routing.allocation.disk.watermark.low=95%
+      - cluster.routing.allocation.disk.watermark.high=97%
+      - cluster.routing.allocation.disk.watermark.flood_stage=98%
+
+  etl_service:
+    container_name: etl_service_movies
+    build: ./etl_service
+    env_file:
+      - .env
+    volumes:
+      - logs:/app/logs
+
+  gateway:
+    build:
+      context: ./nginx_diplom
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: always
+    volumes:
+      - static_volume:/code/static:ro
+      - frontend_static:/usr/share/nginx/html:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - booking_service
+      - auth_service
+      - notifications_service
+      - content_service
+      - content_postgres
+      - notification_db
+      - auth_postgres
+      - booking_db
+      - redis
+      - elasticsearch
+      
+
+  frontend:
+    build:
+      context: ./frontend/booking-app
+      dockerfile: Dockerfile
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - frontend_static:/frontend-build
+
+volumes:
+  pg_auth:
+  logs:
+  notification_pgdata:
+  rabbitmq_data:
+  pg_booking:
+  content_db:
+  static_volume:
+  frontend_static:

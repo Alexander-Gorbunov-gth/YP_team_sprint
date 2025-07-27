@@ -2,7 +2,7 @@ import abc
 from uuid import UUID
 
 from src.domain.entities.event import Event
-from src.domain.schemas.event import EventCreateSchema, EventUpdateSchema
+from src.api.v1.schemas.event import EventCreateSchema, EventUpdateSchema
 
 
 class IEventRepository(abc.ABC):
