@@ -1,4 +1,6 @@
-from dishka import FromDishka
+from typing import Annotated
+
+from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -9,6 +11,7 @@ from src.services.jwt import AbstractJWTService
 auth_scheme = HTTPBearer(auto_error=False)
 
 
+@inject
 async def get_current_user(
     jwt_service: FromDishka[AbstractJWTService], credentials: HTTPAuthorizationCredentials = Depends(auth_scheme)
 ) -> User:
@@ -19,7 +22,10 @@ async def get_current_user(
     try:
         user = jwt_service.decode_token(token)
         return user
-    except SessionHasExpired:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Сессия истекла")
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный токен")
+    except SessionHasExpired as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Сессия истекла") from e
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный токен") from e
+
+
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
