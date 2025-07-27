@@ -24,6 +24,8 @@ async def get_user_subscriptions(
     limit: int = Query(default=10, description="Количество подписок"),
     offset: int = Query(default=0, description="Сдвиг"),
 ):
+    """Получить список подписок текущего пользователя"""
+
     subscriptions = await subscription_service.get_subscriptions_by_user_id(user.id, limit, offset)
     return [SubscriptionResponseSchema.model_validate(sub) for sub in subscriptions]
 
@@ -34,6 +36,8 @@ async def subscribe(
     user: CurrentUserDep,
     subscription_data: SubscriptionCreateSchema,
 ) -> SubscriptionResponseSchema:
+    """Подписаться на автора"""
+
     subscription = await subscription_service.create_subscription(
         SubscriptionCreateDTO(user_id=user.id, host_id=subscription_data.host_id)
     )
@@ -46,6 +50,8 @@ async def unsubscribe(
     user: CurrentUserDep,
     subscription_data: SubscriptionDeleteSchema,
 ) -> bool:
+    """Отписаться от автора"""
+
     await subscription_service.delete_subscription(
         SubscriptionDeleteDTO(user_id=user.id, host_id=subscription_data.host_id)
     )
