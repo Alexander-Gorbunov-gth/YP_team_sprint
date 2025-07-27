@@ -3,7 +3,7 @@ from datetime import timedelta
 from uuid import UUID
 
 from src.domain.entities.event import Event
-from src.domain.schemas.event import EventCreateSchema, EventUpdateSchema
+from src.api.v1.schemas.event import EventCreateSchema, EventUpdateSchema
 from src.services.exceptions import EventNotFoundError, EventTimeConflictError
 from src.services.interfaces.producer import PublishMessage
 from src.services.interfaces.uow import IUnitOfWork
@@ -56,7 +56,9 @@ class EventService(IEventService):
         param: event: EventCreateSchema - событие для создания
         """
         async with self._uow as uow:
-            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(event.owner_id)
+            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(
+                event.owner_id
+            )
             self._check_event_time_conflict(event, user_events)
             return await uow.event_repository.create(event)
 
@@ -73,9 +75,15 @@ class EventService(IEventService):
                 raise EventNotFoundError("Event not found")
             current_event.can_be_updated()
             if event.start_datetime is not None:
-                user_events: list[Event] = await uow.event_repository.get_events_by_user_id(current_event.owner_id)
+                user_events: list[Event] = (
+                    await uow.event_repository.get_events_by_user_id(
+                        current_event.owner_id
+                    )
+                )
             self._check_event_time_conflict(event, user_events)
-            await uow.producer.publish(message=PublishMessage(user_id=current_event.owner_id))
+            await uow.producer.publish(
+                message=PublishMessage(user_id=current_event.owner_id)
+            )
             return await uow.event_repository.update(event)
 
     async def delete(self, event_id: UUID | str) -> None:
@@ -84,13 +92,18 @@ class EventService(IEventService):
         param: event_id: UUID | str - id события
         """
 
-        current_event: Event | None = await self._event_repository.get_full_by_id(event_id)
+        current_event: Event | None = await self._event_repository.get_full_by_id(
+            event_id
+        )
         if current_event is None:
             raise EventNotFoundError("Event not found")
         for reservation in current_event.reservations:
             message = PublishMessage(
                 event_type="example",  # TODO: example Чтобы mypy не жаловался. Нужно заменить на реальный тип события
-                channels=["email", "push"],  # TODO: email, push Чтобы mypy не жаловался. Нужно заменить на реальные.
+                channels=[
+                    "email",
+                    "push",
+                ],  # TODO: email, push Чтобы mypy не жаловался. Нужно заменить на реальные.
                 user_id=reservation.user_id,
             )
             await self._producer.publish(message=message)

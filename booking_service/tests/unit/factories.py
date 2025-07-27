@@ -3,7 +3,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 from src.domain.entities.address import Address
 from src.domain.entities.event import Event
 from src.domain.entities.user import User
-from src.domain.schemas.event import EventCreateSchema, EventUpdateSchema
+from src.api.v1.schemas.event import EventCreateSchema, EventUpdateSchema
 
 
 class UserFactory(ModelFactory[User]):

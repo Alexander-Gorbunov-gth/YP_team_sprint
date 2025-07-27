@@ -2,7 +2,7 @@ import abc
 from uuid import UUID
 
 from src.domain.entities.address import Address
-from src.domain.schemas.address import AdressCreateSchema, UpdateAddressSchema
+from src.api.v1.schemas.address import AdressCreateSchema, UpdateAddressSchema
 
 
 class IAddressRepository(abc.ABC):
