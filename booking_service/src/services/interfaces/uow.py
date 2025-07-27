@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 
+from src.services.interfaces.producer import IProducer
+from src.services.interfaces.repositories.address import IAddressRepository
+from src.services.interfaces.repositories.event import IEventRepository
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 
 
@@ -19,3 +22,15 @@ class IUnitOfWork(ABC):
     @property
     @abstractmethod
     def subscription_repository(self) -> ISubscriptionRepository: ...
+
+    @property
+    @abstractmethod
+    def event_repository(self) -> IEventRepository: ...
+
+    @property
+    @abstractmethod
+    def address_repository(self) -> IAddressRepository: ...
+
+    @property
+    @abstractmethod
+    def producer(self) -> IProducer: ...
