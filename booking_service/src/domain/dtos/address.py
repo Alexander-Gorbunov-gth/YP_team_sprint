@@ -4,6 +4,9 @@ from pydantic import BaseModel, Field
 
 
 class AdressCreateDTO(BaseModel):
+    user_id: UUID
+    latitude: float
+    longitude: float
     country: str
     city: str
     street: str
@@ -13,6 +16,8 @@ class AdressCreateDTO(BaseModel):
 
 class AddressUpdateDTO(BaseModel):
     id: UUID
+    latitude: float | None = None
+    longitude: float | None = None
     country: str | None = None
     city: str | None = None
     street: str | None = None
