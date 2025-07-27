@@ -1,16 +1,16 @@
 import abc
 from uuid import UUID
 
+from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO
 from src.domain.entities.event import Event
-from src.domain.schemas.event import EventCreateSchema, EventUpdateSchema
 
 
 class IEventRepository(abc.ABC):
     @abc.abstractmethod
-    async def create(self, event: EventCreateSchema) -> Event: ...
+    async def create(self, event: EventCreateDTO) -> Event: ...
 
     @abc.abstractmethod
-    async def update(self, event: EventUpdateSchema) -> Event | None: ...
+    async def update(self, event: EventUpdateDTO) -> Event | None: ...
 
     @abc.abstractmethod
     async def delete(self, event_id: UUID | str) -> None: ...

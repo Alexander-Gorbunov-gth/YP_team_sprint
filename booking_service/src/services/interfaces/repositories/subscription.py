@@ -2,8 +2,8 @@ import abc
 from collections.abc import Iterable
 from uuid import UUID
 
+from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.domain.entities.subscription import Subscription
-from src.domain.schemas.subscription import SubscriptionCreateSchema, SubscriptionDeleteSchema
 
 
 class ISubscriptionRepository(abc.ABC):
@@ -13,7 +13,7 @@ class ISubscriptionRepository(abc.ABC):
     ) -> Iterable[Subscription]: ...
 
     @abc.abstractmethod
-    async def create(self, subscription: SubscriptionCreateSchema) -> Subscription: ...
+    async def create(self, subscription: SubscriptionCreateDTO) -> Subscription: ...
 
     @abc.abstractmethod
-    async def delete(self, subscription: SubscriptionDeleteSchema) -> None: ...
+    async def delete(self, subscription: SubscriptionDeleteDTO) -> None: ...
