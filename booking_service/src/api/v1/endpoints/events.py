@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter
 
-from src.domain.schemas import event as schema
+from src.api.v1.schemas.event import EventCreateSchema, EventResponseSchema, EventUpdateSchema
 from tests.unit.routers_fixture import event_data, event_my_data
 
 logger = logging.getLogger(__name__)
@@ -10,11 +10,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/events", tags=["Events"])
 
 
-@router.post(
-    "/", summary="Создать мероприятие", response_model=schema.EventResponseSchema
-)
+@router.post("/", summary="Создать мероприятие", response_model=EventResponseSchema)
 async def create_event(
-    data: schema.EventCreateSchema,
+    data: EventCreateSchema,
 ):
     return event_data
 
@@ -22,7 +20,7 @@ async def create_event(
 @router.get(
     "/",
     summary="Получить список мероприятий",
-    response_model=list[schema.EventResponseSchema],
+    response_model=list[EventResponseSchema],
 )
 async def get_events():
     return [event_data]
@@ -31,7 +29,7 @@ async def get_events():
 @router.get(
     "/my/",
     summary="Получить список моих мероприятий",
-    response_model=list[schema.EventResponseSchema],
+    response_model=list[EventResponseSchema],
 )
 async def get_my_events():
     return [event_my_data]
@@ -40,7 +38,7 @@ async def get_my_events():
 @router.get(
     "/{id}",
     summary="Получить данные о мероприятии",
-    response_model=schema.EventResponseSchema,
+    response_model=EventResponseSchema,
 )
 async def get_event():
     return event_data
@@ -51,8 +49,6 @@ async def delete_event() -> bool:
     return True
 
 
-@router.patch(
-    "/{id}", summary="Обновить мероприятие", response_model=schema.EventResponseSchema
-)
-async def update_event(data: schema.EventUpdateSchema):
+@router.patch("/{id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
+async def update_event(data: EventUpdateSchema):
     return event_data
