@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class AddressBaseSchema(BaseModel):
+class AdressCreateDTO(BaseModel):
     country: str
     city: str
     street: str
@@ -11,15 +11,8 @@ class AddressBaseSchema(BaseModel):
     flat: str | None = Field(default=None)
 
 
-class AdressCreateSchema(AddressBaseSchema):
-    pass
-
-
-class AdressRepresentSchema(AddressBaseSchema):
+class AddressUpdateDTO(BaseModel):
     id: UUID
-
-
-class UpdateAddressSchema(BaseModel):
     country: str | None = None
     city: str | None = None
     street: str | None = None
