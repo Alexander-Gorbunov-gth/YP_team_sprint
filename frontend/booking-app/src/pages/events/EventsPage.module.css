@@ -3,8 +3,9 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   height: 100%;
-  width: 100%; /* Добавить! */
+  width: 90%; /* Добавить! */
   max-width: none; /* Если вдруг ограничено */
+  padding: 30px;
 }
 
 .title {
@@ -26,7 +27,7 @@
   background-origin: border-box;
   background-clip: padding-box, border-box;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  max-height: 320px;
+  max-height: 350px;
   overflow-y: auto;
 }
 

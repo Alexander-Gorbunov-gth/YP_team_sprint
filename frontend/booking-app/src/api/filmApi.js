@@ -1,11 +1,11 @@
-import axios from 'axios';
+import axios from './axiosInstance'; 
 import { FILM_SERVICE_BASE_URL } from '../config';
 
 export async function searchFilms(query) {
   try {
     const res = await axios.get(`${FILM_SERVICE_BASE_URL}/films/search/`, {
       params: {
-        query,
+        query: query,
         page_size: 10
       }
     });

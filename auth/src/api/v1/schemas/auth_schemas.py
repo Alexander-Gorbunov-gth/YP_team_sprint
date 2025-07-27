@@ -6,9 +6,10 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class RegisterForm(BaseModel):
-    email: Annotated[EmailStr, Form(...)]
-    password: Annotated[str, Form(...)]
-    confirm_password: Annotated[str, Form(...)]
+    username: str
+    email: EmailStr
+    password: str
+    confirm_password: str
 
 
 class UserResponse(BaseModel):

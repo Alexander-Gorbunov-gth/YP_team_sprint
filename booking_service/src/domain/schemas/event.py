@@ -10,7 +10,7 @@ from .to_represent import Author, MovieSchema
 class EventBaseSchema(BaseModel):
     movie_id: UUID
     address_id: UUID
-    owner_id: UUID
+    # owner_id: UUID - забрать из токена
     capacity: int
     start_datetime: datetime
 
