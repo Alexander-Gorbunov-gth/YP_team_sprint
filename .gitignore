@@ -156,3 +156,6 @@ yatube_api/posts/static/
 media/
 codes/
 temp/
+
+poetry.lock
+*./poetry.lock

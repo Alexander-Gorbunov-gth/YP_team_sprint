@@ -8,6 +8,7 @@ from src.api.v1 import films, genres, persons
 from src.core.config import settings
 from src.core.middlewares import RateLimiterMiddleware
 from src.db import elastic, redis
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
@@ -47,6 +48,14 @@ app.add_middleware(
     RateLimiterMiddleware,
     limit=settings.rate_limit,
     window=settings.rate_window,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # или ["*"] для всех
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["films"])

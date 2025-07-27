@@ -81,7 +81,7 @@ services:
     ports:
       - 6379:6379
 
-  postgres:
+  admin_postgres:
     image: postgres:15
     container_name: postgres_movies
     restart: always

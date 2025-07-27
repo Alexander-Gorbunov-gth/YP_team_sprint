@@ -28,7 +28,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
         except IntegrityError:
             logger.error("Пользователь с email %s уже существует.", email)
             raise UserIsExists
-        return result.scalar_one()
+        return result.unique().scalar_one()
 
     async def get_by_email(self, email: str) -> User | None:
         query = select(User).filter_by(email=email)
@@ -56,7 +56,11 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
         :return: обновленный объект модели или None, если запись не найдена.
         """
 
-        await self._session.execute(update(User).filter_by(id=user.id).values(**user.to_dict(self.exclude_fields)))
+        await self._session.execute(
+            update(User)
+            .filter_by(id=user.id)
+            .values(**user.to_dict(self.exclude_fields))
+        )
         await self._commit()
         return
 

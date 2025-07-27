@@ -18,6 +18,8 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from src.api.v1 import v1_router
 from src.core import http_client
@@ -32,7 +34,9 @@ async def lifespan(_: FastAPI):
     http_client.http_client = AsyncClient()
     redis.redis = Redis(host=settings.redis.redis_host, port=settings.redis.redis_port)
     postgres.engine = create_async_engine(settings.db.db_url)
-    postgres.async_session_maker = async_sessionmaker(bind=postgres.engine, expire_on_commit=False, class_=AsyncSession)
+    postgres.async_session_maker = async_sessionmaker(
+        bind=postgres.engine, expire_on_commit=False, class_=AsyncSession
+    )
 
     yield
 
@@ -52,7 +56,9 @@ def configure_tracer() -> None:
             )
         )
     )
-    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+    trace.get_tracer_provider().add_span_processor(
+        BatchSpanProcessor(ConsoleSpanExporter())
+    )
 
 
 app = FastAPI(
@@ -72,6 +78,13 @@ app.add_middleware(
     RateLimiterMiddleware,
     limit=settings.service.rate_limit,
     window=settings.service.rate_window,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # или ["*"] для всех
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

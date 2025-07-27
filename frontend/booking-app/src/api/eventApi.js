@@ -20,6 +20,7 @@ export async function getMyEvents() {
 }
 
 export async function createEvent(eventData) {
+  console.log("Создание события с данными:", eventData);
   try {
     const res = await axios.post(`${API_BASE}/events`, eventData);
     return res.data;

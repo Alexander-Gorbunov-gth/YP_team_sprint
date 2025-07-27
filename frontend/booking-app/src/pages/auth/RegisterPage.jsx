@@ -8,16 +8,16 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirm_password, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async () => {
-    if (password !== confirmPassword) {
+    if (password !== confirm_password) {
       alert("Пароли не совпадают");
       return;
     }
     try {
-      const res = await registerUser({ username, email, password, confirmPassword });
+      const res = await registerUser({ username, email, password, confirm_password });
       localStorage.setItem("access_token", res.access_token);
       localStorage.setItem("refresh_token", res.refresh_token);
       navigate("/");
@@ -71,7 +71,7 @@ export default function RegisterPage() {
             className={styles.input}
             type="password"
             autoComplete="new-password"
-            value={confirmPassword}
+            value={confirm_password}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Повторите пароль"
           />
