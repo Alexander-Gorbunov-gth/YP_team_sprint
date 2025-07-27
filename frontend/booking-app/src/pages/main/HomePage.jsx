@@ -2,8 +2,8 @@ import styles from './HomePage.module.css';
 
 const HomePage = () => {
   return (
-    <div className={styles.homepageContainer}>
-      <div className={styles.homepageCard}>
+    <div className={styles.container}>
+      <div className={styles.container}>
         <h1>Дипломный проект</h1>
         <h3>Бронирование билетов</h3>
         <p><strong>Сложность:</strong> средняя</p>
