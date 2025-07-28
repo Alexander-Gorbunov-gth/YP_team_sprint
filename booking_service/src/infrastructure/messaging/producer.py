@@ -1,5 +1,6 @@
 import logging
 
+from aio_pika.abc import HeadersType
 from faststream.rabbit import ExchangeType, RabbitBroker, RabbitExchange
 
 from src.interfaces.connection import AbstractConnection
@@ -24,6 +25,7 @@ class RabbitMQProducer(IProducer, AbstractConnection):
 
     async def connect(self) -> None:
         """Устанавливает соединение с RabbitMQ и создает обменник."""
+
         logger.info("Инициализация продюсера RabbitMQ...")
         self._broker = RabbitBroker(
             self.connection_url,
@@ -55,7 +57,12 @@ class RabbitMQProducer(IProducer, AbstractConnection):
         :param delay_ms: Задержка в миллисекундах
         """
 
-        headers = {"x-delay": delay_ms} if delay_ms else None
+        if self._broker is None:
+            raise RuntimeError("Broker is not initialized")
+
+        headers: HeadersType | None = None
+        if delay_ms is not None:
+            headers = {"x-delay": str(delay_ms)}
 
         await self._broker.publish(
             message=message.model_dump_json(),
