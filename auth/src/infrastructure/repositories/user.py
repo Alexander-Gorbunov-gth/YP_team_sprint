@@ -19,8 +19,12 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create(self, email, password):
-        insert_data = {"email": email, "password": password}
+    async def create(self, username, email, password):
+        insert_data = {
+            "username": username,
+            "email": email,
+            "password": password
+        }
         query = insert(User).values(insert_data).returning(User)
         try:
             result: Result = await self._session.execute(query)
@@ -46,6 +50,18 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
         query = select(User).filter_by(id=user_id)
         result: Result = await self._session.execute(query)
         return result.unique().scalar_one_or_none()
+
+    async def get_many_by_ids(self, ids: list[str]) -> list[User]:
+        """
+        Получает множество записей из базы данных по их идентификаторам.
+
+        :ids: идентификаторы записей.
+        :return: массив объектов модели
+        """
+
+        stmt = select(User).where(User.id.in_(ids))
+        result: Result = await self._session.execute(stmt)
+        return result.unique().scalars().all()
 
     async def update(self, user: User) -> User | None:
         """

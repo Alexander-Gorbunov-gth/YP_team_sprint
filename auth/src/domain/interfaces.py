@@ -21,7 +21,7 @@ class AbstractJWTService(ABC):
 
 class AbstractAuthService(ABC):
     @abstractmethod
-    async def registration_new_user(self, email: str, password: str) -> User:
+    async def registration_new_user(self, username: str, email: str, password: str) -> User:
         raise NotImplementedError
 
     @abstractmethod
@@ -30,6 +30,14 @@ class AbstractAuthService(ABC):
 
     @abstractmethod
     async def change_password(self, user_id: str, old_password: str, new_password: str) -> User:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_user_by_id(self, user_id: UUID) -> User:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_users_by_ids(self, ids: list[UUID]) -> list[User]:
         raise NotImplementedError
 
 

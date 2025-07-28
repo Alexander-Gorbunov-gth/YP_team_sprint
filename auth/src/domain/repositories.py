@@ -7,7 +7,7 @@ from src.domain.entities import Permission, Role, Session, SocialAccount, User
 
 class AbstractUserRepository(ABC):
     @abstractmethod
-    async def create(self, email: str, password: str) -> User:
+    async def create(self, username: str, email: str, password: str) -> User:
         raise NotImplementedError
 
     @abstractmethod
@@ -16,6 +16,10 @@ class AbstractUserRepository(ABC):
 
     @abstractmethod
     async def get_by_id(self, user_id: str) -> User | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_many_by_ids(self, ids: list[str]) -> User | None:
         raise NotImplementedError
 
     @abstractmethod

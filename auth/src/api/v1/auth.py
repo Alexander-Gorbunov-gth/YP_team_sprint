@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, Request, Response, status
 
 from src.api.v1.dependencies import (
@@ -15,11 +17,11 @@ from src.api.v1.schemas.auth_schemas import (
     LoginForm,
     LoginResponse,
     RegisterForm,
-    UserResponse,
+    UserIdResponse,
 )
 from src.core.config import settings
 from src.domain.entities import User
-from src.domain.exceptions import PasswordsNotMatch
+from src.domain.exceptions import PasswordsNotMatch, UserNotFound
 from src.domain.factories.session import SessionFactory
 
 auth_router = APIRouter()
@@ -41,7 +43,8 @@ async def register(
     if register_form.password != register_form.confirm_password:
         raise PasswordsNotMatch
     user = await auth_service.registration_new_user(
-        register_form.email, register_form.password
+        register_form.username, register_form.email,
+        register_form.password
     )
     access_token = jwt_service.generate_access_token(user)
     refresh_token = jwt_service.generate_refresh_token(user)
@@ -100,6 +103,20 @@ async def logout(
         settings.service.access_token_expire,
     )
     return
+
+
+@auth_router.get("/get-user-data/{id}", response_model=UserIdResponse)
+async def get_user_data(id: UUID, auth_service: AuthDep) -> UserIdResponse:
+    user = await auth_service.get_user_by_id(id)
+    if not user:
+        raise UserNotFound
+    return UserIdResponse(id=user.id, username=user.username)
+
+
+@auth_router.post("/get-users-data", response_model=dict[UUID, list[str]])
+async def get_users_data(ids: list[UUID], auth_service: AuthDep) -> dict:
+    users = await auth_service.get_users_by_ids(ids)
+    return {user.id: [user.username] for user in users}
 
 
 @auth_router.post(

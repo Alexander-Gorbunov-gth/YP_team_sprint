@@ -30,6 +30,11 @@ class LoginResponse(BaseModel):
     token_type: str = Field(default="jwt")
 
 
+class UserIdResponse(BaseModel):
+    id: UUID
+    username: str
+
+
 class DjangoLoginResponse(BaseModel):
     id: UUID
     email: str

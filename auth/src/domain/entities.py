@@ -21,6 +21,7 @@ class BaseEntity:
 @dataclass
 class User(BaseEntity):
     id: UUID | None
+    username: str
     email: str
     password: str
     is_active: bool
