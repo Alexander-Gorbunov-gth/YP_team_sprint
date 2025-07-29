@@ -4,8 +4,8 @@ from uuid import uuid4
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.core.config import settings
-from src.db import postgres
-from src.domain.schemas.address import UpdateAddressSchema
+from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
+from src.infrastructure.db import postgres
 from src.infrastructure.repositories.addresses import SQLAlchemyAddressRepository
 
 
@@ -32,23 +32,25 @@ async def test_repository():
     print("\n===> STARTING TEST")
 
     created = await repo.create(
-        user_id=user_id,
-        latitude=latitude,
-        longitude=longitude,
-        country=country,
-        city=city,
-        street=street,
-        house=house,
-        flat=flat,
+        address=AddressCreateDTO(
+            user_id=user_id,
+            latitude=latitude,
+            longitude=longitude,
+            country=country,
+            city=city,
+            street=street,
+            house=house,
+            flat=flat,
+        ),
     )
+
     print(f"[CREATE] Address created: {created}")
 
     address = await repo.get_address(created.id)
     print(f"[GET] Addresses for user_id: {address}")
 
     updated = await repo.update(
-        address_id=created.id,
-        address=UpdateAddressSchema(
+        address=AddressUpdateDTO(
             country="Updated Country",
             city="Updated City",
             street="Updated Street",
