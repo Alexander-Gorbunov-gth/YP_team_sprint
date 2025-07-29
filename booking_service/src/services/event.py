@@ -2,8 +2,8 @@ import abc
 from datetime import timedelta
 from uuid import UUID
 
+from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO
 from src.domain.entities.event import Event
-from src.domain.schemas.event import EventCreateSchema, EventUpdateSchema
 from src.services.exceptions import EventNotFoundError, EventTimeConflictError
 from src.services.interfaces.producer import PublishMessage
 from src.services.interfaces.uow import IUnitOfWork
@@ -11,10 +11,10 @@ from src.services.interfaces.uow import IUnitOfWork
 
 class IEventService(abc.ABC):
     @abc.abstractmethod
-    async def create(self, event: EventCreateSchema) -> Event | None: ...
+    async def create(self, event: EventCreateDTO) -> Event | None: ...
 
     @abc.abstractmethod
-    async def update(self, event: EventUpdateSchema) -> Event | None: ...
+    async def update(self, event: EventUpdateDTO) -> Event | None: ...
 
     @abc.abstractmethod
     async def delete(self, event_id: UUID | str) -> None: ...
@@ -32,9 +32,7 @@ class EventService(IEventService):
     def __init__(self, uow: IUnitOfWork):
         self._uow = uow
 
-    def _check_event_time_conflict(
-        self, event: EventCreateSchema | EventUpdateSchema, user_events: list[Event]
-    ) -> None:
+    def _check_event_time_conflict(self, event: EventCreateDTO | EventUpdateDTO, user_events: list[Event]) -> None:
         """
         Проверяет, что событие не пересекается с другими событиями пользователя.
         param: event: EventCreateSchema - событие для создания
@@ -49,7 +47,7 @@ class EventService(IEventService):
             ):
                 raise EventTimeConflictError("Event overlaps with existing event")
 
-    async def create(self, event: EventCreateSchema) -> Event:
+    async def create(self, event: EventCreateDTO) -> Event:
         """
         Создание события.
         Проверяется, что событие не пересекается с другими событиями пользователя.
@@ -60,7 +58,7 @@ class EventService(IEventService):
             self._check_event_time_conflict(event, user_events)
             return await uow.event_repository.create(event)
 
-    async def update(self, event: EventUpdateSchema) -> Event | None:
+    async def update(self, event: EventUpdateDTO) -> Event | None:
         """
         Обновление события.
         Проверяется, что событие не пересекается с другими событиями пользователя.
@@ -74,8 +72,12 @@ class EventService(IEventService):
             current_event.can_be_updated()
             if event.start_datetime is not None:
                 user_events: list[Event] = await uow.event_repository.get_events_by_user_id(current_event.owner_id)
-            self._check_event_time_conflict(event, user_events)
-            await uow.producer.publish(message=PublishMessage(user_id=current_event.owner_id))
+                self._check_event_time_conflict(event, user_events)
+                await uow.producer.publish(
+                    message=PublishMessage(
+                        user_id=current_event.owner_id, event_type="example", channels=["email", "push"]
+                    )
+                )
             return await uow.event_repository.update(event)
 
     async def delete(self, event_id: UUID | str) -> None:
@@ -84,14 +86,15 @@ class EventService(IEventService):
         param: event_id: UUID | str - id события
         """
 
-        current_event: Event | None = await self._event_repository.get_full_by_id(event_id)
-        if current_event is None:
-            raise EventNotFoundError("Event not found")
-        for reservation in current_event.reservations:
-            message = PublishMessage(
-                event_type="example",  # TODO: example Чтобы mypy не жаловался. Нужно заменить на реальный тип события
-                channels=["email", "push"],  # TODO: email, push Чтобы mypy не жаловался. Нужно заменить на реальные.
-                user_id=reservation.user_id,
-            )
-            await self._producer.publish(message=message)
-        return await self._event_repository.delete(event_id)
+        async with self._uow as uow:
+            current_event: Event | None = await uow.event_repository.get_by_id(event_id)
+            if current_event is None:
+                raise EventNotFoundError("Event not found")
+            for reservation in current_event.reservations:
+                message = PublishMessage(
+                    event_type="example",
+                    channels=["email", "push"],
+                    user_id=reservation.user_id,
+                )
+                await uow.producer.publish(message=message)
+            return await uow.event_repository.delete(event_id)
