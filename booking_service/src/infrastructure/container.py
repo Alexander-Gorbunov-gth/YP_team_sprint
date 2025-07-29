@@ -29,4 +29,4 @@ class Container(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def provide_jwt_service(self) -> AbstractJWTService:
-        return JWTService(settings.auth.secret_key, settings.auth.algorithm)
+        return JWTService(settings.auth.secret_key.get_secret_value(), settings.auth.algorithm)
