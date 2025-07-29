@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import Result, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.domain.dtos.address import AddressUpdateDTO, AdressCreateDTO
+from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
 from src.domain.entities.address import Address
 from src.infrastructure.repositories.exceptions import AddressNotFoundError, NotModifiedError
 from src.services.interfaces.repositories.address import IAddressRepository
@@ -17,7 +17,7 @@ class SQLAlchemyAddressRepository(IAddressRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create(self, address: AdressCreateDTO) -> Address:
+    async def create(self, address: AddressCreateDTO) -> Address:
         query = insert(Address).values(address.model_dump()).returning(Address)
         result: Result = await self._session.execute(query)
         return result.scalar_one()
