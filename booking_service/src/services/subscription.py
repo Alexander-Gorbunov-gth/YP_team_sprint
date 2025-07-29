@@ -32,7 +32,9 @@ class SubscriptionService(ISubscriptionService):
         async with self._uow as uow:
             created_subscription = await uow.subscription_repository.create(subscription)
             if created_subscription is None:
-                logger.warning("Подписка с host_id=%s и user_id=%s уже существует", subscription.host_id, subscription.user_id)
+                logger.warning(
+                    "Подписка с host_id=%s и user_id=%s уже существует", subscription.host_id, subscription.user_id
+                )
                 raise SubscriptionAlreadyExistsError("Подписка уже существует")
             return Subscription.model_validate(await uow.subscription_repository.create(subscription))
 
@@ -40,9 +42,15 @@ class SubscriptionService(ISubscriptionService):
         async with self._uow as uow:
             deleted_subscription = await uow.subscription_repository.delete(subscription)
             if deleted_subscription is None:
-                logger.warning("Подписка с host_id=%s и user_id=%s не найдена", subscription.host_id, subscription.user_id)
+                logger.warning(
+                    "Подписка с host_id=%s и user_id=%s не найдена", subscription.host_id, subscription.user_id
+                )
                 raise SubscriptionNotFoundError("Подписка не найдена")
 
-    async def get_subscriptions_by_user_id(self, user_id: UUID | str, limit: int, offset: int) -> Iterable[Subscription]:
+    async def get_subscriptions_by_user_id(
+        self, user_id: UUID | str, limit: int, offset: int
+    ) -> Iterable[Subscription]:
         async with self._uow as uow:
-            return await uow.subscription_repository.get_subscriptions_by_user_id(user_id=user_id, limit=limit, offset=offset)
+            return await uow.subscription_repository.get_subscriptions_by_user_id(
+                user_id=user_id, limit=limit, offset=offset
+            )
