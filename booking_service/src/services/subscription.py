@@ -36,7 +36,7 @@ class SubscriptionService(ISubscriptionService):
                     "Подписка с host_id=%s и user_id=%s уже существует", subscription.host_id, subscription.user_id
                 )
                 raise SubscriptionAlreadyExistsError("Подписка уже существует")
-            return Subscription.model_validate(await uow.subscription_repository.create(subscription))
+            return created_subscription
 
     async def delete_subscription(self, subscription: SubscriptionDeleteDTO) -> None:
         async with self._uow as uow:

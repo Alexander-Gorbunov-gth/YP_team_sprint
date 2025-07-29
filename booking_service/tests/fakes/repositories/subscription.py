@@ -20,13 +20,17 @@ class FakeSubscriptionRepository(ISubscriptionRepository):
 
         return result[offset : offset + limit]
 
-    async def create(self, subscription: SubscriptionCreateDTO) -> Subscription:
+    async def create(self, subscription: SubscriptionCreateDTO) -> Subscription | None:
         created_subscription = Subscription.create(subscription.host_id, subscription.user_id)
+        for sub in self.subscriptions:
+            if sub.user_id == subscription.user_id and sub.host_id == subscription.host_id:
+                return None
         self.subscriptions.append(created_subscription)
         return created_subscription
 
-    async def delete(self, subscription: SubscriptionDeleteDTO) -> None:
+    async def delete(self, subscription: SubscriptionDeleteDTO) -> Subscription | None:
         for sub in self.subscriptions:
             if sub.user_id == subscription.user_id and sub.host_id == subscription.host_id:
                 self.subscriptions.remove(sub)
-                break
+                return sub
+        return None
