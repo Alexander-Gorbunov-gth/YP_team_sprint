@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from pydantic import BaseModel
 
@@ -11,5 +11,5 @@ class Subscription(DateTimeMixin, BaseModel):
     user_id: UUID
 
     @classmethod
-    def create(cls, id: UUID, host_id: UUID, user_id: UUID) -> "Subscription":
-        return cls(id=id, host_id=host_id, user_id=user_id)
+    def create(cls, host_id: UUID, user_id: UUID) -> "Subscription":
+        return cls(id=uuid4(), host_id=host_id, user_id=user_id)
