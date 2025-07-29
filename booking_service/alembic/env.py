@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from src.core.config import settings
-from src.infrastructure.models import mapper_registry
+from src.infrastructure.models.base import mapper_registry
 
 config = context.config
 
