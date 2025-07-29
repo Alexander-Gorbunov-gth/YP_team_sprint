@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class AdressCreateDTO(BaseModel):
+class AddressCreateDTO(BaseModel):
     user_id: UUID
     latitude: float
     longitude: float
