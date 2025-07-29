@@ -29,6 +29,7 @@ class Address(DateTimeMixin, BaseModel):
         flat: str | None = None,
     ) -> "Address":
         return cls(
+            id=uuid4(),
             user_id=user_id,
             latitude=latitude,
             longitude=longitude,
