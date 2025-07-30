@@ -1,7 +1,7 @@
 // src/pages/auth/LoginPage.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { loginUser } from "../../api/authApi";
 import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
@@ -11,9 +11,9 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("/api/v1/auth/login", { email, password });
-      localStorage.setItem("access_token", res.data.access_token);
-      localStorage.setItem("refresh_token", res.data.refresh_token);
+      const res = await loginUser({ email, password });
+      localStorage.setItem("access_token", res.access_token);
+      localStorage.setItem("refresh_token", res.refresh_token);
       navigate("/");
     } catch (e) {
       alert("Ошибка авторизации");

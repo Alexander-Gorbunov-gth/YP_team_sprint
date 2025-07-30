@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from fastapi import Depends
 from passlib.context import CryptContext
@@ -16,7 +17,7 @@ class AuthService:
         self._user_repository: AbstractUserRepository = user_repository
         self._context: CryptContext = CryptContext(schemes=["bcrypt"])
 
-    async def registration_new_user(self, email: str, password: str) -> User:
+    async def registration_new_user(self, username: str, email: str, password: str) -> User:
         """
         Регистрирует нового пользователя, хешируя его пароль перед сохранением.
 
@@ -26,7 +27,11 @@ class AuthService:
         """
 
         hashed_password = self._get_password_hash(password)
-        new_user = await self._user_repository.create(email=email, password=hashed_password)
+        new_user = await self._user_repository.create(
+            username=username,
+            email=email,
+            password=hashed_password
+        )
         return new_user
 
     async def login_user(self, email: str, password: str) -> User | None:
@@ -64,6 +69,26 @@ class AuthService:
         user.password = hashed_new_password
         updated_user = await self._user_repository.update(user=user)
         return updated_user
+
+    async def get_user_by_id(self, user_id: UUID) -> User | None:
+        """
+        Получает пользователя по его ID.
+
+        :param user_id: Идентификатор пользователя.
+        :return: Объект User.
+        """
+
+        return await self._user_repository.get_by_id(user_id=user_id)
+
+    async def get_users_by_ids(self, ids: list[UUID]) -> list[User]:
+        """
+        Получает пользователей по их IDs.
+
+        :param ids: Идентификаторы пользователей.
+        :return: Объекты User.
+        """
+
+        return await self._user_repository.get_many_by_ids(ids=ids)
 
     def _get_password_hash(self, password) -> str:
         """

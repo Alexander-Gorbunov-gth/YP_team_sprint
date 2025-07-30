@@ -1,4 +1,5 @@
 import logging
+import logging.config
 from pathlib import Path
 
 from pydantic import Field, SecretStr

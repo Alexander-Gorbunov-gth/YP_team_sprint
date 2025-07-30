@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, Table
+from uuid import uuid4
+
+from sqlalchemy import (
+    Column,
+    Float,
+    Integer,
+    String,
+    Table,
+)
+
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.domain.entities.subscription import Subscription

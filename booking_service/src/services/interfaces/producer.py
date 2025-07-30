@@ -1,6 +1,6 @@
 import abc
 from datetime import datetime
-from typing import Dict
+from typing import Any, Coroutine, Dict
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -38,5 +38,12 @@ class PublishMessage(BaseModel):
 
 
 class IProducer(abc.ABC):
+
     @abc.abstractmethod
-    async def publish(self, message: PublishMessage) -> None: ...
+    async def publish(
+        self,
+        message: PublishMessage,
+        routing_key: str,
+        delay_ms: int | None = None
+    ) -> None:
+        pass

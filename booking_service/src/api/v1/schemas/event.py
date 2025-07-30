@@ -32,3 +32,7 @@ class EventResponseSchema(EventBaseSchema):
     address: AddressResponseSchema
     movie: MovieSchema
     author: Author
+
+
+class EventMyResponseSchema(EventResponseSchema):
+    customers: list

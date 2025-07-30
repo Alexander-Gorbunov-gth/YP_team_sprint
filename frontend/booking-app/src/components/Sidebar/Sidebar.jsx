@@ -10,6 +10,13 @@ export default function Sidebar() {
       <Link className={styles.link} to="/bookings">Бронирования</Link>
       <Link className={styles.link} to="/subscriptions">Подписки</Link>
       {/* <Link className={styles.link} to="/notifications">Уведомления</Link> */}
+      <button className={styles.link} onClick={() => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/';
+      }}>
+        Выйти
+      </button>
     </aside>
   );
 }

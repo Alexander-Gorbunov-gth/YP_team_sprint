@@ -3,6 +3,8 @@ from datetime import timedelta
 from uuid import UUID
 
 from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO
+from src.core.config import settings
+
 from src.domain.entities.event import Event
 from src.services.exceptions import EventNotFoundError, EventTimeConflictError
 from src.services.interfaces.producer import PublishMessage
@@ -54,7 +56,9 @@ class EventService(IEventService):
         param: event: EventCreateSchema - событие для создания
         """
         async with self._uow as uow:
-            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(event.owner_id)
+            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(
+                event.owner_id
+            )
             self._check_event_time_conflict(event, user_events)
             return await uow.event_repository.create(event)
 
@@ -66,7 +70,7 @@ class EventService(IEventService):
         """
 
         async with self._uow as uow:
-            current_event: Event | None = await uow.event_repository.get_by_id(event.id)
+            current_event: Event | None = await uow.event_repository.get_by_id(event_id)
             if current_event is None:
                 raise EventNotFoundError("Event not found")
             current_event.can_be_updated()
@@ -97,4 +101,5 @@ class EventService(IEventService):
                     user_id=reservation.user_id,
                 )
                 await uow.producer.publish(message=message)
+
             return await uow.event_repository.delete(event_id)

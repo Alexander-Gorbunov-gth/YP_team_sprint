@@ -22,6 +22,7 @@ async def lifespan(fastapi_app: FastAPI):
         await fastapi_app.state.dishka_container.close()
 
 
+
 def create_app() -> FastAPI:
     fastapi_app = FastAPI(lifespan=lifespan, docs_url="/api/openapi", openapi_url="/api/openapi.json")
     fastapi_app.include_router(router, prefix="/api")
@@ -35,7 +36,7 @@ app = create_app()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # или ["*"] для всех
+    allow_origins=["*"],  # или ["*"] для всех
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

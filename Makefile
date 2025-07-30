@@ -5,3 +5,6 @@ run:
 .PHONY: auth
 auth:
 	@docker compose -f docker-compose.auth_sprint.yaml build && docker compose -f docker-compose.auth_sprint.yaml up
+
+diplom:
+	docker compose -f docker-compose.diplom.yml build --no-cache frontend && docker compose -f docker-compose.diplom.yml up

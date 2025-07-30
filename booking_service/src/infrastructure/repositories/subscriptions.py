@@ -7,6 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.domain.entities.subscription import Subscription
+from src.api.v1.schemas.subscription import (
+    SubscriptionCreateSchema,
+    SubscriptionDeleteSchema,
+)
+from src.infrastructure.repositories.exceptions import (
+    SubscriptionAlreadyExistsError,
+    SubscriptionNotFoundError,
+)
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 
 logger = logging.getLogger(__name__)

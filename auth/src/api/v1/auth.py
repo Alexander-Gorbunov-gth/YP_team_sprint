@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, Request, Response, status
 
 from src.api.v1.dependencies import (
@@ -15,11 +17,11 @@ from src.api.v1.schemas.auth_schemas import (
     LoginForm,
     LoginResponse,
     RegisterForm,
-    UserResponse,
+    UserIdResponse,
 )
 from src.core.config import settings
 from src.domain.entities import User
-from src.domain.exceptions import PasswordsNotMatch
+from src.domain.exceptions import PasswordsNotMatch, UserNotFound
 from src.domain.factories.session import SessionFactory
 
 auth_router = APIRouter()
@@ -27,14 +29,35 @@ auth_router = APIRouter()
 
 @auth_router.post(
     "/register/",
-    response_model=UserResponse,
+    response_model=LoginResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def register(register_form: RegisterForm, auth_service: AuthDep) -> UserResponse:
+async def register(
+    register_form: RegisterForm,
+    request: Request,
+    response: Response,
+    auth_service: AuthDep,
+    jwt_service: JWTDep,
+    session_service: SessionDep,
+) -> LoginResponse:
     if register_form.password != register_form.confirm_password:
         raise PasswordsNotMatch
-    user = await auth_service.registration_new_user(register_form.email, register_form.password)
-    return user
+    user = await auth_service.registration_new_user(
+        register_form.username, register_form.email,
+        register_form.password
+    )
+    access_token = jwt_service.generate_access_token(user)
+    refresh_token = jwt_service.generate_refresh_token(user)
+    session = SessionFactory.create(
+        user_id=user.id,
+        jti=jwt_service.jti,
+        user_agent=request.headers["user-agent"],
+        refresh_token=refresh_token,
+        user_ip=request.headers["host"],
+    )
+    await session_service.create_new_session(session=session)
+    set_refresh_token(response=response, refresh_token=refresh_token)
+    return LoginResponse(access_token=access_token, refresh_token=refresh_token)
 
 
 @auth_router.post(
@@ -50,7 +73,9 @@ async def login(
     jwt_service: JWTDep,
     session_service: SessionDep,
 ) -> LoginResponse:
-    user = await auth_service.login_user(email=login_form.email, password=login_form.password)
+    user = await auth_service.login_user(
+        email=login_form.email, password=login_form.password
+    )
     access_token = jwt_service.generate_access_token(user)
     refresh_token = jwt_service.generate_refresh_token(user)
     session = SessionFactory.create(
@@ -80,7 +105,23 @@ async def logout(
     return
 
 
-@auth_router.post("/refresh/", response_model=LoginResponse, status_code=status.HTTP_200_OK)
+@auth_router.get("/get-user-data/{id}", response_model=UserIdResponse)
+async def get_user_data(id: UUID, auth_service: AuthDep) -> UserIdResponse:
+    user = await auth_service.get_user_by_id(id)
+    if not user:
+        raise UserNotFound
+    return UserIdResponse(id=user.id, username=user.username)
+
+
+@auth_router.post("/get-users-data", response_model=dict[UUID, list[str]])
+async def get_users_data(ids: list[UUID], auth_service: AuthDep) -> dict:
+    users = await auth_service.get_users_by_ids(ids)
+    return {user.id: [user.username] for user in users}
+
+
+@auth_router.post(
+    "/refresh/", response_model=LoginResponse, status_code=status.HTTP_200_OK
+)
 async def refresh(
     response: Response,
     session_service: SessionDep,
@@ -91,7 +132,9 @@ async def refresh(
     new_refresh_token = jwt_service.generate_refresh_token(user=current_user)
     new_access_token = jwt_service.generate_access_token(user=current_user)
     new_jti = jwt_service.jti
-    _ = await session_service.update_session_refresh_token(refresh_token, new_refresh_token, new_jti)
+    _ = await session_service.update_session_refresh_token(
+        refresh_token, new_refresh_token, new_jti
+    )
     set_refresh_token(response=response, refresh_token=new_refresh_token)
     return LoginResponse(access_token=new_access_token, refresh_token=new_refresh_token)
 
@@ -102,9 +145,13 @@ async def logout_others(
     black_list_service: BlacklistDep,
     current_refresh_token: str = Depends(get_refresh_token),
 ):
-    deactivate_sessions = await session_service.deactivate_all_without_current(current_refresh_token)
+    deactivate_sessions = await session_service.deactivate_all_without_current(
+        current_refresh_token
+    )
     jti_tokens = {session.jti: session.user_id for session in deactivate_sessions}
-    await black_list_service.set_many_values(jti_tokens, settings.service.access_token_expire)
+    await black_list_service.set_many_values(
+        jti_tokens, settings.service.access_token_expire
+    )
     return
 
 
@@ -120,7 +167,9 @@ async def django_login(
     auth_service: AuthDep,
     role_service: RoleServ,
 ) -> LoginResponse:
-    user = await auth_service.login_user(email=login_form.email, password=login_form.password)
+    user = await auth_service.login_user(
+        email=login_form.email, password=login_form.password
+    )
     roles = await role_service.get_user_roles(user.id)
     return DjangoLoginResponse(
         id=user.id,

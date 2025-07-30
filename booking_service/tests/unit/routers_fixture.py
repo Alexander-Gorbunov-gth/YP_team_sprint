@@ -5,9 +5,16 @@ from src.api.v1.schemas.reservation import ReservationResponseSchema
 from src.api.v1.schemas.subscription import SubscriptionResponseSchema
 from src.api.v1.schemas.utils import Author, MovieSchema
 from src.domain.entities.address import Address
-from src.domain.entities.reservation import ReservationStatus
+from src.domain.entities.event import Event
+from src.domain.entities.reservation import Reservation, ReservationStatus
+from src.domain.entities.subscription import Subscription
+from src.api.v1.schemas.utils import Author, MovieSchema
+from src.api.v1.schemas.event import EventResponseSchema
+from src.api.v1.schemas.reservation import ReservationResponseSchema
+from src.api.v1.schemas.subscription import SubscriptionResponseSchema
+from src.api.v1.schemas.address import AddressResponseSchema
 
-address_data = Address(
+address_data = AddressResponseSchema(
     id="2a736ae7-7c0f-429a-ba4b-f334e32d05bb",
     user_id="2a736ae7-7c0f-429a-ba4b-f334e32d0aaa",
     latitude=55.7558,

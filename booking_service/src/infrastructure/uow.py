@@ -1,6 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.config import settings
+from src.infrastructure.messaging.producer import RabbitMQProducer
+from src.infrastructure.repositories.events import SQLAlchemyEventRepository
+from infrastructure.repositories.reservations import SQLAlchemyReservationRepository
 from src.infrastructure.repositories.subscriptions import SQLAlchemySubscriptionRepository
+from src.services.interfaces.producer import IProducer
+from src.services.interfaces.repositories.event import IEventRepository
+from src.services.interfaces.repositories.reservation import IReservationRepository
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 from src.services.interfaces.uow import IUnitOfWork
 
@@ -27,5 +34,17 @@ class SQLAlchemyUnitOfWork(IUnitOfWork):
         await self.session.rollback()
 
     @property
+    def producer(self) -> IProducer:
+        return RabbitMQProducer(settings.rabbit.connection_url, settings.rabbit.exchange_name)
+
+    @property
     def subscription_repository(self) -> ISubscriptionRepository:
         return SQLAlchemySubscriptionRepository(self.session)
+
+    @property
+    def event_repository(self) -> IEventRepository:
+        return SQLAlchemyEventRepository(self.session)
+
+    @property
+    def reservation_repository(self) -> IReservationRepository:
+        return SQLAlchemyReservationRepository(self.session)

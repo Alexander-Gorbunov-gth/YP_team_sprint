@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.services.interfaces.producer import IProducer
+
 from src.services.interfaces.repositories.address import IAddressRepository
 from src.services.interfaces.repositories.event import IEventRepository
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
@@ -18,6 +19,10 @@ class IUnitOfWork(ABC):
 
     @abstractmethod
     async def __aexit__(self, exc_type, exc_value, traceback) -> None: ...
+
+    @property
+    @abstractmethod
+    def producer(self) -> IProducer: ...
 
     @property
     @abstractmethod

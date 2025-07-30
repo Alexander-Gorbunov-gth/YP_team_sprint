@@ -102,9 +102,9 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+# .env
 *.auth.env
-*.env
+# *.env
 temps/
 .venv
 env/
@@ -156,3 +156,6 @@ yatube_api/posts/static/
 media/
 codes/
 temp/
+
+poetry.lock
+*./poetry.lock

@@ -6,9 +6,10 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class RegisterForm(BaseModel):
-    email: Annotated[EmailStr, Form(...)]
-    password: Annotated[str, Form(...)]
-    confirm_password: Annotated[str, Form(...)]
+    username: str
+    email: EmailStr
+    password: str
+    confirm_password: str
 
 
 class UserResponse(BaseModel):
@@ -27,6 +28,11 @@ class LoginResponse(BaseModel):
     refresh_token: str
     access_token: str
     token_type: str = Field(default="jwt")
+
+
+class UserIdResponse(BaseModel):
+    id: UUID
+    username: str
 
 
 class DjangoLoginResponse(BaseModel):

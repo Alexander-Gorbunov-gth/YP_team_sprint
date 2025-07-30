@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createEvent } from "../../api/eventApi";
 import { getMyAddresses } from "../../api/addressApi";
 import styles from "./CreateEventPage.module.css";
 import { searchFilms } from '../../api/filmApi';
-
 
 export default function CreateEventPage({ movies = [] }) {
   const [movieId, setMovieId] = useState("");
@@ -14,28 +13,47 @@ export default function CreateEventPage({ movies = [] }) {
   const [addresses, setAddresses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     getMyAddresses().then((data) => setAddresses(data || []));
   }, []);
 
   useEffect(() => {
-  const delayDebounce = setTimeout(() => {
-    if (searchQuery.length > 1) {
-      searchFilms(searchQuery)
-        .then(setSearchResults)
-        .catch(() => setSearchResults([]));
-    } else {
-      setSearchResults([]);
-    }
-  }, 1);
-  return () => clearTimeout(delayDebounce);
-}, [searchQuery]);
+    const delayDebounce = setTimeout(() => {
+      if (searchQuery.length > 1) {
+        searchFilms(searchQuery)
+          .then(setSearchResults)
+          .catch(() => setSearchResults([]));
+      } else {
+        setSearchResults([]);
+      }
+    }, 1);
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setIsInputFocused(false);
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try { 
+    try {
       await createEvent({
         movie_id: movieId,
         address_id: addressId,
@@ -53,36 +71,40 @@ export default function CreateEventPage({ movies = [] }) {
       <p className={styles.title}>Создать мероприятие</p>
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formRow}>
-          <label className={styles.label} style={{ position: "relative" }}>
+          <label className={styles.label}>
             Фильм:
-            <input
-              type="text"
-              className={styles.input}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Введите название фильма"
-            />
-            {searchQuery.length > 1 && (
-              <ul className={styles.dropdown}>
-                {searchResults.length > 0 ? (
-                  searchResults.map((movie) => (
-                    <li
-                      key={movie.id}
-                      className={styles.dropdownItem}
-                      onClick={() => {
-                        setMovieId(movie.id);
-                        setSearchQuery(movie.title);
-                        setSearchResults([]);
-                      }}
-                    >
-                      {movie.title}
-                    </li>
-                  ))
-                ) : (
-                  <li className={styles.dropdownItem}>Фильмы не найдены</li>
-                )}
-              </ul>
-            )}
+            <div style={{ position: "relative" }} ref={dropdownRef}>
+              <input
+                type="text"
+                className={styles.input}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsInputFocused(true)}
+                placeholder="Введите название фильма"
+              />
+              {isInputFocused && searchQuery.length > 1 && (
+                <ul className={styles.dropdown}>
+                  {searchResults.length > 0 ? (
+                    searchResults.map((movie) => (
+                      <li
+                        key={movie.id}
+                        className={styles.dropdownItem}
+                        onClick={() => {
+                          setMovieId(movie.id);
+                          setSearchQuery(movie.title);
+                          setSearchResults([]);
+                          setIsInputFocused(false);
+                        }}
+                      >
+                        {movie.title}
+                      </li>
+                    ))
+                  ) : (
+                    <li className={styles.dropdownItem}>Фильмы не найдены</li>
+                  )}
+                </ul>
+              )}
+            </div>
           </label>
 
           <label className={styles.label}>
@@ -129,13 +151,6 @@ export default function CreateEventPage({ movies = [] }) {
         <button type="submit" className={styles.button}>
           Создать
         </button>
-        {/* <button
-          type="button"
-          className={styles.secondaryButton}
-          onClick={() => navigate("/addresses/new")}
-        >
-          ➕ Добавить адрес
-        </button> */}
       </form>
     </div>
   );
