@@ -1,7 +1,9 @@
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import clear_mappers
 
+from src.infrastructure.models import start_mappers
 from src.core.config import settings
 from src.infrastructure.db import postgres
 from src.interfaces.lifetime import AbstractAppLifetime
@@ -15,6 +17,7 @@ class AppLifetime(AbstractAppLifetime):
 
     async def shutdown(self) -> None:
         await self._disconnect_from_postgres()
+        clear_mappers()
 
     async def _connect_to_postgres(self) -> None:
         postgres.engine = create_async_engine(url=settings.postgres.connection_url, echo=settings.postgres.echo)
@@ -22,6 +25,7 @@ class AppLifetime(AbstractAppLifetime):
         try:
             async with postgres.engine.begin() as _:
                 logger.info("✅ Соединение с базой данных успешно установлено")
+                start_mappers()
         except Exception as e:
             logger.error(
                 "❌ Ошибка при установлении соединения с базой данных %s: %s", settings.postgres.connection_url, e
