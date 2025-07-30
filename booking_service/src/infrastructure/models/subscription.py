@@ -1,35 +1,17 @@
-from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import (
     Column,
-    DateTime,
     Float,
     Integer,
     String,
     Table,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import registry
 
 from src.domain.entities.address import Address
 from src.domain.entities.subscription import Subscription
-
-mapper_registry = registry()
-
-
-def timestamp_columns():
-    return [
-        Column("created_at", DateTime, nullable=False, default=datetime.now(timezone.utc).replace(tzinfo=None)),
-        Column(
-            "updated_at",
-            DateTime,
-            nullable=False,
-            default=datetime.now(timezone.utc).replace(tzinfo=None),
-            onupdate=datetime.now(timezone.utc).replace(tzinfo=None),
-        ),
-    ]
-
+from src.infrastructure.models.base import mapper_registry, timestamp_columns
 
 subscriptions = Table(
     "subscriptions",

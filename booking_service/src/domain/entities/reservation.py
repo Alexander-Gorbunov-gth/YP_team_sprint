@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from src.domain.entities.mixins import DateTimeMixin
 
 
-class ReservationStatus(Enum):
+class ReservationStatus(str, Enum):
     PENDING = "pending"
     CANCELED = "canceled"
     SUCCESS = "success"
