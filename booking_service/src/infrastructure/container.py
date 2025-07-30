@@ -7,8 +7,8 @@ from src.core.config import settings
 from src.infrastructure.db import postgres
 from src.infrastructure.uow import SQLAlchemyUnitOfWork
 from src.services.interfaces.uow import IUnitOfWork
-from src.services.jwt import AbstractJWTService, JWTService
 from src.services.subscription import ISubscriptionService, SubscriptionService
+from src.services.token import AbstractJWTService, JWTService
 
 
 class Container(Provider):
@@ -29,4 +29,4 @@ class Container(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def provide_jwt_service(self) -> AbstractJWTService:
-        return JWTService(settings.auth.secret_key, settings.auth.algorithm)
+        return JWTService(settings.auth.secret_key.get_secret_value(), settings.auth.algorithm)
