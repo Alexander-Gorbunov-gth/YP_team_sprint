@@ -1,10 +1,7 @@
-from uuid import uuid4
-
 from sqlalchemy import (
+
     Column,
-    Float,
     Integer,
-    String,
     Table,
 )
 
@@ -25,6 +22,3 @@ subscriptions = Table(
 def mapped_subscription_table():
     mapper_registry.map_imperatively(Subscription, subscriptions)
 
-
-def mapped_address_table():
-    mapper_registry.map_imperatively(Address, addresses)
