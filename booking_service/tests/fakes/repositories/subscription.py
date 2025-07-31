@@ -21,7 +21,7 @@ class FakeSubscriptionRepository(ISubscriptionRepository):
         return result[offset : offset + limit]
 
     async def create(self, subscription: SubscriptionCreateDTO) -> Subscription | None:
-        created_subscription = Subscription.create(subscription.host_id, subscription.user_id)
+        created_subscription = Subscription.create(1, subscription.host_id, subscription.user_id)
         for sub in self.subscriptions:
             if sub.user_id == subscription.user_id and sub.host_id == subscription.host_id:
                 return None

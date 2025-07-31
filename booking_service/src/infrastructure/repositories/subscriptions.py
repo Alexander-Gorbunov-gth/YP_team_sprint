@@ -7,14 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.domain.entities.subscription import Subscription
-from src.api.v1.schemas.subscription import (
-    SubscriptionCreateSchema,
-    SubscriptionDeleteSchema,
-)
-from src.infrastructure.repositories.exceptions import (
-    SubscriptionAlreadyExistsError,
-    SubscriptionNotFoundError,
-)
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 
 logger = logging.getLogger(__name__)
@@ -53,10 +45,9 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
 
         existing = await self._check_subscription(subscription.host_id, subscription.user_id)
         if existing is None:
-            raise SubscriptionNotFoundError(
-                f"Подписка с {subscription.host_id=} и {subscription.user_id=} не найдена."
-            )
+            return None
         await self._session.delete(existing)
+        return existing
 
     async def get_subscriptions_by_user_id(
         self, user_id: UUID | str, limit: int, offset: int

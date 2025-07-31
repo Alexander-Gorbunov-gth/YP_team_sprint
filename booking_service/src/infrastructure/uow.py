@@ -10,6 +10,8 @@ from src.services.interfaces.repositories.event import IEventRepository
 from src.services.interfaces.repositories.reservation import IReservationRepository
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 from src.services.interfaces.uow import IUnitOfWork
+from src.services.interfaces.repositories.address import IAddressRepository
+from src.infrastructure.repositories.addresses import SQLAlchemyAddressRepository
 
 
 class SQLAlchemyUnitOfWork(IUnitOfWork):
@@ -48,3 +50,7 @@ class SQLAlchemyUnitOfWork(IUnitOfWork):
     @property
     def reservation_repository(self) -> IReservationRepository:
         return SQLAlchemyReservationRepository(self.session)
+
+    @property
+    def address_repository(self) -> IAddressRepository:
+        return SQLAlchemyAddressRepository(self.session)

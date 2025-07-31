@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 class AddressBaseSchema(BaseModel):
     country: str
     city: str
+    latitude: float
+    longitude: float
     street: str
     house: str
     flat: str | None = Field(default=None)

@@ -1,6 +1,6 @@
 import pytest
 
-from src.infrastructure.repositories.exceptions import SubscriptionAlreadyExistsError, SubscriptionNotFoundError
+from src.services.exceptions import SubscriptionAlreadyExistsError, SubscriptionNotFoundError
 from src.services.subscription import SubscriptionService
 from tests.fakes.uow import FakeUnitOfWork
 from tests.unit.factories import SubscriptionCreateDTOFactory, SubscriptionDeleteDTOFactory

@@ -7,8 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
 from src.domain.entities.address import Address
-from src.infrastructure.repositories.exceptions import AddressNotFoundError, NotModifiedError
-from src.api.v1.schemas.address import UpdateAddressSchema
+from src.infrastructure.repositories.exceptions import NotModifiedError
 from src.services.interfaces.repositories.address import IAddressRepository
 
 logger = logging.getLogger(__name__)
@@ -23,13 +22,13 @@ class SQLAlchemyAddressRepository(IAddressRepository):
         result: Result = await self._session.execute(query)
         return result.scalar_one()
 
-    async def get_address(self, address_id: UUID) -> Address:
+    async def get_address(self, address_id: UUID) -> Address | None:
         query = select(Address).filter_by(id=address_id)
         result: Result = await self._session.execute(query)
         address = result.scalar_one_or_none()
         if address is None:
             logger.warning("Address с id=%s не найден.", address_id)
-            raise AddressNotFoundError(f"Address с id={address_id} не найден.")
+            return None
         return address
 
     async def get_my_addresses(self, user_id: UUID) -> Iterable[Address]:
@@ -37,38 +36,26 @@ class SQLAlchemyAddressRepository(IAddressRepository):
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()
 
-    async def delete(self, address_id: UUID) -> None:
+    async def delete(self, address_id: UUID) -> Address | None:
         query = select(Address).filter_by(id=address_id)
         result: Result = await self._session.execute(query)
         address = result.scalar_one_or_none()
         if address is None:
             logger.warning("Удаляемый Address с id=%s не найден.", address_id)
-            raise AddressNotFoundError(f"Address с id={address_id} не найден.")
+            return None
 
         await self._session.delete(address)
-        return
+        return address
 
-    async def update(self, address: AddressUpdateDTO) -> Address:
-        update_data = address.model_dump(exclude_unset=True)
+    async def update(self, address: AddressUpdateDTO, address_id: UUID) -> Address | None:
+        update_data = address.model_dump(exclude_unset=True, exclude_defaults=True, exclude={"id"})
         if not update_data:
             raise NotModifiedError("Не указаны данные для обновления.")
 
-        query = update(Address).where(Address.id == address.id).values(**update_data).returning(Address)  # type: ignore
+        query = update(Address).where(Address.id == address_id).values(**update_data).returning(Address)  # type: ignore
         result: Result = await self._session.execute(query)
-
         updated_address = result.scalar_one_or_none()
-
         if updated_address is None:
-            logger.warning("Address с id=%s не найден для обновления.", address.id)
-            raise AddressNotFoundError(f"Address с id={address.id} не найден для обновления.")
-
+            logger.warning("Address с id=%s не найден для обновления.", address_id)
+            return None
         return updated_address
-
-    async def _commit(self) -> None:
-        await self._session.commit()
-
-
-async def get_address_repository(
-    session: AsyncSession = Depends(get_session),
-) -> SQLAlchemyAddressRepository:
-    return SQLAlchemyAddressRepository(session=session)
