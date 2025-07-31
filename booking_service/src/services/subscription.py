@@ -33,7 +33,7 @@ class SubscriptionService(ISubscriptionService):
             return Subscription.model_validate(
                 await uow.subscription_repository.create(subscription))
 
-    async def delete_subscription(self, subscription: SubscriptionDeleteDTOw) -> None:
+    async def delete_subscription(self, subscription: SubscriptionDeleteDTO) -> None:
         async with self._uow as uow:
             deleted_subscription = await uow.subscription_repository.delete(subscription)
             if deleted_subscription is None:

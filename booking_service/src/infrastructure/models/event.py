@@ -27,15 +27,16 @@ events = Table(
 )
 
 
-mapper_registry.map_imperatively(
-    Event,
-    events,
-    properties={
-        "reservations": relationship(
-            Reservation,
-            back_populates="event",
-            cascade="all, delete-orphan",
-            lazy="joined",
-        ),
-    },
-)
+def mapped_events_table():
+    mapper_registry.map_imperatively(
+        Event,
+        events,
+        properties={
+            "reservations": relationship(
+                Reservation,
+                back_populates="event",
+                cascade="all, delete-orphan",
+                lazy="joined",
+            ),
+        },
+    )

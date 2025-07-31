@@ -2,7 +2,7 @@ import abc
 from datetime import timedelta
 from uuid import UUID
 
-from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO
+from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO, EventGetAllDTO
 from src.core.config import settings
 
 from src.domain.entities.event import Event
@@ -25,7 +25,10 @@ class IEventService(abc.ABC):
     async def get_by_id(self, event_id: UUID | str) -> Event: ...
 
     @abc.abstractmethod
-    async def get_event_list(self, offset: int, limit: int) -> list[Event]: ...
+    async def get_event_list(self, event: EventGetAllDTO) -> list[Event]: ...
+
+    @abc.abstractmethod
+    async def get_events_by_user_id(self, user_id: UUID) -> list[Event]: ...
 
 
 class EventService(IEventService):
@@ -70,7 +73,7 @@ class EventService(IEventService):
         """
 
         async with self._uow as uow:
-            current_event: Event | None = await uow.event_repository.get_by_id(event_id)
+            current_event: Event | None = await uow.event_repository.get_by_id(event.id)
             if current_event is None:
                 raise EventNotFoundError("Event not found")
             current_event.can_be_updated()
@@ -103,3 +106,24 @@ class EventService(IEventService):
                 await uow.producer.publish(message=message)
 
             return await uow.event_repository.delete(event_id)
+
+    async def get_by_id(self, event_id: UUID | str) -> Event:
+        async with self._uow as uow:
+            current_event: Event | None = await uow.event_repository.get_by_id(event_id)
+            if current_event is None:
+                raise EventNotFoundError("Event not found")
+            return current_event
+
+    async def get_event_list(self, event: EventGetAllDTO) -> list[Event]:
+        async with self._uow as uow:
+            current_events: list[Event] = await uow.event_repository.get_event_list(event)
+            if not current_events:
+                raise EventNotFoundError("Events not found")
+            return current_events
+
+    async def get_events_by_user_id(self, user_id: UUID) -> list[Event]:
+        async with self._uow as uow:
+            current_events: list[Event] = await uow.event_repository.get_events_by_user_id(user_id)
+            if not current_events:
+                raise EventNotFoundError("Events not found")
+            return current_events

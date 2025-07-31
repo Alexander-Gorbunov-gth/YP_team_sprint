@@ -4,10 +4,7 @@ from uuid import UUID
 from sqlalchemy import Result, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.v1.schemas.event import (
-    EventCreateSchema,
-    EventUpdateSchema,
-)
+from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
 from src.domain.entities.event import Event
 from src.infrastructure.repositories.exceptions import EventNotFoundError
 from src.services.interfaces.repositories.event import IEventRepository
@@ -19,7 +16,7 @@ class SQLAlchemyEventRepository(IEventRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create(self, event: EventCreateSchema) -> Event:
+    async def create(self, event: EventCreateDTO) -> Event:
         """
         Создает событие в базе данных.
         :param event: Схема события для создания.
@@ -31,7 +28,7 @@ class SQLAlchemyEventRepository(IEventRepository):
         await self._commit()
         return created_event.scalar_one()
 
-    async def update(self, event_id: UUID | str, event: EventUpdateSchema) -> Event | None:
+    async def update(self, event: EventUpdateDTO) -> Event | None:
         """
         Обновляет событие в базе данных.
         :param event: Обновлённый объект события.
@@ -39,12 +36,12 @@ class SQLAlchemyEventRepository(IEventRepository):
         :return: Обновлённое событие.
         """
 
-        query = select(Event).filter_by(id=event_id)
+        query = select(Event).filter_by(id=event.id)
         result: Result = await self._session.execute(query)
         existing_event: Event | None = result.scalar_one_or_none()
 
         if existing_event is None:
-            raise EventNotFoundError(f"Событие с {event_id=} не найдено.")
+            raise EventNotFoundError(f"Событие с {event.id=} не найдено.")
 
         update_data = event.model_dump(
             exclude_unset=True,
@@ -103,7 +100,7 @@ class SQLAlchemyEventRepository(IEventRepository):
         result: Result = await self._session.execute(query)
         return result.scalars().all()
 
-    async def get_event_list(self, limit: int, offset: int) -> list[Event]:
+    async def get_event_list(self, event: EventGetAllDTO) -> list[Event]:
         """
         Получает все события.
         :param limit: Максимальное количество событий для возврата (ограничение выборки).
@@ -113,8 +110,8 @@ class SQLAlchemyEventRepository(IEventRepository):
 
         query = (
             select(Event)
-            .limit(limit)
-            .offset(offset)
+            .limit(event.limit)
+            .offset(event.offset)
             .order_by(Event.created_at.desc())  # type: ignore
         )
         result: Result = await self._session.execute(query)

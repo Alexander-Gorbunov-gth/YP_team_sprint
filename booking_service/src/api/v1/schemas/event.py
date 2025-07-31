@@ -36,3 +36,8 @@ class EventResponseSchema(EventBaseSchema):
 
 class EventMyResponseSchema(EventResponseSchema):
     customers: list
+
+
+class EventGetAllSchema(BaseModel):
+    offset: int
+    limit: int

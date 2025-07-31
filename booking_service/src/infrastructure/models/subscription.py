@@ -26,5 +26,5 @@ def mapped_subscription_table():
     mapper_registry.map_imperatively(Subscription, subscriptions)
 
 
-def mapped_address_table():
-    mapper_registry.map_imperatively(Address, addresses)
+# def mapped_address_table():
+#     mapper_registry.map_imperatively(Address, addresses)
