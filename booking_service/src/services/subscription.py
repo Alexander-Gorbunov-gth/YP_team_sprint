@@ -1,10 +1,14 @@
 import abc
+import logging
 from collections.abc import Iterable
 from uuid import UUID
 
+from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.domain.entities.subscription import Subscription
 from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.services.interfaces.uow import IUnitOfWork
+
+logger = logging.getLogger(__name__)
 
 
 class ISubscriptionService(abc.ABC):
@@ -31,7 +35,12 @@ class SubscriptionService(ISubscriptionService):
 
     async def delete_subscription(self, subscription: SubscriptionDeleteDTOw) -> None:
         async with self._uow as uow:
-            await uow.subscription_repository.delete(subscription)
+            deleted_subscription = await uow.subscription_repository.delete(subscription)
+            if deleted_subscription is None:
+                logger.warning(
+                    "Подписка с host_id=%s и user_id=%s не найдена", subscription.host_id, subscription.user_id
+                )
+                raise SubscriptionNotFoundError("Подписка не найдена")
 
     async def get_subscriptions_by_user_id(
         self, user_id: UUID | str, limit: int, offset: int

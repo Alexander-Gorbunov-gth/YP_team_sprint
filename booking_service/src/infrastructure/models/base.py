@@ -1,9 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    Column,
-    DateTime,
-)
+from sqlalchemy import Column, DateTime
 from sqlalchemy.orm import registry
 
 mapper_registry = registry()

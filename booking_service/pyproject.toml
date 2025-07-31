@@ -30,6 +30,7 @@ pyjwt = {version = "2.10.1", extras = ["crypto"]}
 mypy = "^1.17.0"
 ruff = "^0.12.3"
 pytest = "^8.4.1"
+pytest-asyncio = "1.1.0"
 
 [build-system]
 requires = ["poetry-core"]

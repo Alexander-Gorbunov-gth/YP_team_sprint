@@ -3,11 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from .address import AdressRepresentSchema
-from .to_represent import Author, MovieSchema
 
-
-class EventBaseSchema(BaseModel):
+class EventCreateDTO(BaseModel):
     movie_id: UUID
     address_id: UUID
     # owner_id: UUID - забрать из токена
@@ -15,20 +12,9 @@ class EventBaseSchema(BaseModel):
     start_datetime: datetime
 
 
-class EventCreateSchema(EventBaseSchema):
-    pass
-
-
-class EventUpdateSchema(BaseModel):
-    # movie_id: UUID | None - сам фильм запретим менять
-    address_id: UUID | None
-    # owner_id: UUID | None - # сам автор запретим менять
-    capacity: int | None
-    start_datetime: datetime | None
-
-
-class EventResponseSchema(EventBaseSchema):
+class EventUpdateDTO(BaseModel):
     id: UUID
-    address: AdressRepresentSchema
-    movie: MovieSchema
-    author: Author
+    movie_id: UUID | None = None
+    address_id: UUID | None = None
+    capacity: int | None = None
+    start_datetime: datetime | None = None

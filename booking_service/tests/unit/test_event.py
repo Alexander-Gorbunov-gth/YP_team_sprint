@@ -5,7 +5,7 @@ import pytest
 
 from src.domain.entities.reservation import Reservation, ReservationStatus
 from src.domain.exceptions import DuplicateReservationError, EventUpdateLockedError, NotEnoughSeatsError
-from tests.unit.factories import AddressFactory, EventFacroty, UserFactory
+from tests.unit.factories import AddressFactory, EventFactory, UserFactory
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def host_user():
 
 @pytest.fixture
 def event(address, host_user):
-    return EventFacroty.build(
+    return EventFactory.build(
         capacity=4,
         start_datetime=datetime.now() + timedelta(hours=1),
         addres=address,
