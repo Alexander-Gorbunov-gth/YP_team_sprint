@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
 from src.domain.entities.address import Address
 from src.infrastructure.repositories.exceptions import AddressNotFoundError, NotModifiedError
-from src.api.v1.schemas.address import UpdateAddressSchema
 from src.services.interfaces.repositories.address import IAddressRepository
 
 logger = logging.getLogger(__name__)
@@ -55,20 +54,8 @@ class SQLAlchemyAddressRepository(IAddressRepository):
 
         query = update(Address).where(Address.id == address.id).values(**update_data).returning(Address)  # type: ignore
         result: Result = await self._session.execute(query)
-
         updated_address = result.scalar_one_or_none()
-
         if updated_address is None:
             logger.warning("Address с id=%s не найден для обновления.", address.id)
             raise AddressNotFoundError(f"Address с id={address.id} не найден для обновления.")
-
         return updated_address
-
-    async def _commit(self) -> None:
-        await self._session.commit()
-
-
-async def get_address_repository(
-    session: AsyncSession = Depends(get_session),
-) -> SQLAlchemyAddressRepository:
-    return SQLAlchemyAddressRepository(session=session)
