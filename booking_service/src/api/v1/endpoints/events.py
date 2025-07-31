@@ -53,7 +53,7 @@ async def get_event(
     event_service: FromDishka[IEventService],
     id: str = Path(..., description="ID мероприятия"),
 ):
-    return await event_service.get_by_id(id)
+    return await event_service.get_by_id(id)w
 
 
 @router.delete("/{id}", summary="Удалить мероприятие")

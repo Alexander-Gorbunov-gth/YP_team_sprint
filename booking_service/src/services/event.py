@@ -1,14 +1,16 @@
 import abc
 from datetime import timedelta
 from uuid import UUID
+import logging
 
-from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO, EventGetAllDTO
-from src.core.config import settings
-
+from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO
 from src.domain.entities.event import Event
 from src.services.exceptions import EventNotFoundError, EventTimeConflictError
 from src.services.interfaces.producer import PublishMessage
 from src.services.interfaces.uow import IUnitOfWork
+
+
+logger = logging.getLogger(__name__)
 
 
 class IEventService(abc.ABC):
@@ -59,9 +61,7 @@ class EventService(IEventService):
         param: event: EventCreateSchema - событие для создания
         """
         async with self._uow as uow:
-            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(
-                event.owner_id
-            )
+            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(event.owner_id)
             self._check_event_time_conflict(event, user_events)
             return await uow.event_repository.create(event)
 
@@ -73,18 +73,20 @@ class EventService(IEventService):
         """
 
         async with self._uow as uow:
-            current_event: Event | None = await uow.event_repository.get_by_id(event.id)
+            current_event: Event | None = await uow.event_repository.get_by_id(event_id=event.id)
             if current_event is None:
                 raise EventNotFoundError("Event not found")
             current_event.can_be_updated()
             if event.start_datetime is not None:
                 user_events: list[Event] = await uow.event_repository.get_events_by_user_id(current_event.owner_id)
                 self._check_event_time_conflict(event, user_events)
-                await uow.producer.publish(
-                    message=PublishMessage(
-                        user_id=current_event.owner_id, event_type="example", channels=["email", "push"]
+                for reservation in current_event.reservations:
+                    message = PublishMessage(
+                        user_id=reservation.user_id,
+                        event_type="example",
+                        channels=["email", "push"],
                     )
-                )
+                    await uow.producer.publish(message=message, routing_key="example")
             return await uow.event_repository.update(event)
 
     async def delete(self, event_id: UUID | str) -> None:
@@ -103,27 +105,31 @@ class EventService(IEventService):
                     channels=["email", "push"],
                     user_id=reservation.user_id,
                 )
-                await uow.producer.publish(message=message)
-
+                await uow.producer.publish(message=message, routing_key="example")
             return await uow.event_repository.delete(event_id)
 
+
     async def get_by_id(self, event_id: UUID | str) -> Event:
+        """
+        Получение события по id.
+        param: event_id: UUID | str - id события
+        :return: Event
+        """
+
         async with self._uow as uow:
-            current_event: Event | None = await uow.event_repository.get_by_id(event_id)
-            if current_event is None:
+            event = await uow.event_repository.get_by_id(event_id)
+            if event is None:
+                logger.warning("Event with id=%s not found", event_id)
                 raise EventNotFoundError("Event not found")
-            return current_event
+            return event
 
-    async def get_event_list(self, event: EventGetAllDTO) -> list[Event]:
-        async with self._uow as uow:
-            current_events: list[Event] = await uow.event_repository.get_event_list(event)
-            if not current_events:
-                raise EventNotFoundError("Events not found")
-            return current_events
+    async def get_event_list(self, offset: int, limit: int) -> list[Event]:
+        """
+        Получение списка событий.
+        param: offset: int - смещение
+        param: limit: int - количество событий
+        :return: list[Event]
+        """
 
-    async def get_events_by_user_id(self, user_id: UUID) -> list[Event]:
         async with self._uow as uow:
-            current_events: list[Event] = await uow.event_repository.get_events_by_user_id(user_id)
-            if not current_events:
-                raise EventNotFoundError("Events not found")
-            return current_events
+            return await uow.event_repository.get_event_list(offset, limit)
