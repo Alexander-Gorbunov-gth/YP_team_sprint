@@ -21,5 +21,5 @@ addresses = Table(
     *timestamp_columns(),
 )
 
-def mapped_address_table():
+def mapped_addresses_table():
     mapper_registry.map_imperatively(Address, addresses)

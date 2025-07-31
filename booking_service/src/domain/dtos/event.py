@@ -18,3 +18,8 @@ class EventUpdateDTO(BaseModel):
     address_id: UUID | None = None
     capacity: int | None = None
     start_datetime: datetime | None = None
+
+
+class EventGetAllDTO(BaseModel):
+    offset: int
+    limit: int

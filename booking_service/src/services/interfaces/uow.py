@@ -5,6 +5,7 @@ from src.services.interfaces.producer import IProducer
 from src.services.interfaces.repositories.address import IAddressRepository
 from src.services.interfaces.repositories.event import IEventRepository
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
+from src.services.interfaces.repositories.reservation import IReservationRepository
 
 
 class IUnitOfWork(ABC):
@@ -38,4 +39,4 @@ class IUnitOfWork(ABC):
 
     @property
     @abstractmethod
-    def producer(self) -> IProducer: ...
+    def reservation_repository(self) -> IReservationRepository: ...

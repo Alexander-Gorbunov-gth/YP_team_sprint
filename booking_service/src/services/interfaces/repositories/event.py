@@ -1,7 +1,7 @@
 import abc
 from uuid import UUID
 
-from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO
+from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
 from src.domain.entities.event import Event
 
 
@@ -22,4 +22,4 @@ class IEventRepository(abc.ABC):
     async def get_events_by_user_id(self, user_id: UUID | str) -> list[Event]: ...
 
     @abc.abstractmethod
-    async def get_event_list(self, offset: int, limit: int) -> list[Event]: ...
+    async def get_event_list(self, event: EventGetAllDTO) -> list[Event]: ...

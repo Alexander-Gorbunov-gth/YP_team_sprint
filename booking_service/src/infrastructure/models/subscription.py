@@ -21,4 +21,3 @@ subscriptions = Table(
 
 def mapped_subscription_table():
     mapper_registry.map_imperatively(Subscription, subscriptions)
-
