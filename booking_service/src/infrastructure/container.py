@@ -6,10 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.config import settings
 from src.infrastructure.db import postgres
 from src.infrastructure.uow import SQLAlchemyUnitOfWork
+from src.services.address import AddressService, IAddressService
+from src.services.event import IEventService, EventService
 from src.services.interfaces.uow import IUnitOfWork
 from src.services.subscription import ISubscriptionService, SubscriptionService
 from src.services.token import AbstractJWTService, JWTService
-from src.services.address import IAddressService, AddressService
+
 
 
 class Container(Provider):
@@ -35,3 +37,7 @@ class Container(Provider):
     @provide(scope=Scope.REQUEST)
     async def provide_address_service(self, uow: IUnitOfWork) -> IAddressService:
         return AddressService(uow)
+
+    @provide(scope=Scope.REQUEST)
+    async def provide_event_service(self, uow: IUnitOfWork) -> IEventService:
+        return EventService(uow)
