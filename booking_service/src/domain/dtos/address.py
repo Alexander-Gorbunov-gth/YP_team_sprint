@@ -15,7 +15,6 @@ class AddressCreateDTO(BaseModel):
 
 
 class AddressUpdateDTO(BaseModel):
-    id: UUID
     latitude: float | None = None
     longitude: float | None = None
     country: str | None = None
