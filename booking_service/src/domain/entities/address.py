@@ -15,8 +15,6 @@ class Address(DateTimeMixin, BaseModel):
     street: str
     house: str
     flat: str | None = Field(default=None)
-    latitude: float | None = Field(default=None)
-    longitude: float | None = Field(default=None)
 
     @classmethod
     def create(
@@ -31,6 +29,7 @@ class Address(DateTimeMixin, BaseModel):
         flat: str | None = None,
     ) -> "Address":
         return cls(
+            id=uuid4(),
             user_id=user_id,
             latitude=latitude,
             longitude=longitude,

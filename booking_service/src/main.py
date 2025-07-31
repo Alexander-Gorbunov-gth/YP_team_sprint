@@ -12,22 +12,23 @@ from src.infrastructure.lifetime import AppLifetime
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(fastapi_app: FastAPI):
     app_lifetime = AppLifetime()
     await app_lifetime.startup()
     try:
         yield
     finally:
         await app_lifetime.shutdown()
-        await app.state.dishka_container.close()
+        await fastapi_app.state.dishka_container.close()
+
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(lifespan=lifespan)
-    app.include_router(router, prefix="/api")
+    fastapi_app = FastAPI(lifespan=lifespan, docs_url="/api/openapi", openapi_url="/api/openapi.json")
+    fastapi_app.include_router(router, prefix="/api")
     container = make_async_container(Container())
-    setup_dishka(container=container, app=app)
-    return app
+    setup_dishka(container=container, app=fastapi_app)
+    return fastapi_app
 
 
 app = create_app()
@@ -40,5 +41,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 if __name__ == "__main__":
     uvicorn.run(app=app, host="0.0.0.0", port=8000, reload=True)
