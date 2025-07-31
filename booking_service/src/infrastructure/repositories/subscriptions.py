@@ -65,7 +65,7 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
             raise SubscriptionNotFoundError(
                 f"Подписка с {subscription.host_id=} и {subscription.user_id=} не найдена."
             )
-        await self._session.delete(subscription)
+        await self._session.delete(existing)
 
     async def get_subscriptions_by_user_id(
         self, user_id: UUID | str, limit: int, offset: int
