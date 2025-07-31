@@ -53,14 +53,10 @@ class SQLAlchemySubscriptionRepository(ISubscriptionRepository):
 
         existing = await self._check_subscription(subscription.host_id, subscription.user_id)
         if existing is None:
-            return None
-        delete_query = (
-            delete(Subscription)
-            .filter_by(host_id=subscription.host_id, user_id=subscription.user_id)
-            .returning(Subscription)
-        )
-        deleted_subscription: Result = await self._session.execute(delete_query)
-        return deleted_subscription.scalar_one_or_none()
+            raise SubscriptionNotFoundError(
+                f"Подписка с {subscription.host_id=} и {subscription.user_id=} не найдена."
+            )
+        await self._session.delete(existing)
 
     async def get_subscriptions_by_user_id(
         self, user_id: UUID | str, limit: int, offset: int

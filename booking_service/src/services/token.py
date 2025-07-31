@@ -40,11 +40,12 @@ class JWTService(AbstractJWTService):
                 key=self._secret_key,
                 algorithms=[self._algorithm],
             )
-            token = User(payload["sub"])
-        except jwt.ExpiredSignatureError:
+            token = User(id=payload["sub"])
+        except jwt.ExpiredSignatureError as e:
             logger.error("Токен %s просрочен.", jwt_token)
-            raise SessionHasExpired
-        except (jwt.PyJWTError, TypeError):
+            raise SessionHasExpired from e
+        except (jwt.PyJWTError, TypeError) as e:
             logger.error("Ошибка декодирования токена %s", jwt_token)
-            raise SessionHasExpired
+            logger.error(e)
+            raise SessionHasExpired from e
         return token

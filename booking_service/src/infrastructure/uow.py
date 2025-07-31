@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.config import settings
 from src.infrastructure.messaging.producer import RabbitMQProducer
 from src.infrastructure.repositories.events import SQLAlchemyEventRepository
-from infrastructure.repositories.reservations import SQLAlchemyReservationRepository
+from src.infrastructure.repositories.reservations import SQLAlchemyReservationRepository
 from src.infrastructure.repositories.subscriptions import SQLAlchemySubscriptionRepository
 from src.services.interfaces.producer import IProducer
 from src.services.interfaces.repositories.event import IEventRepository

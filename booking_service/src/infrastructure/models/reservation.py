@@ -21,10 +21,7 @@ reservations = Table(
     Column("event_id", UUID(as_uuid=True), ForeignKey("events.id", ondelete="CASCADE"), nullable=False),
     Column("seats", Integer, nullable=False),
     Column(
-        "status",
-        Enum(ReservationStatus, name="reservation_status"),
-        nullable=False,
-        default=ReservationStatus.PENDING
+        "status", Enum(ReservationStatus, name="reservation_status"), nullable=False, default=ReservationStatus.PENDING
     ),
     *timestamp_columns(),
 )

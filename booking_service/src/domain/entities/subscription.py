@@ -6,10 +6,10 @@ from src.domain.entities.mixins import DateTimeMixin
 
 
 class Subscription(DateTimeMixin, BaseModel):
-    id: UUID
+    id: int
     host_id: UUID
     user_id: UUID
 
     @classmethod
-    def create(cls, host_id: UUID, user_id: UUID) -> "Subscription":
-        return cls(id=uuid4(), host_id=host_id, user_id=user_id)
+    def create(cls,id: int, host_id: UUID, user_id: UUID) -> "Subscription":
+        return cls(id=id, host_id=host_id, user_id=user_id)

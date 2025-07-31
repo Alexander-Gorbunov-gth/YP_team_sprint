@@ -6,7 +6,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.domain.entities.user import User
 from src.services.exceptions import SessionHasExpired
-from src.services.jwt import AbstractJWTService
+from src.services.token import AbstractJWTService
 
 auth_scheme = HTTPBearer(auto_error=False)
 

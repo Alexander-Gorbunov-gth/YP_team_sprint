@@ -5,7 +5,7 @@ from uuid import UUID
 
 from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.domain.entities.subscription import Subscription
-from src.infrastructure.repositories.exceptions import SubscriptionAlreadyExistsError, SubscriptionNotFoundError
+from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.services.interfaces.uow import IUnitOfWork
 
 logger = logging.getLogger(__name__)
@@ -30,15 +30,10 @@ class SubscriptionService(ISubscriptionService):
 
     async def create_subscription(self, subscription: SubscriptionCreateDTO) -> Subscription:
         async with self._uow as uow:
-            created_subscription = await uow.subscription_repository.create(subscription)
-            if created_subscription is None:
-                logger.warning(
-                    "Подписка с host_id=%s и user_id=%s уже существует", subscription.host_id, subscription.user_id
-                )
-                raise SubscriptionAlreadyExistsError("Подписка уже существует")
-            return created_subscription
+            return Subscription.model_validate(
+                await uow.subscription_repository.create(subscription))
 
-    async def delete_subscription(self, subscription: SubscriptionDeleteDTO) -> None:
+    async def delete_subscription(self, subscription: SubscriptionDeleteDTOw) -> None:
         async with self._uow as uow:
             deleted_subscription = await uow.subscription_repository.delete(subscription)
             if deleted_subscription is None:
