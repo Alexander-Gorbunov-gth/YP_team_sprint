@@ -9,6 +9,7 @@ from src.api.v1.schemas.subscription import (
     SubscriptionDeleteSchema,
     SubscriptionResponseSchema,
 )
+from src.api.v1.schemas.utils import Author
 from src.domain.dtos.subscription import SubscriptionCreateDTO, SubscriptionDeleteDTO
 from src.services.subscription import ISubscriptionService
 
@@ -30,10 +31,12 @@ async def get_user_subscriptions(
 ):
     """Получить список подписок текущего пользователя"""
 
-    subscriptions = await subscription_service.get_subscriptions_by_user_id(
-        user.id, limit, offset
-    )
-    return [SubscriptionResponseSchema.model_validate(sub) for sub in subscriptions]
+    subscriptions = await subscription_service.get_subscriptions_by_user_id(user.id, limit, offset)
+    user_subscriptions = []
+    for subscription in subscriptions:
+        author = Author(id=subscription.host_id)
+        user_subscriptions.append(SubscriptionResponseSchema(**subscription.model_dump(), author=author))
+    return user_subscriptions
 
 
 @router.post(
@@ -46,10 +49,10 @@ async def subscribe(
 ) -> SubscriptionResponseSchema:
     """Подписаться на автора"""
 
-    subscription = await subscription_service.create_subscription(
-        SubscriptionCreateDTO(user_id=user.id, host_id=subscription_data.host_id)
-    )
-    return SubscriptionResponseSchema.model_validate(subscription)
+    subscription_dto = SubscriptionCreateDTO(user_id=user.id, host_id=subscription_data.host_id)
+    subscription = await subscription_service.create_subscription(subscription_dto)
+    author = Author(id=subscription_data.host_id)
+    return SubscriptionResponseSchema(**subscription.model_dump(), author=author)
 
 
 @router.delete("/", summary="Отписаться от автора")
@@ -59,7 +62,7 @@ async def unsubscribe(
     subscription_data: SubscriptionDeleteSchema,
 ) -> bool:
     """Отписаться от автора"""
-    await subscription_service.delete_subscription(
-        SubscriptionDeleteDTO(user_id=user.id, host_id=subscription_data.host_id)
-    )
+
+    subscription_dto = SubscriptionDeleteDTO(user_id=user.id, host_id=subscription_data.host_id)
+    await subscription_service.delete_subscription(subscription_dto)
     return True
