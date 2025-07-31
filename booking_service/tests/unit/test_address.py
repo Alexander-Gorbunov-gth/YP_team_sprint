@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from src.core.config import settings
 from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
 from src.infrastructure.db import postgres
-from src.db import postgres
-from src.api.v1.schemas.address import UpdateAddressSchema
+from src.infrastructure.db import postgres
+from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
 from src.infrastructure.repositories.addresses import SQLAlchemyAddressRepository
 
 
