@@ -9,6 +9,7 @@ from src.infrastructure.uow import SQLAlchemyUnitOfWork
 from src.services.interfaces.uow import IUnitOfWork
 from src.services.subscription import ISubscriptionService, SubscriptionService
 from src.services.token import AbstractJWTService, JWTService
+from src.services.address import IAddressService, AddressService
 
 
 class Container(Provider):
@@ -30,3 +31,7 @@ class Container(Provider):
     @provide(scope=Scope.REQUEST)
     async def provide_jwt_service(self) -> AbstractJWTService:
         return JWTService(settings.auth.secret_key.get_secret_value(), settings.auth.algorithm)
+
+    @provide(scope=Scope.REQUEST)
+    async def provide_address_service(self, uow: IUnitOfWork) -> IAddressService:
+        return AddressService(uow)
