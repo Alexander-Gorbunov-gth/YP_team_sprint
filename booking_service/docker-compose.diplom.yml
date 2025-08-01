@@ -1,8 +1,8 @@
 services:
   booking_service:
-    build: .
+    build: ./booking_service
     env_file:
-      - .env
+      - .booking_service.env
     ports:
       - "8050:8050"
     volumes:
@@ -26,7 +26,7 @@ services:
   notifications_service:
     build: ../notifications
     env_file:
-      - ../notifications/.env.dev
+      - ../.notifications.env
     depends_on:
       - notification_db
       - rabbitmq
@@ -38,7 +38,7 @@ services:
   content_service:
     build: ../content_service
     env_file:
-      - .env
+      - ../.env
     ports:
       - 8005:8005
     volumes:
@@ -56,10 +56,10 @@ services:
     volumes:
       - notification_pgdata:/var/lib/postgresql/data/
     env_file:
-      - ../notifications/.env.dev
+      - ../.notifications.env
 
   auth_postgres:
-    image: postgres:14
+    image: postgres:15
     container_name: auth_postgres
     ports:
       - "5434:5432"
@@ -69,13 +69,15 @@ services:
       - ../.auth.env
 
   booking_db:
-    image: postgres:14
+    image: postgres:15
     container_name: booking_db
     restart: always
     volumes:
       - pg_booking:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=booking_db
     env_file:
-      - .env
+      - ../.env
     ports:
       - "5435:5432"
 
@@ -85,7 +87,7 @@ services:
     restart: always
     volumes:
       - content_db:/var/lib/postgresql/data/
-      - ../database_dump.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - ../.env
     healthcheck:
@@ -100,14 +102,14 @@ services:
 
   rabbitmq:
     build:
-      context: ../notifications/rabbitmq
+      context: ./notifications/rabbitmq
       dockerfile: Dockerfile
     container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
     env_file:
-      - ../notifications/.env.dev
+      - ../.notifications.env
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -144,6 +146,50 @@ services:
       - cluster.routing.allocation.disk.watermark.high=97%
       - cluster.routing.allocation.disk.watermark.flood_stage=98%
 
+  etl_service:
+    container_name: etl_service_movies
+    build: ../etl_service
+    env_file:
+      - ../.env
+    volumes:
+      - logs:/app/logs
+
+  gateway:
+    build:
+      context: ../nginx_diplom
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: always
+    volumes:
+      - static_volume:/code/static:ro
+      - frontend_static:/usr/share/nginx/html:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - booking_service
+      - auth_service
+      - notifications_service
+      - content_service
+      - content_postgres
+      - notification_db
+      - auth_postgres
+      - booking_db
+      - redis
+      - elasticsearch
+      
+
+  frontend:
+    build:
+      context: ../frontend/booking-app
+      dockerfile: Dockerfile
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - frontend_static:/frontend-build
+
 volumes:
   pg_auth:
   logs:
@@ -151,3 +197,5 @@ volumes:
   rabbitmq_data:
   pg_booking:
   content_db:
+  static_volume:
+  frontend_static:

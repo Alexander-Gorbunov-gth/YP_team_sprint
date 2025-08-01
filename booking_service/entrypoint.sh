@@ -10,4 +10,8 @@ echo "PostgreSQL готов!"
 echo "Применение миграций Alembic..."
 alembic upgrade head
 
-python -m uvicorn src.main:app --host 0.0.0.0 --port 8050
+exec gunicorn src.main:app \
+  --workers 4 \
+  --worker-class uvicorn.workers.UvicornWorker \
+  --bind 0.0.0.0:8050 \
+  --timeout 120
