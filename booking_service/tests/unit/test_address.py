@@ -6,8 +6,6 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from src.core.config import settings
 from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
 from src.infrastructure.db import postgres
-from src.infrastructure.db import postgres
-from src.domain.dtos.address import AddressCreateDTO, AddressUpdateDTO
 from src.infrastructure.repositories.addresses import SQLAlchemyAddressRepository
 
 
@@ -35,6 +33,7 @@ async def test_repository():
 
     print("\n===> STARTING TEST")
 
+    # Test create
     created = await repo.create(
         address=AddressCreateDTO(
             user_id=user_id,
@@ -47,12 +46,19 @@ async def test_repository():
             flat=flat,
         ),
     )
-
+    assert created.id is not None
+    assert created.user_id == user_id
+    assert created.latitude == latitude
+    assert created.longitude == longitude
     print(f"[CREATE] Address created: {created}")
 
+    # Test get
     address = await repo.get_address(created.id)
+    assert address.id == created.id
+    assert address.country == country
     print(f"[GET] Addresses for user_id: {address}")
 
+    # Test update
     updated = await repo.update(
         address=AddressUpdateDTO(
             country="Updated Country",
@@ -61,16 +67,26 @@ async def test_repository():
             house="Updated House",
             flat="Updated Flat",
         ),
+        address_id=created.id
     )
+    assert updated.country == "Updated Country"
+    assert updated.city == "Updated City"
     print(f"[UPDATE] Address updated: {updated}")
 
+    # Test get_my_addresses
     my_addresses = await repo.get_my_address(user_id=user_id)
+    assert len(my_addresses) == 1
+    assert my_addresses[0].id == created.id
     print(f"[GET MY ADDRESSES] Addresses for user_id: {my_addresses}")
 
+    # Test delete
     deleted = await repo.delete(address_id=created.id)
+    assert deleted is True
     print(f"[DELETE] Address deleted: {deleted}")
 
+    # Verify deletion
     after_delete = await repo.get_my_address(user_id=user_id)
+    assert len(after_delete) == 0
     print(f"[GET AFTER DELETE] Address for user_id: {after_delete}")
 
     print("\n===> TEST COMPLETE")

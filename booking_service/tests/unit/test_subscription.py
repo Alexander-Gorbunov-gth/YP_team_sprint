@@ -25,19 +25,31 @@ async def test_repository():
 
     print(f"\n===> STARTING TEST with user_id={user_id}, host_id={host_id}")
 
+    # Test create
     created = await repo.create(subscription=SubscriptionCreateDTO(host_id=host_id, user_id=user_id))
+    assert created.user_id == user_id
+    assert created.host_id == host_id
     print(f"[CREATE] Subscription created: {created}")
 
+    # Test duplicate creation
     duplicate = await repo.create(subscription=SubscriptionCreateDTO(host_id=host_id, user_id=user_id))
+    assert duplicate is None
     print(f"[DUPLICATE CHECK] Subscription returned: {duplicate}")
 
+    # Test get subscriptions
     subscriptions = await repo.get_subscriptions_by_user_id(user_id=user_id, limit=10, offset=0)
+    assert len(subscriptions) == 1
+    assert subscriptions[0].host_id == host_id
     print(f"[GET] Subscriptions for user_id: {subscriptions}")
 
+    # Test delete
     deleted = await repo.delete(subscription=SubscriptionDeleteDTO(host_id=host_id, user_id=user_id))
+    assert deleted is True
     print(f"[DELETE] Subscription deleted: {deleted}")
 
+    # Verify deletion
     after_delete = await repo.get_subscriptions_by_user_id(user_id=user_id, limit=10, offset=0)
+    assert len(after_delete) == 0
     print(f"[GET AFTER DELETE] Subscriptions for user_id: {after_delete}")
 
     print("\n===> TEST COMPLETE")
