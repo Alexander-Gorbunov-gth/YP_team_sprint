@@ -1,9 +1,11 @@
 from uuid import uuid4
 
 from sqlalchemy import Column, Float, String, Table
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.domain.entities.address import Address
+from src.infrastructure.models.event import Event
 from src.infrastructure.models.base import mapper_registry, timestamp_columns
 
 addresses = Table(
@@ -22,4 +24,10 @@ addresses = Table(
 )
 
 def mapped_addresses_table():
-    mapper_registry.map_imperatively(Address, addresses)
+    mapper_registry.map_imperatively(Address, addresses, properties={
+        "events": relationship(
+            Event,
+            back_populates="address",
+            lazy="joined",
+        ),
+    })
