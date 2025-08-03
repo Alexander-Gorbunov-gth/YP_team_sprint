@@ -8,3 +8,7 @@ class DuplicateReservationError(Exception):
 
 class EventUpdateLockedError(Exception):
     """Событие нельзя отредактировать"""
+
+
+class AddressNotFoundError(Exception):
+    """Адрес не найден."""
