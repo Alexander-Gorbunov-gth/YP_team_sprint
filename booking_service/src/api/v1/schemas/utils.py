@@ -10,6 +10,7 @@ class Author(BaseModel):
 
 
 class MovieSchema(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
     genres: list[str] = Field(default_factory=list)
     title: str = Field(default="Movie Title")
     description: str | None = None
