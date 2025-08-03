@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class EventCreateDTO(BaseModel):
     movie_id: UUID
     address_id: UUID
-    # owner_id: UUID - забрать из токена
+    owner_id: UUID
     capacity: int
     start_datetime: datetime
 

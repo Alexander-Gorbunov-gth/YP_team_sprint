@@ -24,9 +24,10 @@ class SQLAlchemyEventRepository(IEventRepository):
         """
 
         query = insert(Event).values(event.model_dump()).returning(Event)
-        created_event: Result = await self._session.execute(query)
-        await self._commit()
-        return created_event.scalar_one()
+        result: Result = await self._session.execute(query)
+        created_event: Event = result.unique().scalar_one()
+        created_event.address
+        return created_event
 
     async def update(self, event: EventUpdateDTO) -> Event | None:
         """
@@ -66,13 +67,12 @@ class SQLAlchemyEventRepository(IEventRepository):
 
         check_query = select(Event).filter_by(id=event_id)
         result: Result = await self._session.execute(check_query)
-        existing = result.scalar_one_or_none()
+        existing = result.unique().scalar_one_or_none()
 
         if existing is None:
             raise EventNotFoundError(f"Событие с {event_id=} не найдена.")
 
         await self._session.delete(existing)
-        await self._commit()
 
     async def get_by_id(self, event_id: UUID | str) -> Event | None:
         """
@@ -82,6 +82,17 @@ class SQLAlchemyEventRepository(IEventRepository):
         """
 
         query = select(Event).filter_by(id=event_id)
+        result: Result = await self._session.execute(query)
+        return result.unique().scalar_one_or_none()
+
+    async def get_for_update(self, event_id: UUID | str) -> Event | None:
+        """
+        Получает событие для обновления.
+        :param event_id: ID события.
+        :return: Модель события.
+        """
+        
+        query = select(Event).filter_by(id=event_id).with_for_update()
         result: Result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
@@ -94,11 +105,11 @@ class SQLAlchemyEventRepository(IEventRepository):
 
         query = (
             select(Event)
-            .filter_by(user_id=user_id)
+            .filter_by(owner_id=user_id)
             .order_by(Event.created_at.desc())  # type: ignore
         )
         result: Result = await self._session.execute(query)
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def get_event_list(self, event: EventGetAllDTO) -> list[Event]:
         """

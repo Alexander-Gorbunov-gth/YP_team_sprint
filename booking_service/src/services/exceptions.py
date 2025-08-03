@@ -6,6 +6,14 @@ class EventNotFoundError(Exception):
     pass
 
 
+class EventStartDatetimeError(Exception):
+    """Исключение, которое выбрасывается, если дата начала события в прошлом."""
+
+
+class EventNotOwnerError(Exception):
+    """Исключение, которое выбрасывается, если пользователь не является владельцем события."""
+
+
 class ReservationNotFoundError(Exception):
     pass
 

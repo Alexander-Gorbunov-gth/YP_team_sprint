@@ -79,3 +79,17 @@ class Event(DateTimeMixin, BaseModel):
         if self.can_be_updated():
             self.address_id = new_address_id
             self.touch()
+
+    def get_address_for_user(self, user_id: UUID) -> str:
+        """Возвращает адрес для пользователя в зависимости от его роли."""
+        
+        if self.address is None:
+            raise AddressNotFoundError
+
+        if self.owner_id == user_id:
+            return self.address.full_address
+        
+        if any(r.user_id == user_id for r in self.reservations if r.status == ReservationStatus.SUCCESS):
+            return self.address.full_address
+
+        return self.address.public_address

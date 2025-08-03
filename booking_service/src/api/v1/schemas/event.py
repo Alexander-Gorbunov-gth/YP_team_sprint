@@ -10,7 +10,6 @@ from src.api.v1.schemas.utils import Author, MovieSchema
 class EventBaseSchema(BaseModel):
     movie_id: UUID
     address_id: UUID
-    owner_id: UUID
     capacity: int
     start_datetime: datetime
 
@@ -29,7 +28,7 @@ class EventUpdateSchema(BaseModel):
 
 class EventResponseSchema(EventBaseSchema):
     id: UUID
-    address: AddressResponseSchema
+    address: str
     movie: MovieSchema
     author: Author
 
