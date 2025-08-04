@@ -20,7 +20,7 @@ class SQLAlchemyAddressRepository(IAddressRepository):
     async def create(self, address: AddressCreateDTO) -> Address:
         query = insert(Address).values(address.model_dump()).returning(Address)
         result: Result = await self._session.execute(query)
-        return result.scalar_one()
+        return result.unique().scalar_one()
 
     async def get_address(self, address_id: UUID) -> Address | None:
         query = select(Address).filter_by(id=address_id)
@@ -47,8 +47,12 @@ class SQLAlchemyAddressRepository(IAddressRepository):
         await self._session.delete(address)
         return address
 
-    async def update(self, address: AddressUpdateDTO, address_id: UUID) -> Address | None:
-        update_data = address.model_dump(exclude_unset=True, exclude_defaults=True, exclude={"id"})
+    async def update(
+        self, address: AddressUpdateDTO, address_id: UUID
+    ) -> Address | None:
+        update_data = address.model_dump(
+            exclude_unset=True, exclude_defaults=True, exclude={"id"}
+        )
         if not update_data:
             raise NotModifiedError("Не указаны данные для обновления.")
 

@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { API_BASE } from '../config';
+import { getAuthHeaders } from "./authHeaders";
+import axiosInstance from "./axiosInstance";
 
 export async function getMyAddresses() {
   try {
-    const response = await axios.get(`${API_BASE}/address/my/`);
+    const response = await axiosInstance.get(`${API_BASE}/address/my/`, {
+      headers: getAuthHeaders()
+    });
     return response.data;
   } catch (error) {
     console.error('Ошибка при получении адресов:', error);
@@ -12,8 +16,11 @@ export async function getMyAddresses() {
 }
 
 export async function createAddress(addressData) {
+
   try {
-    const response = await axios.post(`${API_BASE}/address/`, addressData);
+    const response = await axiosInstance.post(`${API_BASE}/address/`, addressData, {
+      headers: getAuthHeaders()
+    });
     return response.data;
   } catch (error) {
     console.error('Ошибка при создании адреса:', error);
@@ -23,7 +30,9 @@ export async function createAddress(addressData) {
 
 export async function deleteAddress(id) {
   try {
-    const response = await axios.delete(`${API_BASE}/address/${id}/`);
+    const response = await axiosInstance.delete(`${API_BASE}/address/${id}/`, {
+      headers: getAuthHeaders()
+    });
     return response.data;
   } catch (error) {
     console.error('Ошибка при удалении адреса:', error);
@@ -33,7 +42,9 @@ export async function deleteAddress(id) {
 
 export async function updateAddress(id, addressData) {
   try {
-    const response = await axios.patch(`${API_BASE}/address/${id}/`, addressData);
+    const response = await axiosInstance.patch(`${API_BASE}/address/${id}/`, addressData, {
+      headers: getAuthHeaders()
+    });
     return response.data;
   } catch (error) {
     console.error('Ошибка при обновлении адреса:', error);
