@@ -24,7 +24,6 @@ events = Table(
     Column("owner_id", UUID(as_uuid=True), nullable=False),
     Column("capacity", Integer, nullable=False),
     Column("start_datetime", DateTime(timezone=True), nullable=False),
-    
     *timestamp_columns(),
 )
 
@@ -38,12 +37,12 @@ def mapped_events_table():
                 Reservation,
                 back_populates="event",
                 cascade="all, delete-orphan",
-                lazy="joined",
+                lazy="selectin", 
             ),
             "address": relationship(
                 Address,
                 back_populates="events",
-                lazy="joined",
+                lazy="selectin",
             ),
         },
     )

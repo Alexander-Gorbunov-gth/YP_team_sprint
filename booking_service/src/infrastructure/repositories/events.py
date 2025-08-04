@@ -44,10 +44,7 @@ class SQLAlchemyEventRepository(IEventRepository):
         if existing_event is None:
             raise EventNotFoundError(f"Событие с {event.id=} не найдено.")
 
-        update_data = event.model_dump(
-            exclude_unset=True,
-            exclude_none=True
-        )
+        update_data = event.model_dump(exclude_unset=True, exclude_none=True)
 
         for field, value in update_data.items():
             setattr(existing_event, field, value)
@@ -91,8 +88,8 @@ class SQLAlchemyEventRepository(IEventRepository):
         :param event_id: ID события.
         :return: Модель события.
         """
-        
-        query = select(Event).filter_by(id=event_id).with_for_update()
+
+        query = select(Event).filter_by(id=event_id).with_for_update(skip_locked=True)
         result: Result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
@@ -104,9 +101,7 @@ class SQLAlchemyEventRepository(IEventRepository):
         """
 
         query = (
-            select(Event)
-            .filter_by(owner_id=user_id)
-            .order_by(Event.created_at.desc())  # type: ignore
+            select(Event).filter_by(owner_id=user_id).order_by(Event.created_at.desc())  # type: ignore
         )
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()
@@ -120,10 +115,7 @@ class SQLAlchemyEventRepository(IEventRepository):
         """
 
         query = (
-            select(Event)
-            .limit(event.limit)
-            .offset(event.offset)
-            .order_by(Event.created_at.desc())  # type: ignore
+            select(Event).limit(event.limit).offset(event.offset).order_by(Event.created_at.desc())  # type: ignore
         )
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()

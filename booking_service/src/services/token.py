@@ -44,6 +44,7 @@ class JWTService(AbstractJWTService):
                 jwt=jwt_token,
                 key=self._secret_key,
                 algorithms=[self._algorithm],
+                options={"verify_exp": False},
             )
             # logger.info(f"Decoded payload: {payload}")
             user = User(id=payload["user_uuid"])

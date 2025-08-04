@@ -17,10 +17,13 @@ class ReservationUpdateSchema(BaseModel):
     status: ReservationStatus | None = None
 
 
-class ReservationCreateSchema(ReservationBaseSchema):
-    pass
+class ReservationCreateSchema(BaseModel):
+    event_id: UUID
+    seats: int
 
 
-class ReservationResponseSchema(ReservationBaseSchema):
+class ReservationResponseSchema(BaseModel):
     id: UUID
-    movie: MovieSchema
+    event_id: UUID
+    seats: int
+    status: ReservationStatus

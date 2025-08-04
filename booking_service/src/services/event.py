@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO, EventGetAllDTO
 from src.domain.entities.event import Event
+from src.domain.entities.reservation import Reservation
 from src.services.exceptions import EventNotFoundError, EventTimeConflictError, EventStartDatetimeError, EventNotOwnerError
 from src.services.interfaces.producer import PublishMessage
 from src.services.interfaces.uow import IUnitOfWork
@@ -32,6 +33,9 @@ class IEventService(abc.ABC):
 
     @abc.abstractmethod
     async def get_events_by_user_id(self, user_id: UUID) -> list[Event]: ...
+
+    @abc.abstractmethod
+    async def reserve_seats(self, event_id: UUID | str, user_id: UUID, seats: int) -> Reservation: ...
 
 
 class EventService(IEventService):
@@ -181,3 +185,19 @@ class EventService(IEventService):
 
         async with self._uow as uow:
             return await uow.event_repository.get_events_by_user_id(user_id)
+
+    async def reserve_seats(self, event_id: UUID | str, user_id: UUID, seats: int) -> Reservation:
+        """
+        Бронирование мест на событии.
+        param: event_id: UUID | str - id события
+        param: user_id: UUID - id пользователя
+        param: seats: int - количество мест
+        :return: Reservation
+        """
+        async with self._uow as uow:
+            event = await uow.event_repository.get_for_update(event_id=event_id)
+            event = self._check_event_exists(event)
+            reservation = event.reserve(user_id=user_id, seats_requested=seats)
+            created_reservation = await uow.reservation_repository.create(reservation=reservation)
+            event.add_reservasion(created_reservation)
+            return created_reservation

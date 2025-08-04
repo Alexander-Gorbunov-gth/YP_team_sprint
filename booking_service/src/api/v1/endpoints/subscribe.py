@@ -39,9 +39,7 @@ async def get_user_subscriptions(
     return user_subscriptions
 
 
-@router.post(
-    "/", summary="Подписаться на автора", response_model=SubscriptionResponseSchema
-)
+@router.post("/", summary="Подписаться на автора", response_model=SubscriptionResponseSchema)
 async def subscribe(
     subscription_service: FromDishka[ISubscriptionService],
     user: CurrentUserDep,

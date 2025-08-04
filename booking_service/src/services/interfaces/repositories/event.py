@@ -23,3 +23,6 @@ class IEventRepository(abc.ABC):
 
     @abc.abstractmethod
     async def get_event_list(self, event: EventGetAllDTO) -> list[Event]: ...
+
+    @abc.abstractmethod
+    async def get_for_update(self, event_id: UUID | str) -> Event | None: ...
