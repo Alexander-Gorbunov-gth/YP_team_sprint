@@ -1,5 +1,6 @@
 from http import HTTPStatus
 import logging
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from src.core.auth import require_permissions
@@ -40,7 +41,7 @@ async def film_list(
     page_size: int = Query(default=50, ge=1, le=50, alias="page_size"),
     page: int = Query(default=1, ge=1),
     film_service: FilmService = Depends(get_film_service),
-    perm: bool = Depends(require_permissions([permissions.films_can_view])),
+    # perm: bool = Depends(require_permissions([permissions.films_can_view])),
 ) -> list[ResponseFilm]:
     """Получаем список фильмов с кэшированием"""
     films = await film_service.get_film_list(sort=sort, page_size=page_size, page=page)
@@ -50,16 +51,19 @@ async def film_list(
 
 @router.get("/{film_id}", response_model=ResponseFilm)
 async def film_details(
-    film_id: str,
+    film_id: UUID,
     film_service: FilmService = Depends(get_film_service),
-    perm: bool = Depends(require_permissions([permissions.films_can_view])),
+    # perm: bool = Depends(require_permissions([permissions.films_can_view])),
 ) -> ResponseFilm:
     """Получаем подробности фильма по ID"""
-
-    film = await film_service.get_by_id(film_id)
+    film_id_str = str(film_id)
+    # logger.info(f"{film_id_str=}")
+    film = await film_service.get_by_id(film_id_str)
+    # logger.info(f"{film=}")
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Film not found")
-    return ResponseFilm(**film.dict())
+    result = ResponseFilm(**film.model_dump())
+    return result
 
 
 @router.get("/search/", response_model=list[ResponseFilm])
@@ -74,14 +78,15 @@ async def film_search(
     page: int = Query(default=1, ge=1, alias="page"),
     film_service: FilmService = Depends(get_film_service),
     # perm: bool = Depends(require_permissions([permissions.films_can_view])),
-) -> list[ResponseFilm]:
+) -> list[ResponseFilm] | None:
     """Поиск фильмов по запросу"""
-    logger.info(settings.elastic_url)
     films = await film_service.get_films_by_query(
         query=query, sort=sort, page_size=page_size, page=page
     )
-    handle_no_films_error(
-        films,
-        {"query": query, "sort": sort, "page_size": page_size, "page": page},
-    )
+    if not films:
+        return
+    # handle_no_films_error(
+    #     films,
+    #     {"query": query, "sort": sort, "page_size": page_size, "page": page},
+    # )
     return create_response_films(films)

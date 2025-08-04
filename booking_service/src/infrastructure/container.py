@@ -8,9 +8,11 @@ from src.infrastructure.db import postgres
 from src.infrastructure.uow import SQLAlchemyUnitOfWork
 from src.services.address import AddressService, IAddressService
 from src.services.event import IEventService, EventService
+from src.services.apps import IAppsService, AppsService
 from src.services.interfaces.uow import IUnitOfWork
 from src.services.subscription import ISubscriptionService, SubscriptionService
 from src.services.token import AbstractJWTService, JWTService
+from src.services.reservation import IReservationService, ReservationService
 
 
 class Container(Provider):
@@ -26,12 +28,16 @@ class Container(Provider):
         return SQLAlchemyUnitOfWork(session)
 
     @provide(scope=Scope.REQUEST)
-    async def provide_subscription_service(self, uow: IUnitOfWork) -> ISubscriptionService:
+    async def provide_subscription_service(
+        self, uow: IUnitOfWork
+    ) -> ISubscriptionService:
         return SubscriptionService(uow)
 
     @provide(scope=Scope.REQUEST)
     async def provide_jwt_service(self) -> AbstractJWTService:
-        return JWTService(settings.auth.secret_key.get_secret_value(), settings.auth.algorithm)
+        return JWTService(
+            settings.auth.secret_key.get_secret_value(), settings.auth.algorithm
+        )
 
     @provide(scope=Scope.REQUEST)
     async def provide_address_service(self, uow: IUnitOfWork) -> IAddressService:
@@ -40,3 +46,11 @@ class Container(Provider):
     @provide(scope=Scope.REQUEST)
     async def provide_event_service(self, uow: IUnitOfWork) -> IEventService:
         return EventService(uow)
+
+    @provide(scope=Scope.REQUEST)
+    async def provide_movie_service(self, uow: IUnitOfWork) -> IAppsService:
+        return AppsService(uow)
+
+    @provide(scope=Scope.REQUEST)
+    async def provide_reserv_service(self, uow: IUnitOfWork) -> IReservationService:
+        return ReservationService(uow)

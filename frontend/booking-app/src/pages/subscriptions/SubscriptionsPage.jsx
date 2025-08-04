@@ -32,8 +32,8 @@ export default function SubscriptionsPage() {
       <div className={styles.grid}>
         {subscriptions.map((sub) => (
           <div key={sub.host_id} className={styles.card}>
-            <p><strong>Имя:</strong> {sub.author.name}</p>
-            <p><strong>Username:</strong> {sub.author.username}</p>
+            <p><strong>Имя:</strong> {sub.author.username}</p>
+            
             <button
               className={styles.unsubscribeButton}
               onClick={() => handleUnsubscribe(sub.host_id)}

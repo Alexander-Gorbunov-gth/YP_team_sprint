@@ -7,7 +7,12 @@ from datetime import datetime, timezone
 from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO, EventGetAllDTO
 from src.domain.entities.event import Event
 from src.domain.entities.reservation import Reservation
-from src.services.exceptions import EventNotFoundError, EventTimeConflictError, EventStartDatetimeError, EventNotOwnerError
+from src.services.exceptions import (
+    EventNotFoundError,
+    EventTimeConflictError,
+    EventStartDatetimeError,
+    EventNotOwnerError,
+)
 from src.services.interfaces.producer import PublishMessage
 from src.services.interfaces.uow import IUnitOfWork
 
@@ -35,7 +40,9 @@ class IEventService(abc.ABC):
     async def get_events_by_user_id(self, user_id: UUID) -> list[Event]: ...
 
     @abc.abstractmethod
-    async def reserve_seats(self, event_id: UUID | str, user_id: UUID, seats: int) -> Reservation: ...
+    async def reserve_seats(
+        self, event_id: UUID | str, user_id: UUID, seats: int
+    ) -> Reservation: ...
 
 
 class EventService(IEventService):
@@ -44,7 +51,9 @@ class EventService(IEventService):
     def __init__(self, uow: IUnitOfWork):
         self._uow = uow
 
-    async def _notify_user(self, user_id: UUID, event_type: str, channels: list[str]) -> None:
+    async def _notify_user(
+        self, user_id: UUID, event_type: str, channels: list[str]
+    ) -> None:
         """
         Отправляет уведомление пользователю.
         param: user_id: UUID - id пользователя
@@ -77,8 +86,9 @@ class EventService(IEventService):
         if event.owner_id != user_id:
             raise EventNotOwnerError("User is not the owner of the event")
 
-
-    def _check_event_start_datetime(self, event: EventCreateDTO | EventUpdateDTO) -> None:
+    def _check_event_start_datetime(
+        self, event: EventCreateDTO | EventUpdateDTO
+    ) -> None:
         """
         Проверяет, что дата начала события не в прошлом.
         param: event: EventCreateSchema - событие для создания
@@ -87,19 +97,25 @@ class EventService(IEventService):
             if event.start_datetime < datetime.now(timezone.utc):
                 raise EventStartDatetimeError("Event start datetime is in the past")
 
-
-    def _check_event_time_conflict(self, event: EventCreateDTO | EventUpdateDTO, user_events: list[Event]) -> None:
+    def _check_event_time_conflict(
+        self, event: EventCreateDTO | EventUpdateDTO, user_events: list[Event]
+    ) -> None:
         """
         Проверяет, что событие не пересекается с другими событиями пользователя.
         param: event: EventCreateSchema - событие для создания
         param: user_events: list[Event] - список событий пользователя
         """
-
+        logger.info(f"Checking time conflict for event: {event=} - {user_events=}")
         if event.start_datetime is not None:
             if any(
-                user_event.start_datetime - timedelta(hours=self.EVENT_DURATION_HOURS)
-                < event.start_datetime
-                < user_event.start_datetime + timedelta(hours=self.EVENT_DURATION_HOURS)
+                (
+                    user_event.start_datetime
+                    - timedelta(hours=self.EVENT_DURATION_HOURS)
+                    < event.start_datetime
+                    < user_event.start_datetime
+                    + timedelta(hours=self.EVENT_DURATION_HOURS)
+                )
+                and user_event.id != event.id
                 for user_event in user_events
             ):
                 raise EventTimeConflictError("Event overlaps with existing event")
@@ -111,7 +127,9 @@ class EventService(IEventService):
         param: event: EventCreateSchema - событие для создания
         """
         async with self._uow as uow:
-            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(event.owner_id)
+            user_events: list[Event] = await uow.event_repository.get_events_by_user_id(
+                event.owner_id
+            )
             self._check_event_time_conflict(event, user_events)
             self._check_event_start_datetime(event)
             return await uow.event_repository.create(event)
@@ -124,16 +142,31 @@ class EventService(IEventService):
         """
 
         async with self._uow as uow:
-            current_event: Event | None = await uow.event_repository.get_by_id(event_id=event.id)
-            current_event = self._check_event_exists(current_event)
-            self._check_event_owner(current_event, user_id)
-            current_event.can_be_updated()
-            if event.start_datetime is not None:
-                user_events: list[Event] = await uow.event_repository.get_events_by_user_id(current_event.owner_id)
-                self._check_event_time_conflict(event, user_events)
-                for reservation in current_event.reservations:
-                    await self._notify_user(reservation.user_id, "event_updated", ["email", "push"])
-            return await uow.event_repository.update(event)
+            current_event: Event | None = await uow.event_repository.get_by_id(
+                event_id=event.id
+            )
+            logger.info(f"{current_event=}")
+            try:
+                current_event = self._check_event_exists(current_event)
+                self._check_event_owner(current_event, user_id)
+                current_event.can_be_updated()
+                if event.start_datetime is not None:
+                    user_events: list[Event] = (
+                        await uow.event_repository.get_events_by_user_id(
+                            current_event.owner_id
+                        )
+                    )
+                    self._check_event_time_conflict(event, user_events)
+                    for reservation in current_event.reservations:
+                        await self._notify_user(
+                            reservation.user_id, "event_updated", ["email", "push"]
+                        )
+                result = await uow.event_repository.update(event)
+            except Exception as e:
+                logger.error(f"Error updating event: {e}")
+                raise
+
+            return result
 
     async def delete(self, event_id: UUID | str, user_id: UUID) -> None:
         """
@@ -148,9 +181,10 @@ class EventService(IEventService):
             if user_id != current_event.owner_id:
                 raise EventNotOwnerError("User is not the owner of the event")
             for reservation in current_event.reservations:
-                await self._notify_user(reservation.user_id, "event_deleted", ["email", "push"])
+                await self._notify_user(
+                    reservation.user_id, "event_deleted", ["email", "push"]
+                )
             return await uow.event_repository.delete(event_id)
-
 
     async def get_by_id(self, event_id: UUID | str) -> Event:
         """
@@ -186,7 +220,9 @@ class EventService(IEventService):
         async with self._uow as uow:
             return await uow.event_repository.get_events_by_user_id(user_id)
 
-    async def reserve_seats(self, event_id: UUID | str, user_id: UUID, seats: int) -> Reservation:
+    async def reserve_seats(
+        self, event_id: UUID | str, user_id: UUID, seats: int
+    ) -> Reservation:
         """
         Бронирование мест на событии.
         param: event_id: UUID | str - id события
@@ -198,6 +234,8 @@ class EventService(IEventService):
             event = await uow.event_repository.get_for_update(event_id=event_id)
             event = self._check_event_exists(event)
             reservation = event.reserve(user_id=user_id, seats_requested=seats)
-            created_reservation = await uow.reservation_repository.create(reservation=reservation)
+            created_reservation = await uow.reservation_repository.create(
+                reservation=reservation
+            )
             event.add_reservasion(created_reservation)
             return created_reservation

@@ -3,12 +3,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 
 
-class Author(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
-    username: str = Field(default="john_doe")
-
-
-class MovieSchema(BaseModel):
+class MovieGetDTO(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     genres: list[str] = Field(default_factory=list)
     title: str = Field(default="Movie Title")
