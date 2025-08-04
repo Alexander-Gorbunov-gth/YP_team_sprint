@@ -23,11 +23,16 @@ addresses = Table(
     *timestamp_columns(),
 )
 
+
 def mapped_addresses_table():
-    mapper_registry.map_imperatively(Address, addresses, properties={
-        "events": relationship(
-            Event,
-            back_populates="address",
-            lazy="joined",
-        ),
-    })
+    mapper_registry.map_imperatively(
+        Address,
+        addresses,
+        properties={
+            "events": relationship(
+                Event,
+                back_populates="address",
+                lazy="selectin",
+            ),
+        },
+    )

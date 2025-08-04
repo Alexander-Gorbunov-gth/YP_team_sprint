@@ -35,7 +35,7 @@ def mapped_reservations_table():
             "event": relationship(
                 "Event",
                 back_populates="reservations",
-                lazy="joined",
+                lazy="selectin",
             ),
         },
     )

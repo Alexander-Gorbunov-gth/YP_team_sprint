@@ -4,10 +4,6 @@ from uuid import UUID
 from sqlalchemy import Result, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.v1.schemas.reservation import (
-    ReservationCreateSchema,
-    ReservationUpdateSchema,
-)
 from src.domain.entities.reservation import Reservation
 from src.infrastructure.repositories.exceptions import ReservationNotFoundError
 from src.services.interfaces.repositories.reservation import IReservationRepository
@@ -19,23 +15,19 @@ class SQLAlchemyReservationRepository(IReservationRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create(self, reservation: ReservationCreateSchema) -> Reservation:
+    async def create(self, reservation: Reservation) -> Reservation:
         """
         Создает бронирование в базе данных.
         :param reservation: Схема бронирования для создания.
         :return: Созданное бронирование.
         """
 
-        query = (
-            insert(Reservation)
-            .values(reservation.model_dump())
-            .returning(Reservation)
-        )
+        query = insert(Reservation).values(reservation.model_dump()).returning(Reservation)
         created_subscription: Result = await self._session.execute(query)
         await self._commit()
         return created_subscription.scalar_one()
 
-    async def update(self, reservation_id: UUID | str, reservation: ReservationUpdateSchema) -> Reservation | None:
+    async def update(self, reservation_id: UUID | str, reservation: Reservation) -> Reservation | None:
         """
         Обновляет бронирование в базе данных.
         :param reservation: Обновлённый объект бронирования.
@@ -50,10 +42,7 @@ class SQLAlchemyReservationRepository(IReservationRepository):
         if existing_reservation is None:
             raise ReservationNotFoundError(f"Бронирование с {reservation_id=} не найдено.")
 
-        update_data = reservation.model_dump(
-            exclude_unset=True,
-            exclude_none=True
-        )
+        update_data = reservation.model_dump(exclude_unset=True, exclude_none=True)
 
         for field, value in update_data.items():
             setattr(existing_reservation, field, value)
@@ -100,9 +89,7 @@ class SQLAlchemyReservationRepository(IReservationRepository):
         """
 
         query = (
-            select(Reservation)
-            .filter_by(user_id=user_id)
-            .order_by(Reservation.created_at.desc())  # type: ignore
+            select(Reservation).filter_by(user_id=user_id).order_by(Reservation.created_at.desc())  # type: ignore
         )
         result: Result = await self._session.execute(query)
         return result.scalars().all()
