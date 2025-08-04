@@ -15,8 +15,8 @@ import AddAddressPage from "./pages/address/AddAddressPage";
 import EditEventPage from "./pages/my_events/EditEventPage";
 import EditAddressPage from "./pages/address/EditAddressPage";
 import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage"
-
+import RegisterPage from "./pages/auth/RegisterPage";
+import ErrorPage from "./pages/error/ErrorPage";
 
 function PrivateRoute() {
   const token = localStorage.getItem("access_token");
@@ -46,6 +46,7 @@ function AppLayout() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/error" element={<ErrorPage />} />
 
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<HomePage />} />

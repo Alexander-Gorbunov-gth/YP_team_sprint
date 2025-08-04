@@ -1,15 +1,17 @@
-
-
 import { API_BASE } from "../config";
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
+import { getAuthHeaders } from "./authHeaders";
 
 export async function getMySubscriptions() {
-  const response = await axios.get(`${API_BASE}/subscribe/my/`);
+  const response = await axiosInstance.get(`${API_BASE}/subscribe/my/`, {
+    headers: getAuthHeaders()
+  });
   return response.data;
 }
 
 export async function deleteSubscription(hostId) {
-  const response = await axios.delete(`${API_BASE}/subscribe/`, {
+  const response = await axiosInstance.delete(`${API_BASE}/subscribe/`, {
+    headers: getAuthHeaders(),
     data: {
       host_id: hostId
     }
@@ -18,6 +20,12 @@ export async function deleteSubscription(hostId) {
 }   
 
 export async function createSubscription(subscriptionData) {
-  const response = await axios.post(`${API_BASE}/subscribe/`, subscriptionData);
+  const response = await axiosInstance.post(
+    `${API_BASE}/subscribe/`, 
+    subscriptionData,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
   return response.data;
 }

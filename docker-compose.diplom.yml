@@ -146,13 +146,13 @@ services:
       - cluster.routing.allocation.disk.watermark.high=97%
       - cluster.routing.allocation.disk.watermark.flood_stage=98%
 
-  etl_service:
-    container_name: etl_service_movies
-    build: ./etl_service
-    env_file:
-      - .env
-    volumes:
-      - logs:/app/logs
+  # etl_service:
+  #   container_name: etl_service_movies
+  #   build: ./etl_service
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - logs:/app/logs
 
   gateway:
     build:
@@ -178,17 +178,17 @@ services:
       - elasticsearch
       
 
-  frontend:
-    build:
-      context: ./frontend/booking-app
-      dockerfile: Dockerfile
-    container_name: react_frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    volumes:
-      - frontend_static:/frontend-build
+  # frontend:
+  #   build:
+  #     context: ./frontend/booking-app
+  #     dockerfile: Dockerfile
+  #   container_name: react_frontend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
+  #   volumes:
+  #     - frontend_static:/frontend-build
 
 volumes:
   pg_auth:
