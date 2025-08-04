@@ -40,8 +40,9 @@ export default function AddAddressPage() {
 
   const handleSave = () => {
     if (!selected) return;
+    console.log(selected.data)
     const addressData = parseDadataAddress(selected.data);
-    console.log("Данные для POST:", addressData);
+    // console.log("Данные для POST:", addressData);
     createAddress(addressData)
       .then(() => {
         navigate("/my-events");

@@ -25,7 +25,7 @@ axiosInstance.interceptors.response.use(
       window.location.href = '/login'; // редирект на логин
     }
 
-    if (status >= 400 && status < 500) {
+    if (status >= 402 && status < 500) {
       console.warn('Client error:', error.response);
       window.location.href = '/error';
     }

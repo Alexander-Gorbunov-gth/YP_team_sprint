@@ -38,14 +38,14 @@ class JWTService(AbstractJWTService):
         :return: Объект Token с полезной нагрузкой из токена.
         :raises SessionHasExpired: Если токен просрочен.
         """
-        logger.info(f"Auth payload {jwt_token}")
+        # logger.info(f"Auth payload {jwt_token}")
         try:
             payload = jwt.decode(
                 jwt=jwt_token,
                 key=self._secret_key,
                 algorithms=[self._algorithm],
             )
-            logger.info(f"Decoded payload: {payload}")
+            # logger.info(f"Decoded payload: {payload}")
             user = User(id=payload["user_uuid"])
         except jwt.ExpiredSignatureError as e:
             logger.error("Токен %s просрочен.", jwt_token)
