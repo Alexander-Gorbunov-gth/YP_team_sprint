@@ -11,5 +11,5 @@ class Subscription(DateTimeMixin, BaseModel):
     user_id: UUID
 
     @classmethod
-    def create(cls,id: int, host_id: UUID, user_id: UUID) -> "Subscription":
+    def create(cls, id: int, host_id: UUID, user_id: UUID) -> "Subscription":
         return cls(id=id, host_id=host_id, user_id=user_id)
