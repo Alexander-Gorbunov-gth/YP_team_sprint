@@ -13,7 +13,6 @@ from src.services.subscription import ISubscriptionService, SubscriptionService
 from src.services.token import AbstractJWTService, JWTService
 
 
-
 class Container(Provider):
     @provide(scope=Scope.REQUEST)
     async def provide_session(self) -> AsyncIterable[AsyncSession]:

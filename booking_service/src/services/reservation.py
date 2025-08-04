@@ -40,12 +40,10 @@ class ReservationService(IReservationService):
                         "body": "Пользователь создал бронь",
                         "subject": "Примите или отклоните его заявку.",
                         "address": "",  # TODO: Получить email организатора.
-                        "user_uuid": (await uow.event_repository.get_by_id(
-                            reservation.event_id
-                        )).owner_id
-                    }
+                        "user_uuid": (await uow.event_repository.get_by_id(reservation.event_id)).owner_id,
+                    },
                 ),
-                routing_key=settings.rabbit.email_queue_title
+                routing_key=settings.rabbit.email_queue_title,
             )
             return await uow.reservation_repository.create(reservation)
 
@@ -58,7 +56,7 @@ class ReservationService(IReservationService):
             if current_reservation.status != reservation.status:
                 messages = {
                     ReservationStatus.SUCCESS: "Ваша бронь принята.",
-                    ReservationStatus.CANCELED: "Ваша бронь отклонена."
+                    ReservationStatus.CANCELED: "Ваша бронь отклонена.",
                 }
                 notification_message = PublishMessage(
                     event_type="send_notification",
@@ -67,15 +65,10 @@ class ReservationService(IReservationService):
                         "body": messages.get(reservation.status),
                         "subject": "Организатор принял решение по вашей заявке",
                         "address": "",  # TODO: Получить email пользователя.
-                        "user_uuid": (await uow.event_repository.get_by_id(
-                            current_reservation.event_id
-                        )).owner_id
-                    }
+                        "user_uuid": (await uow.event_repository.get_by_id(current_reservation.event_id)).owner_id,
+                    },
                 )
-                await uow.producer.publish(
-                    message=notification_message,
-                    routing_key=settings.rabbit.email_queue_title
-                )
+                await uow.producer.publish(message=notification_message, routing_key=settings.rabbit.email_queue_title)
 
             return await uow.reservation_repository.update(reservation_id, reservation)
 
@@ -93,12 +86,10 @@ class ReservationService(IReservationService):
                         "body": "Пользователь отменил бронь",
                         "subject": "Пользователь отменил бронь.",
                         "address": "",  # TODO: Получить email организатора.
-                        "user_uuid": (await uow.event_repository.get_by_id(
-                            current_reservation.event_id
-                        )).owner_id
-                    }
+                        "user_uuid": (await uow.event_repository.get_by_id(current_reservation.event_id)).owner_id,
+                    },
                 ),
-                routing_key=settings.rabbit.email_queue_title
+                routing_key=settings.rabbit.email_queue_title,
             )
             await uow.reservation_repository.delete(reservation_id)
 

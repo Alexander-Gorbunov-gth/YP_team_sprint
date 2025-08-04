@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from src.domain.entities.address import Address
 from src.domain.entities.mixins import DateTimeMixin
 from src.domain.entities.reservation import Reservation, ReservationStatus
-from src.domain.exceptions import DuplicateReservationError, EventUpdateLockedError, NotEnoughSeatsError
+from src.domain.exceptions import DuplicateReservationError, EventUpdateLockedError, NotEnoughSeatsError, AddressNotFoundError
 
 
 class Event(DateTimeMixin, BaseModel):
@@ -47,7 +47,6 @@ class Event(DateTimeMixin, BaseModel):
 
     def add_reservasion(self, reservation: Reservation) -> None:
         self.reservations.append(reservation)
-        self.touch()
 
     def cancel_reservation(self, reservation: Reservation) -> None:
         self.reservations.remove(reservation)
@@ -61,7 +60,6 @@ class Event(DateTimeMixin, BaseModel):
             raise DuplicateReservationError
 
         reservation = Reservation.create(user_id=user_id, event_id=self.id, seats=seats_requested)
-        self.reservations.append(reservation)
         return reservation
 
     def can_be_updated(self) -> bool:
@@ -82,13 +80,13 @@ class Event(DateTimeMixin, BaseModel):
 
     def get_address_for_user(self, user_id: UUID) -> str:
         """Возвращает адрес для пользователя в зависимости от его роли."""
-        
+
         if self.address is None:
             raise AddressNotFoundError
 
         if self.owner_id == user_id:
             return self.address.full_address
-        
+
         if any(r.user_id == user_id for r in self.reservations if r.status == ReservationStatus.SUCCESS):
             return self.address.full_address
 

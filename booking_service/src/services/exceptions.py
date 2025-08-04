@@ -25,6 +25,7 @@ class SessionHasExpired(Exception):
 class AddressNotFoundError(Exception):
     """Исключение, которое выбрасывается, если адрес не найден."""
 
+
 class ForbiddenError(Exception):
     """Исключение, которое выбрасывается, если пользователь не имеет доступа к ресурсу."""
 

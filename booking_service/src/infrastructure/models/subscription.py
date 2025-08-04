@@ -1,5 +1,4 @@
 from sqlalchemy import (
-
     Column,
     Integer,
     Table,
@@ -18,6 +17,7 @@ subscriptions = Table(
     Column("user_id", UUID(as_uuid=True), nullable=False),
     *timestamp_columns(),
 )
+
 
 def mapped_subscription_table():
     mapper_registry.map_imperatively(Subscription, subscriptions)
