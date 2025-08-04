@@ -4,7 +4,17 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Path
 
 from src.api.v1.depends import CurrentUserDep
-from src.api.v1.schemas.reservation import ReservationCreateSchema, ReservationResponseSchema, ReservationUpdateSchema
+from src.domain.entities.reservation import Reservation
+from src.api.v1.schemas.reservation import (
+    ReservationCreateSchema,
+    ReservationResponseSchema,
+    ReservationUpdateSchema,
+    ReservationFullResponseSchema,
+)
+from src.domain.entities.movie import Movie
+from src.api.v1.schemas.utils import MovieSchema
+from src.services.event import IEventService
+from src.services.apps import IAppsService
 from src.services.reservation import IReservationService
 
 logger = logging.getLogger(__name__)
@@ -12,20 +22,42 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/reservation", tags=["Booking"], route_class=DishkaRoute)
 
 
-@router.post("/", summary="Забронировать место", response_model=ReservationResponseSchema)
-async def booking(data: ReservationCreateSchema, reservation_service: FromDishka[IReservationService]):
-    return await reservation_service.create(data)
+@router.post(
+    "/", summary="Забронировать место", response_model=ReservationResponseSchema
+)
+async def booking(
+    data: ReservationCreateSchema,
+    reservation_service: FromDishka[IReservationService],
+    current_user: CurrentUserDep,
+):
+    return await reservation_service.create(reservation=data, user_id=current_user.id)
 
 
-@router.get("/{id}", summary="Получить данные о бронировании", response_model=ReservationResponseSchema)
+@router.get(
+    "/{id}",
+    summary="Получить данные о бронировании",
+    response_model=ReservationFullResponseSchema,
+)
 async def get_booking(
     reservation_service: FromDishka[IReservationService],
+    event_service: FromDishka[IEventService],
+    movie_service: FromDishka[IAppsService],
+    current_user: CurrentUserDep,
     id: str = Path(..., description="ID бронирования"),
 ):
-    return await reservation_service.get_by_id(id)
+    reservation: Reservation = await reservation_service.get_by_id(id)
+    event_id = reservation.event_id
+    event = await event_service.get_by_id(event_id)
+    movie_data: Movie = await movie_service.get_film(event.movie_id)
+    movie = MovieSchema(**movie_data.model_dump())
+    return ReservationFullResponseSchema(movie=movie, **reservation.model_dump())
 
 
-@router.get("/my/", summary="Получить список моих бронирований", response_model=list[ReservationResponseSchema])
+@router.get(
+    "/my/",
+    summary="Получить список моих бронирований",
+    response_model=list[ReservationResponseSchema],
+)
 async def get_bookings(
     user: CurrentUserDep,
     reservation_service: FromDishka[IReservationService],
@@ -36,15 +68,21 @@ async def get_bookings(
 @router.delete("/{id}", summary="Отменить бронирование")
 async def delete_booking(
     reservation_service: FromDishka[IReservationService],
+    current_user: CurrentUserDep,
     id: str = Path(..., description="ID бронирования"),
 ) -> bool:
     return await reservation_service.delete(id)
 
 
-@router.patch("/{id}", summary="Изменить бронирование", response_model=ReservationResponseSchema)
+@router.patch(
+    "/{id}", summary="Изменить бронирование", response_model=ReservationResponseSchema
+)
 async def update_booking(
     data: ReservationUpdateSchema,
+    current_user: CurrentUserDep,
     reservation_service: FromDishka[IReservationService],
     id: str = Path(..., description="ID бронирования"),
 ):
-    return await reservation_service.update(id, data)
+    return await reservation_service.update(
+        reservation_id=id, reservation=data, user_id=current_user.id
+    )

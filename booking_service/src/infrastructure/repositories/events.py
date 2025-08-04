@@ -45,7 +45,6 @@ class SQLAlchemyEventRepository(IEventRepository):
             raise EventNotFoundError(f"Событие с {event.id=} не найдено.")
 
         update_data = event.model_dump(exclude_unset=True, exclude_none=True)
-
         for field, value in update_data.items():
             setattr(existing_event, field, value)
 

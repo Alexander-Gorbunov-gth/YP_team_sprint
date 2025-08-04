@@ -3,9 +3,10 @@ import { API_BASE } from '../config';
 import { getAuthHeaders } from "./authHeaders";
 import axiosInstance from "./axiosInstance";
 
-export async function getEvents() {
+export async function getEvents({ offset = 0, limit = 10 }) {
   const res = await axiosInstance.get(`${API_BASE}/events/`, {
     headers: getAuthHeaders(),
+    params: { offset, limit },
   });
   return res.data;
 }
@@ -28,7 +29,6 @@ export async function getMyEvents() {
 }
 
 export async function createEvent(eventData) {
-  console.log("Создание события с данными:", eventData);
   try {
     const res = await axiosInstance.post(`${API_BASE}/events`, eventData, {
       headers: getAuthHeaders(),
@@ -41,7 +41,6 @@ export async function createEvent(eventData) {
 }
 
 export async function updateEvent(id, data) {
-  console.log(data)
   const res = await axiosInstance.patch(`${API_BASE}/events/${id}`, data, {
     headers: getAuthHeaders(),
   });

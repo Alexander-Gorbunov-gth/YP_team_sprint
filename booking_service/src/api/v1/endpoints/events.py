@@ -1,16 +1,26 @@
 import logging
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Query
 
 from src.services.event import IEventService
+from src.services.apps import IAppsService
 from src.api.v1.depends import CurrentUserDep
 from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO
 from src.api.v1.schemas.utils import Author, MovieSchema
-from src.api.v1.schemas.event import EventCreateSchema, EventGetAllSchema, EventResponseSchema, EventUpdateSchema
-from src.api.v1.schemas.reservation import ReservationCreateSchema, ReservationResponseSchema
+from src.api.v1.schemas.event import (
+    EventCreateSchema,
+    EventGetAllSchema,
+    EventResponseSchema,
+    EventUpdateSchema,
+)
+from src.api.v1.schemas.reservation import (
+    ReservationCreateSchema,
+    ReservationResponseSchema,
+)
 from src.services.event import IEventService
 from src.infrastructure.handlers.exceptions import EventNotFoundError
+from src.domain.entities.movie import Movie
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +29,9 @@ router = APIRouter(prefix="/events", tags=["Events"], route_class=DishkaRoute)
 
 @router.post("/", summary="Создать мероприятие", response_model=EventResponseSchema)
 async def create_event(
-    event_service: FromDishka[IEventService], data: EventCreateSchema, current_user: CurrentUserDep
+    event_service: FromDishka[IEventService],
+    data: EventCreateSchema,
+    current_user: CurrentUserDep,
 ) -> EventResponseSchema:
     event_dto = EventCreateDTO(**data.model_dump(), owner_id=current_user.id)
     event = await event_service.create(event_dto)
@@ -43,9 +55,35 @@ async def create_event(
 )
 async def get_events(
     event_service: FromDishka[IEventService],
-    data: EventGetAllSchema,
+    app_service: FromDishka[IAppsService],
+    current_user: CurrentUserDep,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, gt=0),
 ):
-    return await event_service.get_event_list(data)
+    data = EventGetAllSchema(offset=offset, limit=limit)
+    events = await event_service.get_event_list(data)
+    events_response = []
+    for event in events:
+        author_data = await app_service.get_author(event.owner_id)
+        author = (
+            Author(**author_data.model_dump())
+            if author_data
+            else Author(id=event.owner_id)
+        )
+        movie_data: Movie = await app_service.get_film(event.movie_id)
+        if movie_data:
+            movie = MovieSchema(**movie_data.model_dump())
+        else:
+            movie = MovieSchema(id=event.movie_id)
+        event_response = EventResponseSchema(
+            **event.model_dump(exclude={"address"}),
+            author=author,
+            movie=movie,
+            address=event.get_address_for_user(user_id=current_user.id),
+        )
+        events_response.append(event_response)
+    logger.info(event_response)
+    return events_response
 
 
 @router.get(
@@ -55,13 +93,20 @@ async def get_events(
 )
 async def get_my_events(
     event_service: FromDishka[IEventService],
+    movie_service: FromDishka[IAppsService],
     current_user: CurrentUserDep,
 ) -> list[EventResponseSchema]:
     user_events = await event_service.get_events_by_user_id(user_id=current_user.id)
     user_events_response = []
     for user_event in user_events:
         author = Author(id=user_event.owner_id)
-        movie = MovieSchema(id=user_event.movie_id)
+        movie_data: Movie = await movie_service.get_film(user_event.movie_id)
+        if movie_data:
+            logger.info(f"{movie_data.model_dump()=}")
+            movie = MovieSchema(**movie_data.model_dump())
+        else:
+            movie = MovieSchema(id=user_event.movie_id)
+        logger.info(f"{movie.model_dump()=}")
         event_response = EventResponseSchema(
             **user_event.model_dump(exclude={"address"}),
             author=author,
@@ -80,13 +125,15 @@ async def get_my_events(
 async def get_event(
     event_service: FromDishka[IEventService],
     current_user: CurrentUserDep,
+    movie_service: FromDishka[IAppsService],
     event_id: str = Path(..., description="ID мероприятия"),
 ) -> EventResponseSchema:
     event = await event_service.get_by_id(event_id)
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
     author = Author(id=event.owner_id)
-    movie = MovieSchema(id=event.movie_id)
+    movie_data: Movie = await movie_service.get_film(event.movie_id)
+    movie = MovieSchema(**movie_data.model_dump())
     event_response = EventResponseSchema(
         **event.model_dump(exclude={"address"}),
         author=author,
@@ -108,14 +155,19 @@ async def delete_event(
         raise
 
 
-@router.patch("/{id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
+@router.patch(
+    "/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema
+)
 async def update_event(
     data: EventUpdateSchema,
     event_service: FromDishka[IEventService],
     current_user: CurrentUserDep,
+    event_id: str = Path(..., description="ID мероприятия"),
 ) -> EventResponseSchema:
-    event_dto = EventUpdateDTO(**data.model_dump())
+    event_dto = EventUpdateDTO(id=event_id, **data.model_dump())
+    logger.info(f"{event_dto=}")
     updated_event = await event_service.update(event_dto, current_user.id)
+    logger.info(f"{updated_event=}")
     if updated_event is None:
         raise HTTPException(status_code=400, detail="Failed to update event")
     author = Author(id=updated_event.owner_id)
@@ -129,12 +181,18 @@ async def update_event(
     return event_response
 
 
-@router.post("/{event_id}/reserve", summary="Забронировать места на мероприятии", response_model=ReservationResponseSchema)
+@router.post(
+    "/{event_id}/reserve",
+    summary="Забронировать места на мероприятии",
+    response_model=ReservationResponseSchema,
+)
 async def reserve_seats(
     event_service: FromDishka[IEventService],
     current_user: CurrentUserDep,
     reservation_data: ReservationCreateSchema,
 ) -> ReservationResponseSchema:
-    reservation = await event_service.reserve_seats(reservation_data.event_id, current_user.id, reservation_data.seats)
+    reservation = await event_service.reserve_seats(
+        reservation_data.event_id, current_user.id, reservation_data.seats
+    )
     created_reservation = ReservationResponseSchema(**reservation.model_dump())
     return created_reservation

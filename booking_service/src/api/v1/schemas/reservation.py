@@ -27,3 +27,11 @@ class ReservationResponseSchema(BaseModel):
     event_id: UUID
     seats: int
     status: ReservationStatus
+
+
+class ReservationFullResponseSchema(BaseModel):
+    id: UUID
+    event_id: UUID
+    seats: int
+    status: ReservationStatus
+    movie: MovieSchema

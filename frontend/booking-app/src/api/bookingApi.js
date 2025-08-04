@@ -12,7 +12,7 @@ export async function createReservation(payload) {
 }
 
 export async function getBookingsByUser() {
-  const res = await axiosInstance.get(`${API_BASE}/reservation/`, {
+  const res = await axiosInstance.get(`${API_BASE}/reservation/my/`, {
     headers: getAuthHeaders()
   });
   return res.data;

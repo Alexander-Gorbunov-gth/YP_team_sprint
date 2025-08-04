@@ -6,10 +6,18 @@ from pydantic import BaseModel, Field
 from src.domain.entities.address import Address
 from src.domain.entities.mixins import DateTimeMixin
 from src.domain.entities.reservation import Reservation, ReservationStatus
-from src.domain.exceptions import DuplicateReservationError, EventUpdateLockedError, NotEnoughSeatsError, AddressNotFoundError
+from src.domain.exceptions import (
+    DuplicateReservationError,
+    EventUpdateLockedError,
+    NotEnoughSeatsError,
+    AddressNotFoundError,
+)
+from typing import ClassVar
 
 
 class Event(DateTimeMixin, BaseModel):
+    # UPDATE_LOCK_TIMEDELTA: ClassVar[timedelta] = timedelta(hours=2)
+
     id: UUID = Field(default_factory=uuid4)
     movie_id: UUID
     address_id: UUID
@@ -19,11 +27,14 @@ class Event(DateTimeMixin, BaseModel):
     capacity: int = Field(ge=1, le=100)
     start_datetime: datetime
 
-    UPDATE_LOCK_TIMEDELTA: timedelta = Field(timedelta(hours=2))
-
     @classmethod
     def create(
-        cls, movie_id: UUID, address_id: UUID, owner_id: UUID, capacity: int, start_datetime: datetime
+        cls,
+        movie_id: UUID,
+        address_id: UUID,
+        owner_id: UUID,
+        capacity: int,
+        start_datetime: datetime,
     ) -> "Event":
         return cls(
             movie_id=movie_id,
@@ -35,7 +46,9 @@ class Event(DateTimeMixin, BaseModel):
 
     def available_seats(self) -> int:
         reserved = sum(
-            r.seats for r in self.reservations if r.status in {ReservationStatus.PENDING, ReservationStatus.SUCCESS}
+            r.seats
+            for r in self.reservations
+            if r.status in {ReservationStatus.PENDING, ReservationStatus.SUCCESS}
         )
         return self.capacity - reserved
 
@@ -59,12 +72,15 @@ class Event(DateTimeMixin, BaseModel):
         if self.has_reservation_for(user_id=user_id):
             raise DuplicateReservationError
 
-        reservation = Reservation.create(user_id=user_id, event_id=self.id, seats=seats_requested)
+        reservation = Reservation.create(
+            user_id=user_id, event_id=self.id, seats=seats_requested
+        )
         return reservation
 
     def can_be_updated(self) -> bool:
-        now = datetime.now()
-        if (self.start_datetime - now) < self.UPDATE_LOCK_TIMEDELTA:
+        UPDATE_LOCK_TIMEDELTA = timedelta(hours=2)
+        now = datetime.now(tz=self.start_datetime.tzinfo)
+        if (self.start_datetime - now) < UPDATE_LOCK_TIMEDELTA:
             raise EventUpdateLockedError
         return True
 
@@ -87,7 +103,11 @@ class Event(DateTimeMixin, BaseModel):
         if self.owner_id == user_id:
             return self.address.full_address
 
-        if any(r.user_id == user_id for r in self.reservations if r.status == ReservationStatus.SUCCESS):
+        if any(
+            r.user_id == user_id
+            for r in self.reservations
+            if r.status == ReservationStatus.SUCCESS
+        ):
             return self.address.full_address
 
         return self.address.public_address

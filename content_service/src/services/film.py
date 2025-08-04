@@ -35,24 +35,24 @@ class FilmService:
             )
             if not films_list:
                 return None
-            await self.cache_manager.set_object(
-                object_key=key, value=films_list
-            )
+            await self.cache_manager.set_object(object_key=key, value=films_list)
         return [Film(**film) for film in films_list]
 
     async def get_by_id(self, film_id: str) -> Film | None:
         """Получаем фильм по ID с кэшированием."""
-
-        film = await self.cache_manager.get_object(object_key=film_id)
-        if film is None:
-            film = await self.db_manager.get_object_by_id(film_id)
+        try:
+            # film = await self.cache_manager.get_object(object_key=film_id)
+            film = None
             if film is None:
-                return None
-            else:
-                await self.cache_manager.set_object(
-                    object_key=film_id, value=film
-                )
-        return Film(**film)
+                film = await self.db_manager.get_object_by_id(film_id)
+                # if film is None:
+                #     return None
+                # else:
+                #     await self.cache_manager.set_object(object_key=film_id, value=film)
+                logger.info(f"{film=}")
+            return Film(**film)
+        except Exception as e:
+            logger.error(e)
 
     async def get_films_by_query(
         self,
@@ -86,12 +86,8 @@ class FilmService:
     ) -> list[ShortFilm] | None:
         """Получает все фильмы персоны по id"""
 
-        person_films_key = self.cache_manager.get_query_key(
-            person_id, nested_filters
-        )
-        person_films = await self.cache_manager.get_object(
-            object_key=person_films_key
-        )
+        person_films_key = self.cache_manager.get_query_key(person_id, nested_filters)
+        person_films = await self.cache_manager.get_object(object_key=person_films_key)
         if person_films is None:
             person_films = await self.db_manager.get_objects_by_query(
                 person_uuid=person_id, nested_filters=nested_filters

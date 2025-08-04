@@ -11,9 +11,12 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getEvents(), getMySubscriptions()])
+    const offset = 0;
+    const limit = 20;
+    Promise.all([getEvents({ offset, limit }), getMySubscriptions()])
       .then(([eventData, subscriptionsData]) => {
         setEvents(eventData);
+        console.log("Подписки пользователя:", subscriptionsData);
         setMySubscriptions(subscriptionsData || []);
       })
       .finally(() => setLoading(false));
@@ -37,20 +40,15 @@ export default function EventsPage() {
 function EventCard({ event, mySubscriptions }) {
   const navigate = useNavigate();
 
-  const address = event.address
-    ? `${event.address.city}, ${event.address.street} ${event.address.house}` +
-      (event.address.flat ? `, кв. ${event.address.flat}` : "")
-    : "Адрес не указан";
-
   const movie = event.movie || {};
 
-  const isSubscribed = mySubscriptions.some(sub => sub.host_id === event.owner_id);
+  const isSubscribed = mySubscriptions.some(sub => sub.host_id === event.author?.id);
 
   return (
     <div className={styles.card}>
       <h3>{movie.title || `Событие #${event.id}`}</h3>
       <p><strong>Дата:</strong> {dayjs(event.start_datetime).format("DD.MM.YYYY HH:mm")}</p>
-      <p><strong>Адрес:</strong> {address}</p>
+      <p><strong>Адрес:</strong> {event.address}</p>
       <p><strong>Вместимость:</strong> {event.capacity}</p>
       {movie.genres?.length > 0 && (
         <p><strong>Жанры:</strong> {movie.genres.join(", ")}</p>
@@ -66,7 +64,7 @@ function EventCard({ event, mySubscriptions }) {
       )}
       {event.author && (
         <div className={styles.authorInfo}>
-          <p><strong>Автор:</strong> {event.author.name} ({event.author.username})</p>
+          <p><strong>Автор:</strong> {event.author.username}</p>
         </div>
       )}
       <div className={styles.actions}>

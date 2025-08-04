@@ -10,7 +10,10 @@ export default function MyEventsPage() {
 
   useEffect(() => {
     getMyEvents()
-      .then((data) => setEvents(data))
+      .then((data) => {
+        setEvents(data);
+        console.log("Полученные мероприятия:", data);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -39,6 +42,7 @@ export default function MyEventsPage() {
     );
 
   return (
+    
     <div className={styles.container}>
       <div className={styles.headerRow}>
         <h2>Мои мероприятия</h2>
@@ -68,7 +72,7 @@ export default function MyEventsPage() {
           >
             <h3>{event.movie?.title || "Название неизвестно"}</h3>
             <p>
-              <strong>Адрес:</strong> {event.address?.city}, {event.address?.street} {event.address?.house}
+              <strong>Адрес:</strong> {event.address}
             </p>
             <p>
               <strong>Статус:</strong> {new Date(event.start_datetime) > new Date() ? "Запланировано" : "Завершено"}

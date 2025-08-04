@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import Result, insert, select
+from sqlalchemy import Result, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.entities.reservation import Reservation
@@ -15,19 +15,26 @@ class SQLAlchemyReservationRepository(IReservationRepository):
     def __init__(self, session: AsyncSession):
         self._session: AsyncSession = session
 
-    async def create(self, reservation: Reservation) -> Reservation:
+    async def create(
+        self,
+        reservation: Reservation,
+    ) -> Reservation:
         """
         Создает бронирование в базе данных.
         :param reservation: Схема бронирования для создания.
         :return: Созданное бронирование.
         """
 
-        query = insert(Reservation).values(reservation.model_dump()).returning(Reservation)
+        query = (
+            insert(Reservation).values(reservation.model_dump()).returning(Reservation)
+        )
         created_subscription: Result = await self._session.execute(query)
         await self._commit()
         return created_subscription.scalar_one()
 
-    async def update(self, reservation_id: UUID | str, reservation: Reservation) -> Reservation | None:
+    async def update(
+        self, reservation_id: UUID | str, reservation: Reservation
+    ) -> Reservation | None:
         """
         Обновляет бронирование в базе данных.
         :param reservation: Обновлённый объект бронирования.
@@ -36,22 +43,17 @@ class SQLAlchemyReservationRepository(IReservationRepository):
         """
 
         query = select(Reservation).filter_by(id=reservation_id)
-        result: Result = await self._session.execute(query)
-        existing_reservation: Reservation | None = result.scalar_one_or_none()
-
-        if existing_reservation is None:
-            raise ReservationNotFoundError(f"Бронирование с {reservation_id=} не найдено.")
-
-        update_data = reservation.model_dump(exclude_unset=True, exclude_none=True)
-
-        for field, value in update_data.items():
-            setattr(existing_reservation, field, value)
-
-        self._session.add(existing_reservation)
+        update_stmt = (
+            update(Reservation)
+            .where(Reservation.id == reservation_id)
+            .values(**reservation.model_dump())
+            .execution_options(synchronize_session="fetch")
+        )
+        await self._session.execute(update_stmt)
         await self._commit()
-        await self._session.refresh(existing_reservation)
 
-        return existing_reservation
+        refreshed_result = await self._session.execute(query)
+        return refreshed_result.scalar_one()
 
     async def delete(self, reservation_id: UUID | str) -> None:
         """
@@ -65,7 +67,9 @@ class SQLAlchemyReservationRepository(IReservationRepository):
         existing = result.scalar_one_or_none()
 
         if existing is None:
-            raise ReservationNotFoundError(f"Бронирование с {reservation_id=} не найдена.")
+            raise ReservationNotFoundError(
+                f"Бронирование с {reservation_id=} не найдена."
+            )
 
         await self._session.delete(existing)
         await self._commit()

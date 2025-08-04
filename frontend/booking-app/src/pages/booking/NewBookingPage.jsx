@@ -56,7 +56,7 @@ export default function NewBookingPage() {
       <p><strong>Описание:</strong> {movie.description || "–"}</p>
 
       <p><strong>Дата:</strong> {dayjs(event.start_datetime).format("DD.MM.YYYY HH:mm")}</p>
-      <p><strong>Адрес:</strong> {`${event.address.country}, ${event.address.city}, ${event.address.street} ${event.address.house}`}</p>
+      <p><strong>Адрес:</strong> {`${event.address}`}</p>
       <p><strong>Вместимость:</strong> {event.capacity}</p>
       <p><strong>Свободных мест:</strong> {availableSeats}</p>
 

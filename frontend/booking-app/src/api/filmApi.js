@@ -5,10 +5,10 @@ import axiosInstance from "./axiosInstance";
 
 export async function searchFilms(query) {
   try {
-    const res = await axiosInstance.get(`${FILM_SERVICE_BASE_URL}/films/search/`, {
+    const res = await axios.get(`${FILM_SERVICE_BASE_URL}/films/search/`, {
       params: {
         query: query,
-        page_size: 10
+        page_size: 5
       }
     });
     return res.data;
