@@ -15,7 +15,9 @@ router = APIRouter(prefix="/address", tags=["Address"], route_class=DishkaRoute)
 
 
 @router.post("/", summary="Создать адрес", response_model=AddressResponseSchema)
-async def create_address(address_data: AddressCreateSchema, user: CurrentUserDep, address_service: FromDishka[IAddressService]):
+async def create_address(
+    address_data: AddressCreateSchema, user: CurrentUserDep, address_service: FromDishka[IAddressService]
+):
     address_dto = AddressCreateDTO(**address_data.model_dump(), user_id=user.id)
     address = await address_service.create_address(address_dto)
     return AddressResponseSchema(**address.model_dump())
@@ -48,7 +50,9 @@ async def delete_address(address_service: FromDishka[IAddressService], user: Cur
 
 
 @router.patch("/{address_id}", summary="Изменить адрес", response_model=AddressResponseSchema)
-async def update_address(data: UpdateAddressSchema, user: CurrentUserDep, address_service: FromDishka[IAddressService], address_id: UUID):
+async def update_address(
+    data: UpdateAddressSchema, user: CurrentUserDep, address_service: FromDishka[IAddressService], address_id: UUID
+):
     address_dto = AddressUpdateDTO(**data.model_dump(), user_id=user.id, id=address_id)
     address = await address_service.update_address(address_dto, user_id=user.id, address_id=address_id)
     return AddressResponseSchema(**address.model_dump())

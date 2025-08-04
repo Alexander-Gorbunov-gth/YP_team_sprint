@@ -13,10 +13,7 @@ router = APIRouter(prefix="/reservation", tags=["Booking"], route_class=DishkaRo
 
 
 @router.post("/", summary="Забронировать место", response_model=ReservationResponseSchema)
-async def booking(
-    data: ReservationCreateSchema,
-    reservation_service: FromDishka[IReservationService]
-):
+async def booking(data: ReservationCreateSchema, reservation_service: FromDishka[IReservationService]):
     return await reservation_service.create(data)
 
 
