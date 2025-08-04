@@ -23,9 +23,13 @@ async def lifespan(fastapi_app: FastAPI):
         await fastapi_app.state.dishka_container.close()
 
 
-
 def create_app() -> FastAPI:
-    fastapi_app = FastAPI(lifespan=lifespan, docs_url="/api/openapi", openapi_url="/api/openapi.json", exception_handlers=exception_handlers) # type: ignore
+    fastapi_app = FastAPI(
+        lifespan=lifespan,
+        docs_url="/api/openapi",
+        openapi_url="/api/openapi.json",
+        exception_handlers=exception_handlers, # type: ignore
+    )  
     fastapi_app.include_router(router, prefix="/api")
     container = make_async_container(Container())
     setup_dishka(container=container, app=fastapi_app)
