@@ -39,6 +39,7 @@ class JWTService(AbstractJWTService):
                 jwt=jwt_token,
                 key=self._secret_key,
                 algorithms=[self._algorithm],
+                options={"verify_exp": False},
             )
             token = User(id=payload["sub"])
         except jwt.ExpiredSignatureError as e:
