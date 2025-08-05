@@ -14,6 +14,7 @@ from src.domain.entities.event import Event
 from src.domain.entities.reservation import Reservation
 from src.infrastructure.models.address import Address
 from src.infrastructure.models.base import mapper_registry, timestamp_columns
+from src.infrastructure.models.feedback import Feedback
 
 events = Table(
     "events",
@@ -37,11 +38,16 @@ def mapped_events_table():
                 Reservation,
                 back_populates="event",
                 cascade="all, delete-orphan",
-                lazy="selectin", 
+                lazy="selectin",
             ),
             "address": relationship(
                 Address,
                 back_populates="events",
+                lazy="selectin",
+            ),
+            "feedbacks": relationship(
+                Feedback,
+                back_populates="event",
                 lazy="selectin",
             ),
         },

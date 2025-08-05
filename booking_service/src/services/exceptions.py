@@ -36,3 +36,11 @@ class SubscriptionAlreadyExistsError(Exception):
 
 class SubscriptionNotFoundError(Exception):
     """Исключение, которое вызывается, когда попытка удалить подписку, которая не существует."""
+
+
+class FeedbackNotStartedError(Exception):
+    """Исключение, которое вызывается, когда попытка оставить отзыв на событие, которое еще не началось."""
+
+
+class FeedbackOwnerError(Exception):
+    """Исключение, которое вызывается, когда пользователь пытается оставить отзыв на свое собственное событие."""
