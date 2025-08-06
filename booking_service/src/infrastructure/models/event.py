@@ -37,7 +37,7 @@ def mapped_events_table():
                 Reservation,
                 back_populates="event",
                 cascade="all, delete-orphan",
-                lazy="selectin", 
+                lazy="selectin",
             ),
             "address": relationship(
                 Address,

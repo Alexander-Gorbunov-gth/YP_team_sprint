@@ -11,7 +11,10 @@ from src.services.interfaces.repositories.reservation import IReservationReposit
 from src.services.interfaces.repositories.subscription import ISubscriptionRepository
 from src.services.interfaces.uow import IUnitOfWork
 from src.services.interfaces.repositories.address import IAddressRepository
+from src.services.interfaces.repositories.feedback import IFeedbackRepository
 from src.infrastructure.repositories.addresses import SQLAlchemyAddressRepository
+from src.infrastructure.repositories.event_feedbacks import SQLAlchemyEventFeedbackRepository
+from src.infrastructure.repositories.user_feedbacks import SQLAlchemyUserFeedbackRepository
 
 
 class SQLAlchemyUnitOfWork(IUnitOfWork):
@@ -54,3 +57,11 @@ class SQLAlchemyUnitOfWork(IUnitOfWork):
     @property
     def address_repository(self) -> IAddressRepository:
         return SQLAlchemyAddressRepository(self.session)
+
+    @property
+    def event_feedback_repository(self) -> IFeedbackRepository:
+        return SQLAlchemyEventFeedbackRepository(self.session)
+
+    @property
+    def user_feedback_repository(self) -> IFeedbackRepository:
+        return SQLAlchemyUserFeedbackRepository(self.session)

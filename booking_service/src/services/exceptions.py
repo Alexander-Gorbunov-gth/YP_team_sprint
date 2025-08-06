@@ -36,3 +36,23 @@ class SubscriptionAlreadyExistsError(Exception):
 
 class SubscriptionNotFoundError(Exception):
     """Исключение, которое вызывается, когда попытка удалить подписку, которая не существует."""
+
+
+class FeedbackNotFoundError(Exception):
+    """Исключение, которое вызывается, когда попытка удалить отзыв, который не существует."""
+
+
+class EventFeedbackNotStartedError(Exception):
+    """Исключение, которое вызывается, когда попытка оставить отзыв на событие, которое еще не началось."""
+
+
+class EventFeedbackOwnerError(Exception):
+    """Исключение, которое вызывается, когда пользователь пытается оставить отзыв на свое собственное событие."""
+
+
+class UserFeedbackSelfError(Exception):
+    """Исключение, которое вызывается, когда пользователь пытается оставить отзыв на самого себя."""
+
+
+class UserFeedbackUserNotFoundError(Exception):
+    """Исключение, которое вызывается, когда пользователя нет в мероприятии при попытке оставить отзыв."""
