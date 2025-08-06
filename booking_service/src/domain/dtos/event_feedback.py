@@ -5,18 +5,18 @@ from pydantic import BaseModel
 from src.domain.entities.feedback import ReviewType
 
 
-class FeedbackBaseSchema(BaseModel):
+class EventFeedbackBaseSchema(BaseModel):
     event_id: UUID
     user_id: UUID
 
 
-class FeedbackCreateDTO(FeedbackBaseSchema):
+class EventFeedbackCreateDTO(EventFeedbackBaseSchema):
     review: ReviewType
 
 
-class FeedbackUpdateDTO(FeedbackBaseSchema):
+class EventFeedbackUpdateDTO(EventFeedbackBaseSchema):
     review: ReviewType
 
 
-class FeedbackDeleteDTO(FeedbackBaseSchema):
+class EventFeedbackDeleteDTO(EventFeedbackBaseSchema):
     pass

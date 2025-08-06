@@ -44,4 +44,8 @@ class IUnitOfWork(ABC):
 
     @property
     @abstractmethod
-    def feedback_repository(self) -> IFeedbackRepository: ...
+    def event_feedback_repository(self) -> IFeedbackRepository: ...
+
+    @property
+    @abstractmethod
+    def user_feedback_repository(self) -> IFeedbackRepository: ...

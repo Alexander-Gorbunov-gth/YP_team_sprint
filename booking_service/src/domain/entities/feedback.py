@@ -11,8 +11,15 @@ class ReviewType(str, Enum):
     NEGATIVE = "negative"
 
 
-class Feedback(DateTimeMixin, BaseModel):
+class EventFeedbackBaseSchema(DateTimeMixin, BaseModel):
     id: UUID = Field(default_factory=uuid4)
-    event_id: UUID
     user_id: UUID
     review: ReviewType
+
+
+class EventFeedback(EventFeedbackBaseSchema):
+    event_id: UUID
+
+
+class UserFeedback(EventFeedbackBaseSchema):
+    owner_id: UUID

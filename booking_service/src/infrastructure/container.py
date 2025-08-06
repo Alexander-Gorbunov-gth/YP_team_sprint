@@ -8,7 +8,12 @@ from src.infrastructure.db import postgres
 from src.infrastructure.uow import SQLAlchemyUnitOfWork
 from src.services.address import AddressService, IAddressService
 from src.services.event import IEventService, EventService
-from src.services.feedback import IFeedbackService, FeedbackService
+from src.services.feedback import (
+    IEventFeedbackService,
+    IUserFeedbackService,
+    EventFeedbackService,
+    UserFeedbackService
+)
 from src.services.apps import IAppsService, AppsService
 from src.services.interfaces.uow import IUnitOfWork
 from src.services.subscription import ISubscriptionService, SubscriptionService
@@ -53,8 +58,12 @@ class Container(Provider):
         return AppsService(uow)
 
     @provide(scope=Scope.REQUEST)
-    async def provide_feedback_service(self, uow: IUnitOfWork) -> IFeedbackService:
-        return FeedbackService(uow)
+    async def provide_event_feedback_service(self, uow: IUnitOfWork) -> IEventFeedbackService:
+        return EventFeedbackService(uow)
+
+    @provide(scope=Scope.REQUEST)
+    async def provide_user_feedback_service(self, uow: IUnitOfWork) -> IUserFeedbackService:
+        return UserFeedbackService(uow)
 
     @provide(scope=Scope.REQUEST)
     async def provide_reserv_service(self, uow: IUnitOfWork) -> IReservationService:

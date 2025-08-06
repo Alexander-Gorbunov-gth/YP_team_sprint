@@ -8,7 +8,3 @@ class EventNotFoundError(Exception):
 
 class ReservationNotFoundError(Exception):
     """Исключение, которое вызывается, когда попытка удалить бронь, которая не существует."""
-
-
-class FeedbackNotFoundError(Exception):
-    """Исключение, которое вызывается, когда попытка удалить отзыв, который не существует."""
