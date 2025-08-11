@@ -79,3 +79,5 @@ class RabbitMQProducer(IProducer, AbstractConnection):
             routing_key,
             delay_ms,
         )
+
+producer: RabbitMQProducer | None = None

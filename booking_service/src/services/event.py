@@ -1,4 +1,5 @@
 import abc
+import asyncio
 from datetime import timedelta
 from uuid import UUID
 import logging
@@ -78,7 +79,8 @@ class EventService(IEventService):
             event_type=event_type,
             channels=channels,
         )
-        # await self._uow.producer.publish(message=message, routing_key="example")
+        async with self._uow as uow:
+            asyncio.create_task(uow.producer.publish(message=message, routing_key="notification.events"))
 
     def _check_event_exists(self, event: Event | None) -> Event:
         """
@@ -246,11 +248,12 @@ class EventService(IEventService):
         async with self._uow as uow:
             event = await uow.event_repository.get_for_update(event_id=event_id)
             event = self._check_event_exists(event)
+            if event.start_datetime < datetime.now(timezone.utc) + timedelta(hours=self.EVENT_DURATION_HOURS):
+                raise EventStartDatetimeError("Событие уже началось.")
             reservation = event.reserve(user_id=user_id, seats_requested=seats)
-            created_reservation = await uow.reservation_repository.create(
-                reservation=reservation
-            )
+            created_reservation = await uow.reservation_repository.create(reservation=reservation)
             event.add_reservasion(created_reservation)
+            await self._notify_user(event.owner_id, "event_reservation", ["email", "push"])
             return created_reservation
 
     async def get_nearby_events(

@@ -1,5 +1,7 @@
 import asyncio
+import asyncio
 import logging
+from uuid import UUID
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
@@ -19,7 +21,13 @@ from src.api.v1.schemas.utils import Author, MovieSchema
 from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
 from src.domain.entities.event import Event
 from src.domain.entities.movie import Movie
+from src.api.v1.schemas.utils import Author, MovieSchema
+from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
+from src.domain.entities.event import Event
+from src.domain.entities.movie import Movie
 from src.infrastructure.handlers.exceptions import EventNotFoundError
+from src.services.apps import IAppsService
+from src.services.event import IEventService
 from src.services.apps import IAppsService
 from src.services.event import IEventService
 
@@ -64,9 +72,37 @@ async def to_schema(
     )
 
 
+async def to_schema(event: Event, user_id: UUID, app_service: IAppsService) -> EventResponseSchema:
+    # Получаем автора
+    author_data = await app_service.get_author(event.owner_id)
+    author = Author.model_validate(author_data) if author_data else Author(id=event.owner_id)
+
+    # Получаем фильм
+    movie_data: Movie | None = await app_service.get_film(event.movie_id)
+    movie = MovieSchema.model_validate(movie_data) if movie_data else MovieSchema(id=event.movie_id)
+
+    # Фильтруем брони
+    reservations_filtered = [
+        ReservationResponseSchema(**r.model_dump())
+        for r in event.reservations
+        if r.user_id == user_id or event.owner_id == user_id
+    ]
+
+    # Собираем финальный объект
+    return EventResponseSchema(
+        **event.model_dump(exclude={"address", "reservations"}),
+        author=author,
+        movie=movie,
+        address=event.get_address_for_user(user_id=user_id),
+        available_seats=event.available_seats(),
+        reservations=reservations_filtered
+    )
+
+
 @router.post("/", summary="Создать мероприятие", response_model=EventResponseSchema)
 async def create_event(
     event_service: FromDishka[IEventService],
+    app_service: FromDishka[IAppsService],
     app_service: FromDishka[IAppsService],
     data: EventCreateSchema,
     current_user: CurrentUserDep,
@@ -75,6 +111,7 @@ async def create_event(
     event = await event_service.create(event_dto)
     if event is None:
         raise HTTPException(status_code=400, detail="Failed to create event")
+    return await to_schema(event, current_user.id, app_service)
     return await to_schema(event, current_user.id, app_service)
 
 
@@ -91,36 +128,10 @@ async def get_events(
     limit: int = Query(100, gt=0),
 ):
     data = EventGetAllDTO(offset=offset, limit=limit)
+    data = EventGetAllDTO(offset=offset, limit=limit)
     events = await event_service.get_event_list(data)
     tasks = [to_schema(event, current_user.id, app_service) for event in events]
     events_response = await asyncio.gather(*tasks)
-    # events_response = []
-    # for event in events:
-    #    author_data = await app_service.get_author(event.owner_id)
-    #    author = (
-    #        Author(**author_data.model_dump())
-    #        if author_data
-    #        else Author(id=event.owner_id)
-    #     )
-    #         movie_data: Movie | None = await app_service.get_film(event.movie_id)
-    #         if movie_data:
-    #             movie = MovieSchema(**movie_data.model_dump())
-    #         else:
-    #             movie = MovieSchema(id=event.movie_id)
-    #         event_response = EventResponseSchema(
-    #             **event.model_dump(exclude={"address", "reservations"}),
-    #             author=author,
-    #             movie=movie,
-    #             address=event.get_address_for_user(user_id=current_user.id),
-    #             available_seats=event.available_seats(),
-    #             reservations=[
-    #                 ReservationResponseSchema(**reservation.model_dump())
-    #                 for reservation in event.reservations
-    #                 if reservation.user_id == current_user.id
-    #                 or event.owner_id == current_user.id
-    #             ],
-    #         )
-    #         events_response.append(event_response)
     return events_response
 
 
@@ -137,28 +148,6 @@ async def get_my_events(
     user_events = await event_service.get_events_by_user_id(user_id=current_user.id)
     tasks = [to_schema(event, current_user.id, movie_service) for event in user_events]
     user_events_response = await asyncio.gather(*tasks)
-    #     user_events_response = []
-    #     for user_event in user_events:
-    #         author = Author(id=user_event.owner_id)
-    #         movie_data: Movie = await movie_service.get_film(user_event.movie_id)
-    #         if movie_data:
-    #             logger.info(f"{movie_data.model_dump()=}")
-    #             movie = MovieSchema(**movie_data.model_dump())
-    #         else:
-    #             movie = MovieSchema(id=user_event.movie_id)
-    #         logger.info(f"{movie.model_dump()=}")
-    #         event_response = EventResponseSchema(
-    #             **user_event.model_dump(exclude={"address", "reservations"}),
-    #             author=author,
-    #             movie=movie,
-    #             available_seats=user_event.available_seats(),
-    #             address=user_event.get_address_for_user(user_id=current_user.id),
-    #             reservations=[
-    #                 ReservationResponseSchema(**reservation.model_dump())
-    #                 for reservation in user_event.reservations
-    #             ],
-    #         )
-    #         user_events_response.append(event_response)
     return user_events_response
 
 
@@ -175,6 +164,10 @@ async def get_event(
     event_id: str = Path(..., description="ID мероприятия"),
 ) -> EventResponseSchema:
     event = await event_service.get_by_id(event_id)
+# <<<<<<< feature/booking_finish
+#     if event is None:
+#         raise HTTPException(status_code=404, detail="Event not found")
+#     return await to_schema(event, current_user.id, movie_service)
     # if event is None:
     #     raise HTTPException(status_code=404, detail="Event not found")
     # return await to_schema(event, current_user.id, movie_service)
@@ -211,13 +204,15 @@ async def delete_event(
     except EventNotFoundError:
         raise EventNotFoundError("Событие не найдено")
 
-
+# @router.patch("/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
+# @router.patch("/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
 @router.patch(
     "/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema
 )
 async def update_event(
     data: EventUpdateSchema,
     event_service: FromDishka[IEventService],
+    app_service: FromDishka[IAppsService],
     app_service: FromDishka[IAppsService],
     current_user: CurrentUserDep,
     event_id: str = Path(..., description="ID мероприятия"),
@@ -228,6 +223,7 @@ async def update_event(
     logger.info(f"{updated_event=}")
     if updated_event is None:
         raise HTTPException(status_code=400, detail="Failed to update event")
+    return await to_schema(updated_event, current_user.id, app_service)
     return await to_schema(updated_event, current_user.id, app_service)
 
 
@@ -241,9 +237,7 @@ async def reserve_seats(
     current_user: CurrentUserDep,
     reservation_data: ReservationCreateSchema,
 ) -> ReservationResponseSchema:
-    reservation = await event_service.reserve_seats(
-        reservation_data.event_id, current_user.id, reservation_data.seats
-    )
+    reservation = await event_service.reserve_seats(reservation_data.event_id, current_user.id, reservation_data.seats)
     created_reservation = ReservationResponseSchema(**reservation.model_dump())
     return created_reservation
 
@@ -256,12 +250,15 @@ async def reserve_seats(
 async def get_nearby_events(
     event_service: FromDishka[IEventService],
     app_service: FromDishka[IAppsService],
+    app_service: FromDishka[IAppsService],
     current_user: CurrentUserDep,
     latitude: float = Query(..., description="Широта"),
     longitude: float = Query(..., description="Долгота"),
     radius: float = Query(3_000.0, description="Радиус в метрах"),
 ) -> list[EventResponseSchema]:
     events = await event_service.get_nearby_events(latitude, longitude, radius)
+    tasks = [to_schema(event, current_user.id, app_service) for event in events]
+    event_responses = await asyncio.gather(*tasks)
     tasks = [to_schema(event, current_user.id, app_service) for event in events]
     event_responses = await asyncio.gather(*tasks)
     return event_responses

@@ -1,12 +1,12 @@
 import logging
-from uuid import UUID
 from collections.abc import Sequence
+from uuid import UUID
+from datetime import datetime, timezone
 
-from sqlalchemy import Result, insert, select, sql, update
+from sqlalchemy import Result, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
-from src.domain.entities.address import Address
 from src.domain.entities.event import Event
 from src.infrastructure.repositories.exceptions import EventNotFoundError
 from src.services.interfaces.repositories.event import IEventRepository
@@ -90,7 +90,7 @@ class SQLAlchemyEventRepository(IEventRepository):
         result: Result = await self._session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_events_by_user_id(self, user_id: UUID | str) -> list[Event]:
+    async def get_events_by_user_id(self, user_id: UUID | str) -> Sequence[Event]:
         """
         Получает все события пользователя.
         :param user_id: ID пользователя.
@@ -103,7 +103,7 @@ class SQLAlchemyEventRepository(IEventRepository):
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()
 
-    async def get_event_list(self, event: EventGetAllDTO) -> list[Event]:
+    async def get_event_list(self, event: EventGetAllDTO) -> Sequence[Event]:
         """
         Получает все события.
         :param limit: Максимальное количество событий для возврата (ограничение выборки).
@@ -112,14 +112,17 @@ class SQLAlchemyEventRepository(IEventRepository):
         """
 
         query = (
-            select(Event).limit(event.limit).offset(event.offset).order_by(Event.created_at.desc())  # type: ignore
+            select(Event)
+            .filter(Event.start_datetime > datetime.now(timezone.utc))
+            .limit(event.limit)
+            .offset(event.offset)
+            .order_by(Event.created_at.desc())  # type: ignore
         )
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()
 
     async def _commit(self) -> None:
         await self._session.commit()
-
 
     async def get_events_by_addresses(self, addresses: list[UUID]) -> Sequence[Event]:
         """

@@ -1,7 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import settings
-from src.infrastructure.messaging.producer import RabbitMQProducer
 from src.infrastructure.repositories.events import SQLAlchemyEventRepository
 from src.infrastructure.repositories.reservations import SQLAlchemyReservationRepository
 from src.infrastructure.repositories.subscriptions import (
@@ -25,8 +23,9 @@ from src.infrastructure.repositories.user_feedbacks import (
 
 
 class SQLAlchemyUnitOfWork(IUnitOfWork):
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, producer: IProducer):
         self.session = session
+        self._producer = producer
 
     async def __aenter__(self) -> "SQLAlchemyUnitOfWork":
         return self
@@ -47,9 +46,8 @@ class SQLAlchemyUnitOfWork(IUnitOfWork):
 
     @property
     def producer(self) -> IProducer:
-        return RabbitMQProducer(
-            settings.rabbit.connection_url, settings.rabbit.exchange_name
-        )
+        return self._producer
+
 
     @property
     def subscription_repository(self) -> ISubscriptionRepository:
