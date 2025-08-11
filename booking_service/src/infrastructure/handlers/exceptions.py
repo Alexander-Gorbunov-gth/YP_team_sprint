@@ -2,6 +2,7 @@ from collections.abc import Callable, Coroutine
 from typing import Any, NoReturn
 from fastapi import HTTPException, Request, Response, status
 
+from src.domain.exceptions import NotEnoughSeatsError, DuplicateReservationError
 from src.services.exceptions import (
     EventNotFoundError,
     EventNotOwnerError,
@@ -35,4 +36,6 @@ exception_handlers: dict[type[Exception], Callable[[Request, Any], Coroutine[Any
     EventTimeConflictError: create_exception_handler(
         status_code=status.HTTP_400_BAD_REQUEST, detail="Время пересекается с другим событием."
     ),
+    NotEnoughSeatsError: create_exception_handler(status_code=status.HTTP_400_BAD_REQUEST, detail="Недостаточно мест."),
+    DuplicateReservationError: create_exception_handler(status_code=status.HTTP_400_BAD_REQUEST, detail="Вы уже бронировали это место."),
 }
