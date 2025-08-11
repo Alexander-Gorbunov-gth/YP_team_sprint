@@ -7,7 +7,7 @@ from src.domain import exceptions as domain_exc
 
 
 EXC_MAP: dict[type[Exception], tuple[int, str]] = {
-    exc.EventTimeConflictError: (409, "EVENT_TIME_CONFLICT"),
+    exc.EventTimeConflictError: (400, "EVENT_TIME_CONFLICT"),
     exc.EventNotFoundError: (404, "EVENT_NOT_FOUND"),
     exc.EventStartDatetimeError: (400, "EVENT_START_DATETIME_INVALID"),
     exc.EventNotOwnerError: (403, "EVENT_NOT_OWNER"),

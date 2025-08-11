@@ -69,10 +69,12 @@ class Event(DateTimeMixin, BaseModel):
 
     def reserve(self, user_id: UUID, seats_requested: int) -> Reservation:
         if not self.can_reserve_seats(seats_requested=seats_requested):
-            raise NotEnoughSeatsError
+            raise NotEnoughSeatsError("Недостаточно мест для бронирования")
 
         if self.has_reservation_for(user_id=user_id):
-            raise DuplicateReservationError
+            raise DuplicateReservationError(
+                "Уже существует бронирование на это мероприятие"
+            )
 
         reservation = Reservation.create(
             user_id=user_id, event_id=self.id, seats=seats_requested
@@ -83,7 +85,7 @@ class Event(DateTimeMixin, BaseModel):
         UPDATE_LOCK_TIMEDELTA = timedelta(hours=2)
         now = datetime.now(tz=self.start_datetime.tzinfo)
         if (self.start_datetime - now) < UPDATE_LOCK_TIMEDELTA:
-            raise EventUpdateLockedError
+            raise EventUpdateLockedError("Нельзя менять событие за 2 ч. до начала")
         return True
 
     def change_datetime(self, new_start_datetime: datetime):
