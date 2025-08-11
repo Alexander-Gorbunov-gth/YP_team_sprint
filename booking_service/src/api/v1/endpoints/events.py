@@ -196,3 +196,26 @@ async def reserve_seats(
     )
     created_reservation = ReservationResponseSchema(**reservation.model_dump())
     return created_reservation
+
+
+@router.post("/nearby/", summary="Получить список событий в заданном радиусе от заданной точки", response_model=list[EventResponseSchema])
+async def get_nearby_events(
+    event_service: FromDishka[IEventService],
+    current_user: CurrentUserDep,
+    latitude: float = Query(..., description="Широта"),
+    longitude: float = Query(..., description="Долгота"),
+    radius: float = Query(3_000.0, description="Радиус в метрах"),
+) -> list[EventResponseSchema]:
+    events = await event_service.get_nearby_events(latitude, longitude, radius)
+    event_responses: list[EventResponseSchema] = []
+    for event in events:
+        author = Author(id=event.owner_id)
+        movie = MovieSchema(id=event.movie_id)
+        event_response = EventResponseSchema(
+            **event.model_dump(exclude={"address"}),
+            author=author,
+            movie=movie,
+            address=event.get_address_for_user(user_id=current_user.id),
+        )
+        event_responses.append(event_response)
+    return event_responses
