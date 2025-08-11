@@ -213,11 +213,6 @@ async def reserve_seats(
     summary="Получить список событий в заданном радиусе от заданной точки",
     response_model=list[EventResponseSchema],
 )
-@router.post(
-    "/nearby/",
-    summary="Получить список событий в заданном радиусе от заданной точки",
-    response_model=list[EventResponseSchema],
-)
 async def get_nearby_events(
     event_service: FromDishka[IEventService],
     app_service: FromDishka[IAppsService],
