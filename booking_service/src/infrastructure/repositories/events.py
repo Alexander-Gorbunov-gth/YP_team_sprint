@@ -1,10 +1,12 @@
 import logging
 from uuid import UUID
+from collections.abc import Sequence
 
-from sqlalchemy import Result, insert, select
+from sqlalchemy import Result, insert, select, sql
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
+from src.domain.entities.address import Address
 from src.domain.entities.event import Event
 from src.infrastructure.repositories.exceptions import EventNotFoundError
 from src.services.interfaces.repositories.event import IEventRepository
@@ -121,3 +123,15 @@ class SQLAlchemyEventRepository(IEventRepository):
 
     async def _commit(self) -> None:
         await self._session.commit()
+
+
+    async def get_events_by_addresses(self, addresses: list[UUID]) -> Sequence[Event]:
+        """
+        Получает все события по списку адресов.
+        :param addresses: Список адресов.
+        :return: Список событий.
+        """
+
+        query = select(Event).filter(Event.address_id.in_(addresses))
+        result: Result = await self._session.execute(query)
+        return result.unique().scalars().all()

@@ -21,3 +21,6 @@ class IAddressRepository(abc.ABC):
 
     @abc.abstractmethod
     async def update(self, address: AddressUpdateDTO, address_id: UUID) -> Address | None: ...
+
+    @abc.abstractmethod
+    async def get_nearby_addresses(self, latitude: float, longitude: float, radius: float = 3_000.0) -> Iterable[Address]: ...

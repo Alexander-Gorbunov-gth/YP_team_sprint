@@ -1,4 +1,5 @@
 import abc
+from collections.abc import Sequence
 from uuid import UUID
 
 from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
@@ -26,3 +27,6 @@ class IEventRepository(abc.ABC):
 
     @abc.abstractmethod
     async def get_for_update(self, event_id: UUID | str) -> Event | None: ...
+
+    @abc.abstractmethod
+    async def get_events_by_addresses(self, addresses: list[UUID]) -> Sequence[Event]: ...
