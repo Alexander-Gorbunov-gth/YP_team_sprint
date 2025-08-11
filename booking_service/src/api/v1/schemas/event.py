@@ -1,10 +1,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.api.v1.schemas.address import AddressResponseSchema
 from src.api.v1.schemas.utils import Author, MovieSchema
+from src.api.v1.schemas.reservation import ReservationResponseSchema
 
 
 class EventBaseSchema(BaseModel):
@@ -29,8 +30,10 @@ class EventUpdateSchema(BaseModel):
 class EventResponseSchema(EventBaseSchema):
     id: UUID
     address: str
+    available_seats: int
     movie: MovieSchema
     author: Author
+    reservations: list[ReservationResponseSchema] = Field(default_factory=list)
 
 
 class EventMyResponseSchema(EventResponseSchema):

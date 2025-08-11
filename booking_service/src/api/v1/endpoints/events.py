@@ -70,16 +70,22 @@ async def get_events(
             if author_data
             else Author(id=event.owner_id)
         )
-        movie_data: Movie = await app_service.get_film(event.movie_id)
+        movie_data: Movie | None = await app_service.get_film(event.movie_id)
         if movie_data:
             movie = MovieSchema(**movie_data.model_dump())
         else:
             movie = MovieSchema(id=event.movie_id)
         event_response = EventResponseSchema(
-            **event.model_dump(exclude={"address"}),
+            **event.model_dump(exclude={"address", "reservations"}),
             author=author,
             movie=movie,
             address=event.get_address_for_user(user_id=current_user.id),
+            available_seats=event.available_seats(),
+            reservations=[
+                ReservationResponseSchema(**reservation.model_dump()) 
+                for reservation in event.reservations if reservation.user_id == current_user.id 
+                or event.owner_id == current_user.id
+            ]
         )
         events_response.append(event_response)
     logger.info(event_response)
@@ -108,10 +114,12 @@ async def get_my_events(
             movie = MovieSchema(id=user_event.movie_id)
         logger.info(f"{movie.model_dump()=}")
         event_response = EventResponseSchema(
-            **user_event.model_dump(exclude={"address"}),
+            **user_event.model_dump(exclude={"address", "reservations"}),
             author=author,
             movie=movie,
+            available_seats=user_event.available_seats(),
             address=user_event.get_address_for_user(user_id=current_user.id),
+            reservations=[ReservationResponseSchema(**reservation.model_dump()) for reservation in user_event.reservations]
         )
         user_events_response.append(event_response)
     return user_events_response
