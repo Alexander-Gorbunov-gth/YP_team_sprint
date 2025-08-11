@@ -45,7 +45,7 @@ class JWTService(AbstractJWTService):
                 algorithms=[self._algorithm],
                 options={"verify_exp": False},
             )
-            user = User(id=payload["sub"])
+            user = User(id=payload["user_uuid"])
         except jwt.ExpiredSignatureError as e:
             logger.error("Токен %s просрочен.", jwt_token)
             raise SessionHasExpired from e

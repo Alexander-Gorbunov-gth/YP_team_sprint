@@ -25,6 +25,7 @@ httpx = "^0.28.1"
 greenlet = "^3.2.3"
 pyjwt = {version = "2.10.1", extras = ["crypto"]}
 gunicorn = "^23.0.0"
+geoalchemy2 = "0.18.0"
 
 
 [tool.poetry.group.dev.dependencies]

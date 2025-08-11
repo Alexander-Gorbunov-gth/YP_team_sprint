@@ -74,6 +74,10 @@ export default function MyEventsPage() {
             <p>
               <strong>Адрес:</strong> {event.address}
             </p>
+            
+            <p>
+              <strong>Мест доступно:</strong> {event.available_seats}
+            </p>
             <p>
               <strong>Статус:</strong> {new Date(event.start_datetime) > new Date() ? "Запланировано" : "Завершено"}
             </p>

@@ -46,7 +46,9 @@ class IEventService(abc.ABC):
     ) -> Reservation: ...
 
     @abc.abstractmethod
-    async def get_nearby_events(self, latitude: float, longitude: float, radius: float = 3_000.0) -> Sequence[Event]: ...
+    async def get_nearby_events(
+        self, latitude: float, longitude: float, radius: float = 3_000.0
+    ) -> Sequence[Event]: ...
 
 
 class EventService(IEventService):
@@ -244,8 +246,9 @@ class EventService(IEventService):
             event.add_reservasion(created_reservation)
             return created_reservation
 
-
-    async def get_nearby_events(self, latitude: float, longitude: float, radius: float = 3_000.0) -> Sequence[Event]:
+    async def get_nearby_events(
+        self, latitude: float, longitude: float, radius: float = 3_000.0
+    ) -> Sequence[Event]:
         """
         Получение списка событий в радиусе 3 км от заданной точки.
         :param latitude: Широта
@@ -255,7 +258,9 @@ class EventService(IEventService):
         """
 
         async with self._uow as uow:
-            addresses = await uow.address_repository.get_nearby_addresses(latitude, longitude, radius)
+            addresses = await uow.address_repository.get_nearby_addresses(
+                latitude, longitude, radius
+            )
             address_ids = [address.id for address in addresses]
             events = await uow.event_repository.get_events_by_addresses(address_ids)
             return events

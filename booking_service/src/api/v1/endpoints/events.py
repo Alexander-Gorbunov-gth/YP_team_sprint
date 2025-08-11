@@ -85,6 +85,33 @@ async def get_events(
     events = await event_service.get_event_list(data)
     tasks = [to_schema(event, current_user.id, app_service) for event in events]
     events_response = await asyncio.gather(*tasks)
+    #events_response = []
+    #for event in events:
+    #    author_data = await app_service.get_author(event.owner_id)
+    #    author = (
+    #        Author(**author_data.model_dump())
+    #        if author_data
+    #        else Author(id=event.owner_id)
+   #     )
+#         movie_data: Movie | None = await app_service.get_film(event.movie_id)
+#         if movie_data:
+#             movie = MovieSchema(**movie_data.model_dump())
+#         else:
+#             movie = MovieSchema(id=event.movie_id)
+#         event_response = EventResponseSchema(
+#             **event.model_dump(exclude={"address", "reservations"}),
+#             author=author,
+#             movie=movie,
+#             address=event.get_address_for_user(user_id=current_user.id),
+#             available_seats=event.available_seats(),
+#             reservations=[
+#                 ReservationResponseSchema(**reservation.model_dump())
+#                 for reservation in event.reservations
+#                 if reservation.user_id == current_user.id
+#                 or event.owner_id == current_user.id
+#             ],
+#         )
+#         events_response.append(event_response)
     return events_response
 
 
@@ -101,6 +128,28 @@ async def get_my_events(
     user_events = await event_service.get_events_by_user_id(user_id=current_user.id)
     tasks = [to_schema(event, current_user.id, movie_service) for event in user_events]
     user_events_response = await asyncio.gather(*tasks)
+#     user_events_response = []
+#     for user_event in user_events:
+#         author = Author(id=user_event.owner_id)
+#         movie_data: Movie = await movie_service.get_film(user_event.movie_id)
+#         if movie_data:
+#             logger.info(f"{movie_data.model_dump()=}")
+#             movie = MovieSchema(**movie_data.model_dump())
+#         else:
+#             movie = MovieSchema(id=user_event.movie_id)
+#         logger.info(f"{movie.model_dump()=}")
+#         event_response = EventResponseSchema(
+#             **user_event.model_dump(exclude={"address", "reservations"}),
+#             author=author,
+#             movie=movie,
+#             available_seats=user_event.available_seats(),
+#             address=user_event.get_address_for_user(user_id=current_user.id),
+#             reservations=[
+#                 ReservationResponseSchema(**reservation.model_dump())
+#                 for reservation in user_event.reservations
+#             ],
+#         )
+#         user_events_response.append(event_response)
     return user_events_response
 
 
@@ -112,6 +161,7 @@ async def get_my_events(
 async def get_event(
     event_service: FromDishka[IEventService],
     current_user: CurrentUserDep,
+    app_service: FromDishka[IAppsService],
     movie_service: FromDishka[IAppsService],
     event_id: str = Path(..., description="ID мероприятия"),
 ) -> EventResponseSchema:
@@ -119,6 +169,25 @@ async def get_event(
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
     return await to_schema(event, current_user.id, movie_service)
+#     author = Author(id=event.owner_id)
+#     movie_data: Movie = await movie_service.get_film(event.movie_id)
+#     movie = MovieSchema(**movie_data.model_dump())
+#     reservations = []
+#     for reservation in event.reservations:
+#         user = await app_service.get_author(reservation.user_id)
+#         user = Author(**user.model_dump())
+#         reservations.append(
+#             ReservationResponseSchema(author=user, **reservation.model_dump())
+#         )
+#     event_response = EventResponseSchema(
+#         **event.model_dump(exclude={"address", "reservations"}),
+#         author=author,
+#         movie=movie,
+#         available_seats=event.available_seats(),
+#         address=event.get_address_for_user(user_id=current_user.id),
+#         reservations=reservations,
+#     )
+#     return event_response
 
 
 @router.delete("/{event_id}", summary="Удалить мероприятие")
