@@ -119,7 +119,7 @@ class EventService(IEventService):
                     < user_event.start_datetime
                     + timedelta(hours=self.EVENT_DURATION_HOURS)
                 )
-                and user_event.id != event.id
+                and user_event.id != event.id if isinstance(event, EventUpdateDTO) else False
                 for user_event in user_events
             ):
                 raise EventTimeConflictError("Event overlaps with existing event")
