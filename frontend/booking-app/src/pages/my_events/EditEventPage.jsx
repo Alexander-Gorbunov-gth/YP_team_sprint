@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getEventById, updateEvent } from "../../api/eventApi";
 import { getMyAddresses } from "../../api/addressApi";
 import { getBookingById, updateBookingStatus } from "../../api/bookingApi";
+import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { createUserFeedback } from "../../api/userFeedbackApi";
 import styles from "./EditEventPage.module.css";
 
 export default function EditEventPage() {
@@ -15,6 +17,11 @@ export default function EditEventPage() {
 
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
+  const handleFeedback = async (user_id, review) => {
+    await createUserFeedback({ user_id, review });
+    // Success notifications (if any) handled elsewhere; errors handled by global interceptor
+  };
+
   const refreshEvent = async () => {
     const fresh = await getEventById(id);
     setEvent(fresh);
@@ -25,8 +32,6 @@ export default function EditEventPage() {
     try {
       await updateBookingStatus(reservationId, "success");
       await refreshEvent();
-    } catch (e) {
-      alert(e.message);
     } finally {
       setActionLoadingId(null);
     }
@@ -36,8 +41,6 @@ export default function EditEventPage() {
     try {
       await updateBookingStatus(reservationId, "canceled");
       await refreshEvent();
-    } catch (e) {
-      alert(e.message);
     } finally {
       setActionLoadingId(null);
     }
@@ -66,12 +69,8 @@ export default function EditEventPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await updateEvent(id, form);
-      navigate("/my-events");
-    } catch (err) {
-      alert("Ошибка при обновлении мероприятия");
-    }
+    await updateEvent(id, form);
+    navigate("/my-events");
   };
 
 function renderStatus(status) {
@@ -90,6 +89,8 @@ function renderStatus(status) {
   if (loading) return <p>Загрузка...</p>;
   if (!event) return <p>Мероприятие не найдено</p>;
   const movie = event.movie || {};
+  const POSITIVE = "positive";
+  const NEGATIVE = "negative";
   
   return (
     <div className={styles.container}>
@@ -105,6 +106,20 @@ function renderStatus(status) {
                     <div><strong>Бронировал:</strong> {r.author?.username ?? "—"}</div>
                     <div><strong>Мест:</strong> {r.seats}</div>
                     <div><strong>Статус:</strong> {renderStatus(r.status)}</div>
+                    {r.author?.id !== event.author?.id && (
+                      <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                        <FaThumbsUp
+                          style={{ cursor: "pointer", color: "#10b981", fontSize: "20px" }}
+                          onClick={() => handleFeedback(r.author?.id, POSITIVE)}
+                          title="Поставить лайк"
+                        />
+                        <FaThumbsDown
+                          style={{ cursor: "pointer", color: "#ef4444", fontSize: "20px" }}
+                          onClick={() => handleFeedback(r.author?.id, NEGATIVE)}
+                          title="Поставить дизлайк"
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className={styles.buttonGroup}>
                     {r.status !== "success" && r.status !== "canceled" && (
