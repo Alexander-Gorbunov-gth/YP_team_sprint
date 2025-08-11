@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from uuid import UUID, uuid4
+import logging
 
 from pydantic import BaseModel, Field
 
@@ -14,9 +15,10 @@ from src.domain.exceptions import (
 )
 from typing import ClassVar
 
+logger = logging.getLogger(__name__)
+
 
 class Event(DateTimeMixin, BaseModel):
-    # UPDATE_LOCK_TIMEDELTA: ClassVar[timedelta] = timedelta(hours=2)
 
     id: UUID = Field(default_factory=uuid4)
     movie_id: UUID

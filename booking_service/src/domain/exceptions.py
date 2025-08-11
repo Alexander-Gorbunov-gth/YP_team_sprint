@@ -12,3 +12,7 @@ class EventUpdateLockedError(Exception):
 
 class AddressNotFoundError(Exception):
     """Адрес не найден."""
+
+
+class NotAvailable(Exception):
+    """Нет прав для этого действия"""

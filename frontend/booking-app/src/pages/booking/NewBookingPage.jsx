@@ -45,7 +45,6 @@ export default function NewBookingPage() {
     : "Адрес не указан";
 
   const movie = event.movie || {};
-  const availableSeats = event.reservations ? event.capacity - event.reservations.length : event.capacity;
 
   return (
     <div className={styles.container}>
@@ -58,7 +57,7 @@ export default function NewBookingPage() {
       <p><strong>Дата:</strong> {dayjs(event.start_datetime).format("DD.MM.YYYY HH:mm")}</p>
       <p><strong>Адрес:</strong> {`${event.address}`}</p>
       <p><strong>Вместимость:</strong> {event.capacity}</p>
-      <p><strong>Свободных мест:</strong> {availableSeats}</p>
+      <p><strong>Свободных мест:</strong> {event.available_seats}</p>
 
       <hr style={{ margin: "20px 0" }} />
 

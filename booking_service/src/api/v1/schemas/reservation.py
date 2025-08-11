@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from src.api.v1.schemas.utils import MovieSchema
 from src.domain.entities.reservation import ReservationStatus
+from src.api.v1.schemas.utils import Author
 
 
 class ReservationBaseSchema(BaseModel):
@@ -28,6 +29,7 @@ class ReservationResponseSchema(BaseModel):
     seats: int
     status: ReservationStatus
     movie_title: str | None = None
+    author: Author | None = None
 
 
 class ReservationFullResponseSchema(BaseModel):

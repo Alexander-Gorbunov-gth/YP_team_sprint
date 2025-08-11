@@ -50,7 +50,8 @@ export default function BookingDetailPage() {
       <p><strong>Актёры:</strong> {movie.actors_names?.join(", ") || "–"}</p>
       <p><strong>Количество мест:</strong> {booking.seats}</p>
       <p><strong>Статус:</strong> {renderStatus(booking.status)}</p>
-      {booking.status === "success" || booking.status === "pending" && (
+
+      {(booking.status === "success" || booking.status === "pending") && (
         <button
           className={styles.buttonCancel}
           onClick={() => handleUpdateStatus("canceled")}
