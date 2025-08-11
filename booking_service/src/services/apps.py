@@ -18,6 +18,9 @@ class IAppsService(abc.ABC):
     @abc.abstractmethod
     async def get_film(self, film_id: UUID) -> Movie | None: ...
 
+    @abc.abstractmethod
+    async def get_author(self, user_id: UUID) -> Author | None: ...
+
 
 class AppsService(IAppsService):
 
