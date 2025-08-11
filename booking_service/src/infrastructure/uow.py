@@ -2,7 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.repositories.events import SQLAlchemyEventRepository
 from src.infrastructure.repositories.reservations import SQLAlchemyReservationRepository
-from src.infrastructure.repositories.subscriptions import SQLAlchemySubscriptionRepository
+from src.infrastructure.repositories.subscriptions import (
+    SQLAlchemySubscriptionRepository,
+)
 from src.services.interfaces.producer import IProducer
 from src.services.interfaces.repositories.event import IEventRepository
 from src.services.interfaces.repositories.reservation import IReservationRepository
@@ -11,8 +13,13 @@ from src.services.interfaces.uow import IUnitOfWork
 from src.services.interfaces.repositories.address import IAddressRepository
 from src.services.interfaces.repositories.feedback import IFeedbackRepository
 from src.infrastructure.repositories.addresses import SQLAlchemyAddressRepository
-from src.infrastructure.repositories.event_feedbacks import SQLAlchemyEventFeedbackRepository
-from src.infrastructure.repositories.user_feedbacks import SQLAlchemyUserFeedbackRepository
+from src.infrastructure.repositories.event_feedbacks import (
+    SQLAlchemyEventFeedbackRepository,
+    IEventFeedbackRepository,
+)
+from src.infrastructure.repositories.user_feedbacks import (
+    SQLAlchemyUserFeedbackRepository,
+)
 
 
 class SQLAlchemyUnitOfWork(IUnitOfWork):
@@ -41,6 +48,7 @@ class SQLAlchemyUnitOfWork(IUnitOfWork):
     def producer(self) -> IProducer:
         return self._producer
 
+
     @property
     def subscription_repository(self) -> ISubscriptionRepository:
         return SQLAlchemySubscriptionRepository(self.session)
@@ -58,7 +66,7 @@ class SQLAlchemyUnitOfWork(IUnitOfWork):
         return SQLAlchemyAddressRepository(self.session)
 
     @property
-    def event_feedback_repository(self) -> IFeedbackRepository:
+    def event_feedback_repository(self) -> IEventFeedbackRepository:
         return SQLAlchemyEventFeedbackRepository(self.session)
 
     @property

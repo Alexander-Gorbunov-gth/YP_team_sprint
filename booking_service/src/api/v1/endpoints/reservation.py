@@ -25,17 +25,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/reservation", tags=["Booking"], route_class=DishkaRoute)
 
 
-@router.post(
-    "/", summary="Забронировать место", response_model=ReservationResponseSchema
-)
-async def booking(
-    data: ReservationCreateSchema,
-    reservation_service: FromDishka[IReservationService],
-    current_user: CurrentUserDep,
-):
-    return await reservation_service.create(reservation=data, user_id=current_user.id)
-
-
 @router.get(
     "/{id}",
     summary="Получить данные о бронировании",

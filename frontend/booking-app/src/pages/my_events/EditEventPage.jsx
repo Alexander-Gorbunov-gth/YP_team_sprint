@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getEventById, updateEvent } from "../../api/eventApi";
+import { getEventById, updateEvent, deleteEvent } from "../../api/eventApi";
 import { getMyAddresses } from "../../api/addressApi";
 import { getBookingById, updateBookingStatus } from "../../api/bookingApi";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
-import { createUserFeedback } from "../../api/userFeedbackApi";
+import { createUserFeedback, getUserFeedback } from "../../api/userFeedbackApi";
 import styles from "./EditEventPage.module.css";
 
 export default function EditEventPage() {
@@ -14,17 +14,43 @@ export default function EditEventPage() {
   const [addresses, setAddresses] = useState([]);
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(true);
+  const [feedbackByUser, setFeedbackByUser] = useState({});
 
   const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const handleFeedback = async (user_id, review) => {
     await createUserFeedback({ user_id, review });
-    // Success notifications (if any) handled elsewhere; errors handled by global interceptor
+    await loadUserFeedback(user_id);
+  };
+
+  const loadUserFeedback = async (userId) => {
+    try {
+      if (!userId) return;
+      // ожидаем формат { user_id, my: "positive" | "negative" | null, positive: number, negative: number }
+      const fb = await getUserFeedback(userId);
+      setFeedbackByUser((prev) => ({ ...prev, [userId]: fb }));
+    } catch (_) {
+      // handled globally (axios interceptor)
+    }
   };
 
   const refreshEvent = async () => {
     const fresh = await getEventById(id);
     setEvent(fresh);
+    const authorId = fresh?.author?.id;
+    const uniqueUserIds = Array.from(new Set(
+      (fresh?.reservations || [])
+        .map((r) => r?.author?.id)
+        .filter((uid) => uid && uid !== authorId)
+    ));
+    await Promise.all(uniqueUserIds.map(loadUserFeedback));
+  };
+
+    const handleDelete = async () => {
+    if (window.confirm("Вы уверены, что хотите удалить мероприятие?")) {
+      await deleteEvent(id);
+      navigate("/my-events");
+    }
   };
 
   const handleConfirm = async (reservationId) => {
@@ -58,6 +84,13 @@ export default function EditEventPage() {
           start_datetime: eventData.start_datetime,
         });
         console.log(eventData)
+        const authorId = eventData?.author?.id;
+        const uniqueUserIds = Array.from(new Set(
+          (eventData?.reservations || [])
+            .map((r) => r?.author?.id)
+            .filter((uid) => uid && uid !== authorId)
+        ));
+        Promise.all(uniqueUserIds.map(loadUserFeedback));
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -107,18 +140,49 @@ function renderStatus(status) {
                     <div><strong>Мест:</strong> {r.seats}</div>
                     <div><strong>Статус:</strong> {renderStatus(r.status)}</div>
                     {r.author?.id !== event.author?.id && (
-                      <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                        <FaThumbsUp
-                          style={{ cursor: "pointer", color: "#10b981", fontSize: "20px" }}
-                          onClick={() => handleFeedback(r.author?.id, POSITIVE)}
-                          title="Поставить лайк"
-                        />
-                        <FaThumbsDown
-                          style={{ cursor: "pointer", color: "#ef4444", fontSize: "20px" }}
-                          onClick={() => handleFeedback(r.author?.id, NEGATIVE)}
-                          title="Поставить дизлайк"
-                        />
-                      </div>
+                      (() => {
+                        const fb = feedbackByUser[r.author?.id];
+                        const my = fb?.my ?? null; // "positive" | "negative" | null
+                        const posCount = fb?.positive ?? 0;
+                        const negCount = fb?.negative ?? 0;
+
+                        const isPositive = my === POSITIVE;
+                        const isNegative = my === NEGATIVE;
+
+                        return (
+                          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginTop: "8px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <FaThumbsUp
+                                style={{
+                                  cursor: "pointer",
+                                  color: isPositive ? "#10b981" : "rgba(0,0,0,0.3)",
+                                  fontSize: "22px"
+                                }}
+                                onClick={() => handleFeedback(r.author?.id, POSITIVE)}
+                                title="Поставить лайк"
+                              />
+                              <span style={{ fontSize: 13, color: "#6b7280", minWidth: 14, textAlign: "right" }}>
+                                {posCount}
+                              </span>
+                            </div>
+
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <FaThumbsDown
+                                style={{
+                                  cursor: "pointer",
+                                  color: isNegative ? "#ef4444" : "rgba(0,0,0,0.3)",
+                                  fontSize: "22px"
+                                }}
+                                onClick={() => handleFeedback(r.author?.id, NEGATIVE)}
+                                title="Поставить дизлайк"
+                              />
+                              <span style={{ fontSize: 13, color: "#6b7280", minWidth: 14, textAlign: "right" }}>
+                                {negCount}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()
                     )}
                   </div>
                   <div className={styles.buttonGroup}>
@@ -206,6 +270,14 @@ function renderStatus(status) {
 
             <button type="submit" className={styles.button}>Сохранить</button>
           </form>
+          <button
+            type="button"
+            className={styles.buttonCancel}
+            onClick={handleDelete}
+            style={{ marginTop: "16px" }}
+          >
+            Удалить мероприятие
+          </button>
         </div>
       </div>
     </div>

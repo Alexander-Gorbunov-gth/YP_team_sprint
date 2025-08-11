@@ -36,14 +36,23 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/events", tags=["Events"], route_class=DishkaRoute)
 
 
-async def to_schema(event: Event, user_id: UUID, app_service: IAppsService) -> EventResponseSchema:
+async def to_schema(
+    event: Event, user_id: UUID, app_service: IAppsService
+) -> EventResponseSchema:
     # Получаем автора
     author_data = await app_service.get_author(event.owner_id)
-    author = Author.model_validate(author_data) if author_data else Author(id=event.owner_id)
+    logger.info(f"Author data: {author_data}")
+    author = (
+        Author(**author_data.model_dump()) if author_data else Author(id=event.owner_id)
+    )
 
     # Получаем фильм
     movie_data: Movie | None = await app_service.get_film(event.movie_id)
-    movie = MovieSchema.model_validate(movie_data) if movie_data else MovieSchema(id=event.movie_id)
+    movie = (
+        MovieSchema(**movie_data.model_dump())
+        if movie_data
+        else MovieSchema(id=event.movie_id)
+    )
 
     # Фильтруем брони
     reservations_filtered = [
@@ -59,7 +68,7 @@ async def to_schema(event: Event, user_id: UUID, app_service: IAppsService) -> E
         movie=movie,
         address=event.get_address_for_user(user_id=user_id),
         available_seats=event.available_seats(),
-        reservations=reservations_filtered
+        reservations=reservations_filtered,
     )
 
 
@@ -155,9 +164,33 @@ async def get_event(
     event_id: str = Path(..., description="ID мероприятия"),
 ) -> EventResponseSchema:
     event = await event_service.get_by_id(event_id)
-    if event is None:
-        raise HTTPException(status_code=404, detail="Event not found")
-    return await to_schema(event, current_user.id, movie_service)
+# <<<<<<< feature/booking_finish
+#     if event is None:
+#         raise HTTPException(status_code=404, detail="Event not found")
+#     return await to_schema(event, current_user.id, movie_service)
+    # if event is None:
+    #     raise HTTPException(status_code=404, detail="Event not found")
+    # return await to_schema(event, current_user.id, movie_service)
+
+    author = Author(id=event.owner_id)
+    movie_data: Movie = await movie_service.get_film(event.movie_id)
+    movie = MovieSchema(**movie_data.model_dump())
+    reservations = []
+    for reservation in event.reservations:
+        user = await app_service.get_author(reservation.user_id)
+        user = Author(**user.model_dump())
+        reservations.append(
+            ReservationResponseSchema(author=user, **reservation.model_dump())
+        )
+    event_response = EventResponseSchema(
+        **event.model_dump(exclude={"address", "reservations"}),
+        author=author,
+        movie=movie,
+        available_seats=event.available_seats(),
+        address=event.get_address_for_user(user_id=current_user.id),
+        reservations=reservations,
+    )
+    return event_response
 
 
 @router.delete("/{event_id}", summary="Удалить мероприятие")
@@ -169,11 +202,13 @@ async def delete_event(
     try:
         await event_service.delete(event_id, current_user.id)
     except EventNotFoundError:
-        raise
+        raise EventNotFoundError("Событие не найдено")
 
-
-@router.patch("/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
-@router.patch("/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
+# @router.patch("/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
+# @router.patch("/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema)
+@router.patch(
+    "/{event_id}", summary="Обновить мероприятие", response_model=EventResponseSchema
+)
 async def update_event(
     data: EventUpdateSchema,
     event_service: FromDishka[IEventService],
@@ -202,7 +237,6 @@ async def reserve_seats(
     current_user: CurrentUserDep,
     reservation_data: ReservationCreateSchema,
 ) -> ReservationResponseSchema:
-    reservation = await event_service.reserve_seats(reservation_data.event_id, current_user.id, reservation_data.seats)
     reservation = await event_service.reserve_seats(reservation_data.event_id, current_user.id, reservation_data.seats)
     created_reservation = ReservationResponseSchema(**reservation.model_dump())
     return created_reservation
