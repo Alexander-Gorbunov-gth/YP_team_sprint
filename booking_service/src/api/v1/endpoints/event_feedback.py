@@ -16,24 +16,30 @@ from src.services.feedback import IEventFeedbackService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/event_feedback", tags=["EventFeedback"], route_class=DishkaRoute)
+router = APIRouter(
+    prefix="/event_feedback", tags=["EventFeedback"], route_class=DishkaRoute
+)
 
 
 @router.post(
-    "/", summary="Поставить оценку мероприятию", response_model=EventFeedbackResponseSchema
+    "/",
+    summary="Поставить оценку мероприятию",
+    response_model=EventFeedbackResponseSchema,
 )
 async def create_feedback(
     data: EventFeedbackCreateSchema,
     feedback_service: FromDishka[IEventFeedbackService],
-    # current_user: CurrentUserDep,
+    current_user: CurrentUserDep,
 ):
-    # feedback_data = EventFeedbackCreateDTO(**data.model_dump(), user_id=current_user.id)
-    feedback_data = EventFeedbackCreateDTO(**data.model_dump(), user_id="067c88ea-ac1e-7499-8000-dd86f8c118e0")
+    user_id = current_user.id
+    feedback_data = EventFeedbackCreateDTO(**data.model_dump(), user_id=user_id)
     return await feedback_service.set_review(feedback=feedback_data)
 
 
 @router.get(
-    "/{event_id}", summary="Получить оценки мероприятия", response_model=list[EventFeedbackResponseSchema]
+    "/{event_id}",
+    summary="Получить оценки мероприятия",
+    response_model=list[EventFeedbackResponseSchema],
 )
 async def get_feedbacks(
     feedback_service: FromDishka[IEventFeedbackService],
@@ -45,9 +51,8 @@ async def get_feedbacks(
 @router.delete("/{event_id}", summary="Убрать оценку мероприятию")
 async def delete_feedback(
     feedback_service: FromDishka[IEventFeedbackService],
-    # current_user: CurrentUserDep,
+    current_user: CurrentUserDep,
     event_id: str = Path(..., description="ID ивента"),
 ):
-    # feedback_data = EventFeedbackDeleteDTO(event_id=event_id, user_id=current_user.id)
-    feedback_data = EventFeedbackDeleteDTO(event_id=event_id, user_id="067c88ea-ac1e-7499-8000-dd86f8c118e0")
+    feedback_data = EventFeedbackDeleteDTO(event_id=event_id, user_id=current_user.id)
     return await feedback_service.delete(feedback=feedback_data)

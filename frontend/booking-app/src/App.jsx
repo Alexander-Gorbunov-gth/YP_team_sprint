@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Navigate, Outlet } from "react-router-dom";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Header from "./components/Header/Header";
+import { Toaster } from "react-hot-toast";
 
 import EventsPage from './pages/events/EventsPage'; // <-- импорт OK
 import HomePage from "./pages/main/HomePage";
@@ -60,8 +61,10 @@ function AppLayout() {
               <Route path="/bookings/new" element={<NewBookingPage />} />
               <Route path="/subscriptions" element={<SubscriptionsPage />} />
               <Route path="/events/:id" element={<EditEventPage />} />
+              
             </Route>
           </Routes>
+          <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
         </main>
       </div>
     </div>

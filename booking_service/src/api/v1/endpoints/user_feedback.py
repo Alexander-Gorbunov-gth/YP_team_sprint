@@ -16,24 +16,29 @@ from src.services.feedback import IUserFeedbackService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/user_feedback", tags=["UserFeedback"], route_class=DishkaRoute)
+router = APIRouter(
+    prefix="/user-feedback", tags=["UserFeedback"], route_class=DishkaRoute
+)
 
 
 @router.post(
-    "/", summary="Поставить оценку пользователю", response_model=UserFeedbackResponseSchema
+    "/",
+    summary="Поставить оценку пользователю",
+    response_model=UserFeedbackResponseSchema,
 )
 async def create_feedback(
     data: UserFeedbackCreateSchema,
     feedback_service: FromDishka[IUserFeedbackService],
-    # current_user: CurrentUserDep,
+    current_user: CurrentUserDep,
 ):
-    # feedback_data = UserFeedbackCreateDTO(**data.model_dump(), owner_id=current_user.id)
-    feedback_data = UserFeedbackCreateDTO(**data.model_dump(), owner_id="067c88ea-ac1e-7499-8000-dd86f8c118e0")
+    feedback_data = UserFeedbackCreateDTO(**data.model_dump(), owner_id=current_user.id)
     return await feedback_service.set_review(feedback=feedback_data)
 
 
 @router.get(
-    "/{review_user_id}", summary="Получить оценки пользователя", response_model=list[UserFeedbackResponseSchema]
+    "/{review_user_id}",
+    summary="Получить оценки пользователя",
+    response_model=list[UserFeedbackResponseSchema],
 )
 async def get_feedbacks(
     feedback_service: FromDishka[IUserFeedbackService],
@@ -45,9 +50,10 @@ async def get_feedbacks(
 @router.delete("/{review_user_id}", summary="Убрать оценку пользователю")
 async def delete_feedback(
     feedback_service: FromDishka[IUserFeedbackService],
-    # current_user: CurrentUserDep,
+    current_user: CurrentUserDep,
     review_user_id: str = Path(..., description="ID пользователя"),
 ):
-    # feedback_data = UserFeedbackDeleteDTO(user_id=review_user_id, owner_id=current_user.id)
-    feedback_data = UserFeedbackDeleteDTO(user_id=review_user_id, owner_id="067c88ea-ac1e-7499-8000-dd86f8c118e0")
+    feedback_data = UserFeedbackDeleteDTO(
+        user_id=review_user_id, owner_id=current_user.id
+    )
     return await feedback_service.delete(feedback=feedback_data)
