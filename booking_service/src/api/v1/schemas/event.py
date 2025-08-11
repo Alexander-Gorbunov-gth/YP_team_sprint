@@ -20,11 +20,9 @@ class EventCreateSchema(EventBaseSchema):
 
 
 class EventUpdateSchema(BaseModel):
-    # movie_id: UUID | None - сам фильм запретим менять
-    address_id: UUID | None
-    # owner_id: UUID | None - # сам автор запретим менять
-    capacity: int | None
-    start_datetime: datetime | None
+    address_id: UUID | None = Field(default=None)
+    capacity: int | None = Field(default=None)
+    start_datetime: datetime | None = Field(default=None)
 
 
 class EventResponseSchema(EventBaseSchema):
