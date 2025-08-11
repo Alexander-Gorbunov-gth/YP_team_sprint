@@ -1,8 +1,9 @@
 from uuid import uuid4
 
-from sqlalchemy import Column, Float, String, Table
+from sqlalchemy import Column, Float, String, Table, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
+from geoalchemy2 import Geography
 
 from src.domain.entities.address import Address
 from src.infrastructure.models.event import Event
@@ -15,12 +16,14 @@ addresses = Table(
     Column("user_id", UUID(as_uuid=True), nullable=False),
     Column("latitude", Float, nullable=False),
     Column("longitude", Float, nullable=False),
+    Column("location", Geography(geometry_type="POINT", srid=4326), nullable=False),
     Column("country", String, nullable=False),
     Column("city", String, nullable=False),
     Column("street", String, nullable=False),
     Column("house", String, nullable=False),
     Column("flat", String, nullable=True),
     *timestamp_columns(),
+    Index("idx_user_id", "user_id"),
 )
 
 
