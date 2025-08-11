@@ -40,8 +40,24 @@ export async function createEvent(eventData) {
   }
 }
 
+export async function createEventReserv(event_id, seats) {
+  const res = await axiosInstance.post(
+    `${API_BASE}/events/${event_id}/reserve`,
+    { event_id, seats },
+    { headers: getAuthHeaders() }
+  );
+  return res.data;
+}
+
 export async function updateEvent(id, data) {
   const res = await axiosInstance.patch(`${API_BASE}/events/${id}`, data, {
+    headers: getAuthHeaders(),
+  });
+  return res.data;
+}
+
+export async function deleteEvent(id) {
+  const res = await axiosInstance.delete(`${API_BASE}/events/${id}`, {
     headers: getAuthHeaders(),
   });
   return res.data;

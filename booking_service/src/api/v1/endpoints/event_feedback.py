@@ -7,6 +7,7 @@ from src.api.v1.depends import CurrentUserDep
 from src.api.v1.schemas.event_feedback import (
     EventFeedbackCreateSchema,
     EventFeedbackResponseSchema,
+    ResultEventFeedbackResponseSchema,
 )
 from src.domain.dtos.event_feedback import (
     EventFeedbackCreateDTO,
@@ -17,7 +18,7 @@ from src.services.feedback import IEventFeedbackService
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/event_feedback", tags=["EventFeedback"], route_class=DishkaRoute
+    prefix="/event-feedback", tags=["EventFeedback"], route_class=DishkaRoute
 )
 
 
@@ -39,13 +40,20 @@ async def create_feedback(
 @router.get(
     "/{event_id}",
     summary="Получить оценки мероприятия",
-    response_model=list[EventFeedbackResponseSchema],
+    response_model=ResultEventFeedbackResponseSchema,
 )
 async def get_feedbacks(
     feedback_service: FromDishka[IEventFeedbackService],
+    current_user: CurrentUserDep,
     event_id: str = Path(..., description="ID ивента"),
 ):
-    return await feedback_service.get(id=event_id)
+    user_id = current_user.id
+    positive, negative, my_feedback = await feedback_service.get(
+        id=event_id, user_id=user_id
+    )
+    return ResultEventFeedbackResponseSchema(
+        user_id=user_id, my=my_feedback, positive=positive, negative=negative
+    )
 
 
 @router.delete("/{event_id}", summary="Убрать оценку мероприятию")

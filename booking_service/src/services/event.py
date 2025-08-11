@@ -21,6 +21,12 @@ from src.services.interfaces.uow import IUnitOfWork
 logger = logging.getLogger(__name__)
 
 
+def to_utc(dt: datetime) -> datetime:
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
 class IEventService(abc.ABC):
     @abc.abstractmethod
     async def create(self, event: EventCreateDTO) -> Event | None: ...
@@ -72,7 +78,7 @@ class EventService(IEventService):
             event_type=event_type,
             channels=channels,
         )
-        await self._uow.producer.publish(message=message, routing_key="example")
+        # await self._uow.producer.publish(message=message, routing_key="example")
 
     def _check_event_exists(self, event: Event | None) -> Event:
         """
@@ -115,16 +121,22 @@ class EventService(IEventService):
         if event.start_datetime is not None:
             if any(
                 (
-                    user_event.start_datetime
-                    - timedelta(hours=self.EVENT_DURATION_HOURS)
-                    < event.start_datetime
-                    < user_event.start_datetime
-                    + timedelta(hours=self.EVENT_DURATION_HOURS)
+                    (
+                        to_utc(user_event.start_datetime)
+                        - timedelta(hours=self.EVENT_DURATION_HOURS)
+                        < to_utc(event.start_datetime)
+                        < to_utc(user_event.start_datetime)
+                        + timedelta(hours=self.EVENT_DURATION_HOURS)
+                    )
+                    and user_event.id != event.id
+                    if isinstance(event, EventUpdateDTO)
+                    else False
                 )
-                and user_event.id != event.id if isinstance(event, EventUpdateDTO) else False
                 for user_event in user_events
             ):
-                raise EventTimeConflictError("Event overlaps with existing event")
+                raise EventTimeConflictError(
+                    "Нельзя изменить мероприятие за 3 дня до его начала или если оно уже началось."
+                )
 
     async def create(self, event: EventCreateDTO) -> Event:
         """
@@ -152,27 +164,22 @@ class EventService(IEventService):
                 event_id=event.id
             )
             logger.info(f"{current_event=}")
-            try:
-                current_event = self._check_event_exists(current_event)
-                self._check_event_owner(current_event, user_id)
-                current_event.can_be_updated()
-                if event.start_datetime is not None:
-                    user_events: list[Event] = (
-                        await uow.event_repository.get_events_by_user_id(
-                            current_event.owner_id
-                        )
-                    )
-                    self._check_event_time_conflict(event, user_events)
-                    for reservation in current_event.reservations:
-                        await self._notify_user(
-                            reservation.user_id, "event_updated", ["email", "push"]
-                        )
-                result = await uow.event_repository.update(event)
-            except Exception as e:
-                logger.error(f"Error updating event: {e}")
-                raise
 
-            return result
+            current_event = self._check_event_exists(current_event)
+            self._check_event_owner(current_event, user_id)
+            current_event.can_be_updated()
+            if event.start_datetime is not None:
+                user_events: list[Event] = (
+                    await uow.event_repository.get_events_by_user_id(
+                        current_event.owner_id
+                    )
+                )
+                self._check_event_time_conflict(event, user_events)
+                for reservation in current_event.reservations:
+                    await self._notify_user(
+                        reservation.user_id, "event_updated", ["email", "push"]
+                    )
+            return await uow.event_repository.update(event)
 
     async def delete(self, event_id: UUID | str, user_id: UUID) -> None:
         """

@@ -16,13 +16,45 @@ from src.domain.entities.feedback import EventFeedback
 
 class IFeedbackRepository(abc.ABC):
     @abc.abstractmethod
-    async def create(self, feedback: EventFeedbackCreateDTO | UserFeedbackCreateDTO) -> EventFeedback: ...
+    async def create(
+        self, feedback: EventFeedbackCreateDTO | UserFeedbackCreateDTO
+    ) -> EventFeedback: ...
 
     @abc.abstractmethod
-    async def update(self, feedback: EventFeedbackUpdateDTO | UserFeedbackUpdateDTO) -> EventFeedback: ...
+    async def update(
+        self, feedback: EventFeedbackUpdateDTO | UserFeedbackUpdateDTO
+    ) -> EventFeedback: ...
 
     @abc.abstractmethod
-    async def delete(self, feedback: EventFeedbackDeleteDTO | UserFeedbackDeleteDTO) -> bool: ...
+    async def delete(
+        self, feedback: EventFeedbackDeleteDTO | UserFeedbackDeleteDTO
+    ) -> bool: ...
 
     @abc.abstractmethod
     async def get_id(self, id: UUID | str) -> list[EventFeedback]: ...
+
+    @abc.abstractmethod
+    async def get_my_feedback(self, id: UUID | str, user_id: UUID): ...
+
+
+class IEventFeedbackRepository(abc.ABC):
+    @abc.abstractmethod
+    async def create(
+        self, feedback: EventFeedbackCreateDTO | UserFeedbackCreateDTO
+    ) -> EventFeedback: ...
+
+    @abc.abstractmethod
+    async def update(
+        self, feedback: EventFeedbackUpdateDTO | UserFeedbackUpdateDTO
+    ) -> EventFeedback: ...
+
+    @abc.abstractmethod
+    async def delete(
+        self, feedback: EventFeedbackDeleteDTO | UserFeedbackDeleteDTO
+    ) -> bool: ...
+
+    @abc.abstractmethod
+    async def get_id(self, id: UUID | str) -> list[EventFeedback]: ...
+
+    @abc.abstractmethod
+    async def get_my_feedback(self, id: UUID | str, user_id: UUID): ...

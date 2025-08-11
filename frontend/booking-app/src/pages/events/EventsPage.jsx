@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getEvents } from "../../api/eventApi";
 import { createSubscription, getMySubscriptions } from "../../api/subscriptionApi";
+import { getUserFeedback, getUserEventsFeedback } from "../../api/userFeedbackApi";
 import dayjs from "dayjs";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./EventsPage.module.css";
@@ -40,9 +41,49 @@ export default function EventsPage() {
 function EventCard({ event, mySubscriptions }) {
   const navigate = useNavigate();
 
+  const [authorFeedback, setAuthorFeedback] = useState({ positive: 0, negative: 0, my: null });
+  const [eventsFeedback, setEventsFeedback] = useState({ positive: 0, negative: 0 });
+  const [feedbackLoading, setFeedbackLoading] = useState(true);
+
   const movie = event.movie || {};
 
   const isSubscribed = mySubscriptions.some(sub => sub.host_id === event.author?.id);
+
+  useEffect(() => {
+    const authorId = event.author?.id;
+    if (!authorId) {
+      setFeedbackLoading(false);
+      return;
+    }
+    let isMounted = true;
+    (async () => {
+      try {
+        const data = await getUserFeedback(authorId);
+        // Expected shape: { user_id, my, positive, negative }
+        if (isMounted && data) {
+          setAuthorFeedback({
+            positive: Number(data.positive ?? 0),
+            negative: Number(data.negative ?? 0),
+            my: data.my ?? null,
+          });
+        }
+
+        // Fetch overall events feedback for this author
+        const eventsData = await getUserEventsFeedback(authorId);
+        if (isMounted && eventsData) {
+          setEventsFeedback({
+            positive: Number(eventsData.positive ?? 0),
+            negative: Number(eventsData.negative ?? 0),
+          });
+        }
+      } catch (e) {
+        // silently ignore on list page
+      } finally {
+        if (isMounted) setFeedbackLoading(false);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [event.author?.id]);
 
   return (
     <div className={styles.card}>
@@ -64,7 +105,15 @@ function EventCard({ event, mySubscriptions }) {
       )}
       {event.author && (
         <div className={styles.authorInfo}>
-          <p><strong>Автор:</strong> {event.author.username}</p>
+          <p><strong>Автор:</strong> {event.author.username} ( 👍 {authorFeedback.positive} / 👎 {authorFeedback.negative} )</p>
+          <div className={styles.authorFeedback}>
+          
+          </div>
+          <div className={styles.authorFeedback} style={{ marginTop: 6 }}>
+            <p><strong>Оценки событий автора:</strong></p>
+            <span title="Лайки за события автора">👍 {eventsFeedback.positive}</span>
+            <span style={{ marginLeft: 10 }} title="Дизлайки за события автора">👎 {eventsFeedback.negative}</span>
+          </div>
         </div>
       )}
       <div className={styles.actions}>

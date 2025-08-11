@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getEventById } from "../../api/eventApi";
-import { createReservation } from "../../api/bookingApi";
+import { getEventById, createEventReserv } from "../../api/eventApi";
+import { getUserFeedback, getUserEventsFeedback } from "../../api/userFeedbackApi";
 import dayjs from "dayjs";
 import styles from "./NewBookingPage.module.css";
 
@@ -14,11 +14,19 @@ export default function NewBookingPage() {
   const [seats, setSeats] = useState(1);
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
+  const [authorFeedback, setAuthorFeedback] = useState(null);
+  const [authorEventsFeedback, setAuthorEventsFeedback] = useState(null);
 
   useEffect(() => {
     if (eventId) {
       getEventById(eventId)
-        .then(setEvent)
+        .then((eventData) => {
+          setEvent(eventData);
+          if (eventData && eventData.author && eventData.author.id) {
+            getUserFeedback(eventData.author.id).then(setAuthorFeedback);
+            getUserEventsFeedback(eventData.author.id).then(setAuthorEventsFeedback);
+          }
+        })
         .finally(() => setLoading(false));
     }
   }, [eventId]);
@@ -26,14 +34,10 @@ export default function NewBookingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const newReservation = await createReservation({
-        event_id: event.id,
-        seats: Number(seats),
-        status: "pending",
-      });
+      const newReservation = await createEventReserv(event.id, Number(seats));
       navigate(`/bookings/${newReservation.id}`);
-    } catch {
-      alert("Ошибка при бронировании");
+    } catch (e) {
+      // Error shown by global axios interceptor
     }
   };
 
@@ -59,6 +63,11 @@ export default function NewBookingPage() {
       <p><strong>Вместимость:</strong> {event.capacity}</p>
       <p><strong>Свободных мест:</strong> {event.available_seats}</p>
 
+      <div style={{ margin: "20px 0", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }}>
+        <p><strong>Оценки автора:</strong> 👍 {authorFeedback?.positive ?? 0} / 👎 {authorFeedback?.negative ?? 0}</p>
+        <p><strong>Оценки событий автора:</strong> 👍 {authorEventsFeedback?.positive ?? 0} / 👎 {authorEventsFeedback?.negative ?? 0}</p>
+      </div>
+
       <hr style={{ margin: "20px 0" }} />
 
       <form onSubmit={handleSubmit}>
@@ -67,7 +76,7 @@ export default function NewBookingPage() {
           <input
             type="number"
             min="1"
-            max={event.capacity}
+            // max={Math.max(1, event.available_seats ?? event.capacity)}
             value={seats}
             onChange={(e) => setSeats(e.target.value)}
             required

@@ -1,9 +1,9 @@
 class EventTimeConflictError(Exception):
-    pass
+    """Нельзя изменить мероприятие за 3 дня до его начала или если оно уже началось."""
 
 
 class EventNotFoundError(Exception):
-    pass
+    """Мероприятие не найдено."""
 
 
 class EventStartDatetimeError(Exception):
