@@ -25,8 +25,10 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Необходимо авторизоваться"
         )
     token = credentials.credentials
+    logger.info(f"{token=}")
     try:
         user = jwt_service.decode_token(token)
+        logger.info(f"{user=}")
         return user
     except SessionHasExpired as e:
         raise HTTPException(

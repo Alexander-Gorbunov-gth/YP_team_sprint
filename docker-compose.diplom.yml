@@ -69,7 +69,8 @@ services:
       - .auth.env
 
   booking_db:
-    image: postgres:15
+    platform: linux/amd64
+    image: postgis/postgis:17-3.5
     container_name: booking_db
     restart: always
     volumes:

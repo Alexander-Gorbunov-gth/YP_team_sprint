@@ -60,9 +60,23 @@ async def get_booking(
 )
 async def get_bookings(
     user: CurrentUserDep,
+    movie_service: FromDishka[IAppsService],
+    event_service: FromDishka[IEventService],
     reservation_service: FromDishka[IReservationService],
 ):
-    return await reservation_service.get_by_user_id(user.id)
+    reservations = await reservation_service.get_by_user_id(user.id)
+    response = []
+    for reservation in reservations:
+        event_id = reservation.event_id
+        event = await event_service.get_by_id(event_id)
+        movie_data: Movie = await movie_service.get_film(event.movie_id)
+        response.append(
+            ReservationResponseSchema(
+                **reservation.model_dump(),
+                movie_title=movie_data.title,
+            )
+        )
+    return response
 
 
 @router.delete("/{id}", summary="Отменить бронирование")

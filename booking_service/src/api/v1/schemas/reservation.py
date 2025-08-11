@@ -27,6 +27,7 @@ class ReservationResponseSchema(BaseModel):
     event_id: UUID
     seats: int
     status: ReservationStatus
+    movie_title: str | None = None
 
 
 class ReservationFullResponseSchema(BaseModel):

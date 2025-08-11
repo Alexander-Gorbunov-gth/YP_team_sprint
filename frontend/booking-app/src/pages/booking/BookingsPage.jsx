@@ -44,20 +44,24 @@ export default function BookingsPage() {
         <div
           key={b.id}
           className={styles.card}
-          onClick={() => navigate(`/bookings/${b.id}`)}
+          // onClick={() => navigate(`/bookings/${b.id}`)}
         >
-          <p><strong>Мероприятие:</strong> {b.event?.movie?.title || b.event_id}</p>
+          <p><strong>Мероприятие:</strong> {b.movie_title || b.event_id}</p>
           <p><strong>Мест:</strong> {b.seats}</p>
           <p><strong>Статус:</strong> {getStatusLabel(b.status)}</p>
-          <button
-            className={styles.button}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/bookings/${b.id}`);
-            }}
-          >
-            Управлять бронированием
-          </button>
+
+          {b.status !== "canceled" && (
+            <button
+              className={styles.button}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/bookings/${b.id}`);
+              }}
+            >
+              Управлять бронированием
+            </button>
+          )}
+          
         </div>
       ))}
     </div>
