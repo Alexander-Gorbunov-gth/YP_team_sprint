@@ -2,7 +2,7 @@ import logging
 from uuid import UUID
 from collections.abc import Sequence
 
-from sqlalchemy import Result, insert, select, sql
+from sqlalchemy import Result, insert, select, sql, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
@@ -39,22 +39,18 @@ class SQLAlchemyEventRepository(IEventRepository):
         :return: Обновлённое событие.
         """
 
-        query = select(Event).filter_by(id=event.id)
-        result: Result = await self._session.execute(query)
-        existing_event: Event | None = result.scalar_one_or_none()
+        stmt = (
+            update(Event)
+            .where(Event.id == event.id)
+            .values(**event.model_dump(exclude_unset=True, exclude_none=True))
+            .returning(Event)
+        )
 
-        if existing_event is None:
-            raise EventNotFoundError(f"Событие с {event.id=} не найдено.")
-
-        update_data = event.model_dump(exclude_unset=True, exclude_none=True)
-        for field, value in update_data.items():
-            setattr(existing_event, field, value)
-
-        self._session.add(existing_event)
-        await self._commit()
-        await self._session.refresh(existing_event)
-
-        return existing_event
+        result = await self._session.execute(stmt)
+        updated_event = result.scalar_one_or_none()
+        if updated_event is None:
+            raise EventNotFoundError("Событие с id=%s не найдено.", event.id)
+        return updated_event
 
     async def delete(self, event_id: UUID | str) -> None:
         """
