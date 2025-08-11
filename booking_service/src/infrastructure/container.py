@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
 from src.infrastructure.db import postgres
+from src.infrastructure.messaging import producer
 from src.infrastructure.uow import SQLAlchemyUnitOfWork
 from src.services.address import AddressService, IAddressService
 from src.services.event import IEventService, EventService
@@ -16,12 +17,19 @@ from src.services.feedback import (
 )
 from src.services.apps import IAppsService, AppsService
 from src.services.interfaces.uow import IUnitOfWork
+from src.services.interfaces.producer import IProducer
 from src.services.subscription import ISubscriptionService, SubscriptionService
 from src.services.token import AbstractJWTService, JWTService
 from src.services.reservation import IReservationService, ReservationService
 
 
 class Container(Provider):
+    @provide(scope=Scope.APP)
+    async def provide_rabbitmq_producer(self) -> IProducer:
+        if producer.producer is None:
+            raise RuntimeError("RabbitMQ producer is not initialized")
+        return producer.producer
+
     @provide(scope=Scope.REQUEST)
     async def provide_session(self) -> AsyncIterable[AsyncSession]:
         if postgres.session_maker is None:
@@ -30,8 +38,8 @@ class Container(Provider):
             yield session
 
     @provide(scope=Scope.REQUEST)
-    async def provide_uow(self, session: AsyncSession) -> IUnitOfWork:
-        return SQLAlchemyUnitOfWork(session)
+    async def provide_uow(self, session: AsyncSession, producer: IProducer) -> IUnitOfWork:
+        return SQLAlchemyUnitOfWork(session, producer)
 
     @provide(scope=Scope.REQUEST)
     async def provide_subscription_service(
