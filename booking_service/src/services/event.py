@@ -3,6 +3,7 @@ from datetime import timedelta
 from uuid import UUID
 import logging
 from datetime import datetime, timezone
+from collections.abc import Sequence
 
 from src.domain.dtos.event import EventCreateDTO, EventUpdateDTO, EventGetAllDTO
 from src.domain.entities.event import Event
@@ -43,6 +44,9 @@ class IEventService(abc.ABC):
     async def reserve_seats(
         self, event_id: UUID | str, user_id: UUID, seats: int
     ) -> Reservation: ...
+
+    @abc.abstractmethod
+    async def get_nearby_events(self, latitude: float, longitude: float, radius: float = 3_000.0) -> Sequence[Event]: ...
 
 
 class EventService(IEventService):
@@ -239,3 +243,19 @@ class EventService(IEventService):
             )
             event.add_reservasion(created_reservation)
             return created_reservation
+
+
+    async def get_nearby_events(self, latitude: float, longitude: float, radius: float = 3_000.0) -> Sequence[Event]:
+        """
+        Получение списка событий в радиусе 3 км от заданной точки.
+        :param latitude: Широта
+        :param longitude: Долгота
+        :param radius: Радиус в метрах
+        :return: Список событий
+        """
+
+        async with self._uow as uow:
+            addresses = await uow.address_repository.get_nearby_addresses(latitude, longitude, radius)
+            address_ids = [address.id for address in addresses]
+            events = await uow.event_repository.get_events_by_addresses(address_ids)
+            return events
