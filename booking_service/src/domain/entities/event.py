@@ -55,7 +55,11 @@ class Event(DateTimeMixin, BaseModel):
         return self.capacity - reserved
 
     def has_reservation_for(self, user_id: UUID) -> bool:
-        return any(r.user_id == user_id for r in self.reservations)
+        return any(
+            r.user_id == user_id
+            for r in self.reservations
+            if r.status in {ReservationStatus.PENDING, ReservationStatus.SUCCESS}
+        )
 
     def can_reserve_seats(self, seats_requested: int) -> bool:
         return seats_requested <= self.available_seats()
