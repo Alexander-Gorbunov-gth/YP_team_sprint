@@ -191,7 +191,7 @@ async def update_event(
 
 
 @router.post(
-    "/{event_id}/reserve",
+    "/{event_id}/reserve/",
     summary="Забронировать места на мероприятии",
     response_model=ReservationResponseSchema,
 )
