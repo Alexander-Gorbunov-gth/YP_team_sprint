@@ -165,7 +165,7 @@ services:
       - static_volume:/code/static:ro
       - frontend_static:/usr/share/nginx/html:ro
     ports:
-      - "80:80"
+      - "8000:80"
     depends_on:
       - booking_service
       - auth_service
