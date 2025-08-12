@@ -131,6 +131,10 @@ class SQLAlchemyEventRepository(IEventRepository):
         :return: Список событий.
         """
 
-        query = select(Event).filter(Event.address_id.in_(addresses))
+        query = (
+            select(Event)
+            .filter(Event.address_id.in_(addresses))
+            .filter(Event.start_datetime > datetime.now(timezone.utc))
+        )
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()
