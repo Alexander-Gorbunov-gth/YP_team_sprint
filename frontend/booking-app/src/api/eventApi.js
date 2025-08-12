@@ -30,7 +30,7 @@ export async function getMyEvents() {
 
 export async function createEvent(eventData) {
   try {
-    const res = await axiosInstance.post(`${API_BASE}/events`, eventData, {
+    const res = await axiosInstance.post(`${API_BASE}/events/`, eventData, {
       headers: getAuthHeaders(),
     });
     return res.data;
@@ -42,7 +42,7 @@ export async function createEvent(eventData) {
 
 export async function createEventReserv(event_id, seats) {
   const res = await axiosInstance.post(
-    `${API_BASE}/events/${event_id}/reserve`,
+    `${API_BASE}/events/${event_id}/reserve/`,
     { event_id, seats },
     { headers: getAuthHeaders() }
   );
