@@ -5,7 +5,6 @@ import { AppError } from "./AppError";
 import { showErrorToast } from '../ui/showErrorToast'; // <-- добавили
 
 const axiosInstance = axios.create({
-  baseURL: API_AUTH_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
