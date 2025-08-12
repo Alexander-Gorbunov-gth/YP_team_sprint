@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import func, case
 from sqlalchemy import Result, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from src.domain.entities.event import Event
 from src.domain.dtos.event_feedback import (
     EventFeedbackCreateDTO,
     EventFeedbackDeleteDTO,
@@ -113,7 +113,12 @@ class SQLAlchemyEventFeedbackRepository(IEventFeedbackRepository):
             case((EventFeedback.review == "negative", 1))
         ).label("negative")
 
-        query = select(positive_count, negative_count).filter_by(user_id=id)
+        query = (
+            select(positive_count, negative_count)
+            .join(Event, EventFeedback.event_id == Event.id)
+            .where(Event.owner_id == id)
+        )
+
         result: Result = await self._session.execute(query)
         row = result.one()
 
