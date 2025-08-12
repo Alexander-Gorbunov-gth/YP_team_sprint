@@ -62,3 +62,14 @@ export async function deleteEvent(id) {
   });
   return res.data;
 }
+
+export async function getNearbyEvents({ addressId, radiusKm = 5 }) {
+  const body = { address: addressId, radius: Number(radiusKm) };
+  console.log(body);
+  const { data } = await axiosInstance.post(
+    `${API_BASE}/events/nearby/`,
+    body,
+    { headers: getAuthHeaders() }
+  );
+  return data; // list[EventResponseSchema]
+}

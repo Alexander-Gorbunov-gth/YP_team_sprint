@@ -30,7 +30,9 @@ async def my_sessions(
     session_service: SessionDep,
     payload: Token = Depends(get_access_token_data),
 ):
-    sessions = await session_service.get_current_user_sessions(user_id=payload.user_uuid)
+    sessions = await session_service.get_current_user_sessions(
+        user_id=payload.user_uuid
+    )
     return sessions
 
 

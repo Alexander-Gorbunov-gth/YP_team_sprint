@@ -41,3 +41,10 @@ class EventMyResponseSchema(EventResponseSchema):
 class EventGetAllSchema(BaseModel):
     offset: int
     limit: int
+
+
+class GetNearbyEventsSchema(BaseModel):
+    address: UUID
+    radius: float = Field(
+        default=5.0, description="Радиус в километрах (по умолчанию 5 км)"
+    )

@@ -69,10 +69,21 @@ export default function MyEventsPage() {
             className={styles.card}
             onClick={() => navigate(`/events/${event.id}`)}
             style={{ cursor: "pointer" }}
+            
           >
             <h3>{event.movie?.title || "Название неизвестно"}</h3>
             <p>
               <strong>Адрес:</strong> {event.address}
+            </p>
+            <p>
+              <strong>Дата:</strong>{" "}
+              {new Date(event.start_datetime).toLocaleString("ru-RU", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </p>
             
             <p>

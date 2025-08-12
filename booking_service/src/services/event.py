@@ -80,7 +80,9 @@ class EventService(IEventService):
             channels=channels,
         )
         async with self._uow as uow:
-            asyncio.create_task(uow.producer.publish(message=message, routing_key="notification.events"))
+            asyncio.create_task(
+                uow.producer.publish(message=message, routing_key="notification.events")
+            )
 
     def _check_event_exists(self, event: Event | None) -> Event:
         """
@@ -109,7 +111,7 @@ class EventService(IEventService):
         """
         if event.start_datetime is not None:
             if event.start_datetime < datetime.now(timezone.utc):
-                raise EventStartDatetimeError("Event start datetime is in the past")
+                raise EventStartDatetimeError("Нельзя создать событие в прошлом.")
 
     def _check_event_time_conflict(
         self, event: EventCreateDTO | EventUpdateDTO, user_events: list[Event]
@@ -248,16 +250,22 @@ class EventService(IEventService):
         async with self._uow as uow:
             event = await uow.event_repository.get_for_update(event_id=event_id)
             event = self._check_event_exists(event)
-            if event.start_datetime < datetime.now(timezone.utc) + timedelta(hours=self.EVENT_DURATION_HOURS):
+            if event.start_datetime < datetime.now(timezone.utc) + timedelta(
+                hours=self.EVENT_DURATION_HOURS
+            ):
                 raise EventStartDatetimeError("Событие уже началось.")
             reservation = event.reserve(user_id=user_id, seats_requested=seats)
-            created_reservation = await uow.reservation_repository.create(reservation=reservation)
+            created_reservation = await uow.reservation_repository.create(
+                reservation=reservation
+            )
             event.add_reservasion(created_reservation)
-            await self._notify_user(event.owner_id, "event_reservation", ["email", "push"])
+            await self._notify_user(
+                event.owner_id, "event_reservation", ["email", "push"]
+            )
             return created_reservation
 
     async def get_nearby_events(
-        self, latitude: float, longitude: float, radius: float = 3_000.0
+        self, latitude: float, longitude: float, radius: float = 3
     ) -> Sequence[Event]:
         """
         Получение списка событий в радиусе 3 км от заданной точки.

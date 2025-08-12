@@ -78,13 +78,13 @@ async def film_search(
     page: int = Query(default=1, ge=1, alias="page"),
     film_service: FilmService = Depends(get_film_service),
     # perm: bool = Depends(require_permissions([permissions.films_can_view])),
-) -> list[ResponseFilm] | None:
+) -> list[ResponseFilm | None]:
     """Поиск фильмов по запросу"""
     films = await film_service.get_films_by_query(
         query=query, sort=sort, page_size=page_size, page=page
     )
     if not films:
-        return
+        return []
     # handle_no_films_error(
     #     films,
     #     {"query": query, "sort": sort, "page_size": page_size, "page": page},

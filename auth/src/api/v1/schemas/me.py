@@ -21,3 +21,5 @@ class Session(BaseModel):
 class ProfileResponse(BaseModel):
     email: EmailStr
     created_at: datetime
+    id: UUID
+    username: str
