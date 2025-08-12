@@ -20,7 +20,9 @@ class SQLAlchemyAddressRepository(IAddressRepository):
 
     async def create(self, address: AddressCreateDTO) -> Address:
         insert_data = address.model_dump()
-        insert_data["location"] = WKTElement(f"POINT({address.longitude} {address.latitude})", srid=4326)
+        insert_data["location"] = WKTElement(
+            f"POINT({address.longitude} {address.latitude})", srid=4326
+        )
         query = insert(Address).values(insert_data).returning(Address)
         result: Result = await self._session.execute(query)
         return result.unique().scalar_one()
@@ -59,7 +61,10 @@ class SQLAlchemyAddressRepository(IAddressRepository):
         if not update_data:
             raise NotModifiedError("Не указаны данные для обновления.")
         if update_data.get("latitude") and update_data.get("longitude"):
-            update_data["location"] = WKTElement(f"POINT({update_data['longitude']} {update_data['latitude']})", srid=4326)
+            update_data["location"] = WKTElement(
+                f"POINT({update_data['longitude']} {update_data['latitude']})",
+                srid=4326,
+            )
 
         query = update(Address).where(Address.id == address_id).values(**update_data).returning(Address)  # type: ignore
         result: Result = await self._session.execute(query)
@@ -69,8 +74,9 @@ class SQLAlchemyAddressRepository(IAddressRepository):
             return None
         return updated_address
 
-    
-    async def get_nearby_addresses(self, latitude: float, longitude: float, radius: float = 3_000.0) -> Iterable[Address]:
+    async def get_nearby_addresses(
+        self, latitude: float, longitude: float, radius: float = 3
+    ) -> Iterable[Address]:
         """
         Получает список адресов в зависимости от радиуса от заданной точки.
         :param latitude: Широта
@@ -78,7 +84,11 @@ class SQLAlchemyAddressRepository(IAddressRepository):
         :param radius: Радиус в метрах
         :return: Список адресов
         """
-        
-        query = select(Address).where(Address.location.ST_DWithin(WKTElement(f"POINT({longitude} {latitude})", srid=4326), radius))
+
+        query = select(Address).where(
+            Address.location.ST_DWithin(
+                WKTElement(f"POINT({longitude} {latitude})", srid=4326), radius * 1000
+            )
+        )
         result: Result = await self._session.execute(query)
         return result.unique().scalars().all()

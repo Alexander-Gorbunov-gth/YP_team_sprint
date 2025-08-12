@@ -12,6 +12,7 @@ from src.api.v1.schemas.event import (
     EventCreateSchema,
     EventResponseSchema,
     EventUpdateSchema,
+    GetNearbyEventsSchema,
 )
 from src.api.v1.schemas.reservation import (
     ReservationCreateSchema,
@@ -20,6 +21,7 @@ from src.api.v1.schemas.reservation import (
 from src.api.v1.schemas.utils import Author, MovieSchema
 from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
 from src.domain.entities.event import Event
+from src.domain.entities.address import Address
 from src.domain.entities.movie import Movie
 from src.api.v1.schemas.utils import Author, MovieSchema
 from src.domain.dtos.event import EventCreateDTO, EventGetAllDTO, EventUpdateDTO
@@ -30,20 +32,29 @@ from src.services.apps import IAppsService
 from src.services.event import IEventService
 from src.services.apps import IAppsService
 from src.services.event import IEventService
+from src.services.address import IAddressService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/events", tags=["Events"], route_class=DishkaRoute)
 
 
-async def to_schema(event: Event, user_id: UUID, app_service: IAppsService) -> EventResponseSchema:
+async def to_schema(
+    event: Event, user_id: UUID, app_service: IAppsService
+) -> EventResponseSchema:
     # Получаем автора
     author_data = await app_service.get_author(event.owner_id)
-    author = Author.model_validate(author_data) if author_data else Author(id=event.owner_id)
+    author = (
+        Author(**author_data.model_dump()) if author_data else Author(id=event.owner_id)
+    )
 
     # Получаем фильм
     movie_data: Movie | None = await app_service.get_film(event.movie_id)
-    movie = MovieSchema.model_validate(movie_data) if movie_data else MovieSchema(id=event.movie_id)
+    movie = (
+        MovieSchema(**movie_data.model_dump())
+        if movie_data
+        else MovieSchema(id=event.movie_id)
+    )
 
     # Фильтруем брони
     reservations_filtered = [
@@ -59,7 +70,7 @@ async def to_schema(event: Event, user_id: UUID, app_service: IAppsService) -> E
         movie=movie,
         address=event.get_address_for_user(user_id=user_id),
         available_seats=event.available_seats(),
-        reservations=reservations_filtered
+        reservations=reservations_filtered,
     )
 
 
@@ -176,7 +187,7 @@ async def update_event(
     if updated_event is None:
         raise HTTPException(status_code=400, detail="Failed to update event")
     return await to_schema(updated_event, current_user.id, app_service)
-    return await to_schema(updated_event, current_user.id, app_service)
+    # return await to_schema(updated_event, current_user.id, app_service)
 
 
 @router.post(
@@ -189,7 +200,9 @@ async def reserve_seats(
     current_user: CurrentUserDep,
     reservation_data: ReservationCreateSchema,
 ) -> ReservationResponseSchema:
-    reservation = await event_service.reserve_seats(reservation_data.event_id, current_user.id, reservation_data.seats)
+    reservation = await event_service.reserve_seats(
+        reservation_data.event_id, current_user.id, reservation_data.seats
+    )
     created_reservation = ReservationResponseSchema(**reservation.model_dump())
     return created_reservation
 
@@ -200,14 +213,21 @@ async def reserve_seats(
     response_model=list[EventResponseSchema],
 )
 async def get_nearby_events(
+    body: GetNearbyEventsSchema,
     event_service: FromDishka[IEventService],
     app_service: FromDishka[IAppsService],
     current_user: CurrentUserDep,
-    latitude: float = Query(..., description="Широта"),
-    longitude: float = Query(..., description="Долгота"),
-    radius: float = Query(3_000.0, description="Радиус в метрах"),
+    address_service: FromDishka[IAddressService],
+    # latitude: float = Query(..., description="Широта"),
+    # longitude: float = Query(..., description="Долгота"),
+    # radius: float = Query(3_000.0, description="Радиус в метрах"),
 ) -> list[EventResponseSchema]:
-    events = await event_service.get_nearby_events(latitude, longitude, radius)
+    address: Address = await address_service.get_address_by_id(
+        body.address, user_id=current_user.id
+    )
+    events = await event_service.get_nearby_events(
+        address.latitude, address.longitude, body.radius
+    )
     tasks = [to_schema(event, current_user.id, app_service) for event in events]
     event_responses = await asyncio.gather(*tasks)
     tasks = [to_schema(event, current_user.id, app_service) for event in events]

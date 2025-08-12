@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getEvents } from "../../api/eventApi";
+import { getEvents, getNearbyEvents } from "../../api/eventApi";
+import { getMyAddresses } from "../../api/addressApi";
 import { createSubscription, getMySubscriptions } from "../../api/subscriptionApi";
 import { getUserFeedback, getUserEventsFeedback } from "../../api/userFeedbackApi";
 import dayjs from "dayjs";
@@ -11,29 +12,170 @@ export default function EventsPage() {
   const [mySubscriptions, setMySubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [radiusKm, setRadiusKm] = useState(5);
+  const [filteredEvents, setFilteredEvents] = useState(null); // null -> not filtered
+  const [searching, setSearching] = useState(false);
+
   useEffect(() => {
     const offset = 0;
     const limit = 20;
-    Promise.all([getEvents({ offset, limit }), getMySubscriptions()])
-      .then(([eventData, subscriptionsData]) => {
+    Promise.all([
+      getEvents({ offset, limit }),
+      getMySubscriptions(),
+      getMyAddresses(),
+    ])
+      .then(([eventData, subscriptionsData, myAddresses]) => {
         setEvents(eventData);
-        console.log("Подписки пользователя:", subscriptionsData);
         setMySubscriptions(subscriptionsData || []);
+        setAddresses(myAddresses || []);
       })
       .finally(() => setLoading(false));
   }, []);
 
+  const handleNearbySearch = async (e) => {
+    e?.preventDefault?.();
+    if (!selectedAddressId) return;
+    try {
+      setSearching(true);
+      const data = await getNearbyEvents({ addressId: selectedAddressId, radiusKm });
+      setFilteredEvents(Array.isArray(data) ? data : []);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleResetFilter = () => {
+    setFilteredEvents(null);
+  };
+
   if (loading) return <p>Загрузка событий...</p>;
-  if (!events.length) return <p>Нет доступных событий.</p>;
-
-
+  const list = filteredEvents !== null ? filteredEvents : events;
+  if (!list.length) return <p>Нет доступных событий.</p>;
 
   return (
-    <div className={styles.container}>
-      {/* <h2 className={styles.title}>Доступные события</h2> */}
-      {events.map((event) => (
+    <div style={{ width: "100%" }}>
+      {/* Full-width search bar */}
+      <div
+        className={styles.filterBar}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 20,
+          border: "1px solid #e5e7eb",
+          padding: 12,
+          borderRadius: 10,
+          background: "#fff",
+          width: "100%",
+          maxWidth: 800,
+          marginLeft: "auto",
+          marginRight: "auto",
+          flexWrap: "wrap",
+        }}
+      >
+        <h3 style={{ width: "100%", textAlign: "center", marginBottom: 12 }}>
+          Найти события рядом
+        </h3>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
+            width: "100%",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <label
+              style={{
+                fontSize: 12,
+                color: "#6b7280",
+                marginBottom: 6,
+                textAlign: "center",
+              }}
+            >
+              Сохранённый адрес
+            </label>
+            <select
+              value={selectedAddressId}
+              onChange={(e) => setSelectedAddressId(e.target.value)}
+              className={styles.select}
+              style={{
+                width: "340px",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #d1d5db",
+                textAlign: "center",
+              }}
+            >
+              <option value="">— Выберите адрес —</option>
+              {addresses.map((addr) => (
+                <option key={addr.id} value={addr.id}>
+                   {addr.city}, {addr.street} {addr.house}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <label
+              style={{
+                fontSize: 12,
+                color: "#6b7280",
+                marginBottom: 6,
+                textAlign: "center",
+              }}
+            >
+              Радиус (км)
+            </label>
+            <input
+              type="number"
+              min={1}
+              step={0.5}
+              value={radiusKm}
+              onChange={(e) => setRadiusKm(Number(e.target.value) || 1)}
+              className={styles.input}
+              style={{
+                width: "60px",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #d1d5db",
+                textAlign: "center",
+              }}
+            />
+          </div>
+
+          <button
+            onClick={handleNearbySearch}
+            disabled={!selectedAddressId || searching}
+            className={styles.button}
+            style={{ padding: "10px 14px" }}
+          >
+            {searching ? "Ищем..." : "Показать рядом"}
+          </button>
+
+          {filteredEvents !== null && (
+            <button
+              onClick={handleResetFilter}
+              className={styles.button}
+              style={{ padding: "10px 14px", background: "#6b7280" }}
+            >
+              Сбросить
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Cards container under the full-width filter */}
+      <div className={styles.container}>
+      {list.map((event) => (
         <EventCard key={event.id} event={event} mySubscriptions={mySubscriptions} />
       ))}
+      </div>
     </div>
   );
 }
@@ -100,9 +242,9 @@ function EventCard({ event, mySubscriptions }) {
       {movie.actors_names?.length > 0 && (
         <p><strong>Актёры:</strong> {movie.actors_names.join(", ")}</p>
       )}
-      {movie.description && (
+      {/* {movie.description && (
         <p><strong>Описание:</strong> {movie.description}</p>
-      )}
+      )} */}
       {event.author && (
         <div className={styles.authorInfo}>
           <p><strong>Автор:</strong> {event.author.username} ( 👍 {authorFeedback.positive} / 👎 {authorFeedback.negative} )</p>
@@ -123,7 +265,7 @@ function EventCard({ event, mySubscriptions }) {
         </Link>
         {!isSubscribed && (
           <button
-            className={styles.subscribeButton}
+            className={styles.buttonSecondary}
             onClick={async () => {
               try {
                 await createSubscription({
@@ -132,7 +274,6 @@ function EventCard({ event, mySubscriptions }) {
                 navigate(0); // Обновить страницу
               } catch (err) {
                 console.error("Ошибка подписки", err);
-                alert("Не удалось подписаться");
               }
             }}
           >
