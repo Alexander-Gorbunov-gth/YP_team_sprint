@@ -31,13 +31,16 @@ class FakeAddressRepository(IAddressRepository):
                 return address
         return None
 
-    async def update(self, address: AddressUpdateDTO) -> Address | None:
+    async def update(self, address: AddressUpdateDTO, address_id: UUID) -> Address | None:
         insert_data = address.model_dump(exclude_unset=True)
         if not insert_data:
             return None
         for i, a in enumerate(self._addresses):
-            if a.id == address.id:
+            if a.id == address_id:
                 for key, value in insert_data.items():
                     setattr(self._addresses[i], key, value)
                 return self._addresses[i]
         return None
+
+    async def get_nearby_addresses(self, latitude: float, longitude: float, radius: float = 3_000.0) -> Iterable[Address]:
+        return [address for address in self._addresses if address.latitude == latitude and address.longitude == longitude]

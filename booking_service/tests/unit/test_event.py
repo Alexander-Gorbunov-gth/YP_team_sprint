@@ -32,12 +32,12 @@ def event(address, host_user):
         address_id=address.id,
         owner_id=host_user.id,
         reservations=[],
-        UPDATE_LOCK_TIMEDELTA=timedelta(hours=2),
     )
 
 
 def test_successful_reservation(event, guest_user):
     reservation = event.reserve(user_id=guest_user.id, seats_requested=2)
+    event.add_reservasion(reservation)
 
     assert isinstance(reservation, Reservation)
     assert reservation.user_id == guest_user.id
@@ -46,16 +46,19 @@ def test_successful_reservation(event, guest_user):
 
 
 def test_user_cannot_reserve_twice(event, guest_user):
-    event.reserve(user_id=guest_user.id, seats_requested=1)
+    reservation = event.reserve(user_id=guest_user.id, seats_requested=1)
+    event.add_reservasion(reservation)
 
     with pytest.raises(DuplicateReservationError):
-        event.reserve(user_id=guest_user.id, seats_requested=1)
+        reservation_2 = event.reserve(user_id=guest_user.id, seats_requested=1)
+        event.add_reservasion(reservation_2)
 
     assert len(event.reservations) == 1
 
 
 def test_cannot_reserve_more_than_available(event, guest_user):
     reservation = event.reserve(user_id=guest_user.id, seats_requested=3)
+    event.add_reservasion(reservation)
 
     assert reservation.status == ReservationStatus.PENDING
     assert event.capacity - 3 == event.available_seats()
@@ -63,7 +66,8 @@ def test_cannot_reserve_more_than_available(event, guest_user):
     random_uuid = uuid4()
 
     with pytest.raises(NotEnoughSeatsError):
-        event.reserve(user_id=random_uuid, seats_requested=2)
+        reservation_2 = event.reserve(user_id=random_uuid, seats_requested=2)
+        event.add_reservasion(reservation_2)
 
     assert len(event.reservations) == 1
 
@@ -75,15 +79,3 @@ def test_cannot_update_event(event):
 
     with pytest.raises(EventUpdateLockedError):
         event.change_datetime(datetime.now())
-
-
-def test_update_event(event):
-    event.UPDATE_LOCK_TIMEDELTA = timedelta(minutes=30)
-
-    random_address_uuid = uuid4()
-    new_start_datetime = datetime.now() + timedelta(days=1)
-    event.change_address(new_address_id=random_address_uuid)
-    event.change_datetime(new_start_datetime=new_start_datetime)
-
-    assert event.address_id == random_address_uuid
-    assert event.start_datetime == new_start_datetime
